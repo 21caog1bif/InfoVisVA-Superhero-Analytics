@@ -1,0 +1,147 @@
+/* Grundlegendes Styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+h1 {
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-bottom: 2px solid #ddd;
+}
+
+/* Tab Container Styling */
+.tab-container {
+    display: flex;
+    justify-content: center;
+    border-bottom: 2px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    margin-bottom: -1px;
+}
+
+.tab.active {
+    background-color: #fff;
+    border-top: 2px solid #007bff;
+    border-left: 2px solid #ddd;
+    border-right: 2px solid #ddd;
+}
+
+.tab-content {
+    display: none;
+    padding: 0;
+    flex-grow: 1;
+}
+
+.tab-content.active {
+    display: flex;
+    height: calc(100vh - 120px); /* Höhe abzüglich Header und Tab-Leiste */
+}
+
+/* Layout für Filter und Visualisierung */
+.tab-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* Filter Sidebar */
+.filter-sidebar {
+    width: 250px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-right: 2px solid #ddd;
+    overflow-y: auto; /* Scrollbar hinzufügen, falls Inhalt zu lang ist */
+}
+
+.filter-sidebar h3 {
+    margin-bottom: 20px;
+}
+
+.filter-sidebar label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.filter-sidebar input,
+.filter-sidebar select,
+.filter-sidebar button {
+    width: 100%;
+    margin-top: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.filter-sidebar button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.filter-sidebar button:hover {
+    background-color: #0056b3;
+}
+
+/* Chart Area */
+.chart-area {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #fff;
+}
+
+canvas {
+    max-width: 800px;
+    max-height: 600px;
+    display: block;
+}
+
+.hero-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+}
+
+.hero-image-container img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 10px;
+}
+
+.hero-details {
+    text-align: center;
+    margin: 20px;
+    padding: 100px;
+}
+
+.hero-details img {
+    max-width: 150px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.hero-info {
+    text-align: left;
+    font-size: 14px;
+    margin-top: 10px;
+}
+

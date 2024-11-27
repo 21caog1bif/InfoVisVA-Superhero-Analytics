@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superhero Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Superhero Analytics</h1>
+
+    <!-- Tabs -->
+    <div class="tab-container">
+        <div class="tab active" onclick="openTab(event, 'tab1')">Attribute Visualization</div>
+        <div class="tab" onclick="openTab(event, 'tab2')">Superhero Comparison</div>
+    </div>
+
+    <!-- Tab 1: Attribute Visualization -->
+    <div id="tab1" class="tab-content active">
+        <div class="tab-layout">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <h3>Filters</h3>
+
+                <!-- Attribute Selector -->
+                <label for="attributeSelector">Attribute:</label>
+                <select id="attributeSelector">
+                    <option value="intelligence">Intelligence</option>
+                    <option value="strength">Strength</option>
+                    <option value="speed">Speed</option>
+                    <option value="durability">Durability</option>
+                    <option value="power">Power</option>
+                    <option value="combat">Combat</option>
+                </select>
+
+                <!-- Race Selector -->
+                <label for="raceFilter">Race:</label>
+                <select id="raceFilter">
+                    <option value="">All</option>
+                </select>
+
+                <!-- Gender Selector -->
+                <label for="genderFilter">Gender:</label>
+                <select id="genderFilter">
+                    <option value="">All</option>
+                </select>
+
+                <!-- Alignment Selector -->
+                <label for="alignmentFilter">Alignment:</label>
+                <select id="alignmentFilter">
+                    <option value="">All</option>
+                    <option value="good">Good</option>
+                    <option value="bad">Bad</option>
+                    <option value="neutral">Neutral</option>
+                </select>
+
+                <!-- Height Filter -->
+                <label for="heightFilter">Height (cm):</label>
+                <input type="number" id="minHeightFilter" placeholder="Min Height">
+                <input type="number" id="maxHeightFilter" placeholder="Max Height">
+
+                <!-- Weight Filter -->
+                <label for="weightFilter">Weight (kg):</label>
+                <input type="number" id="minWeightFilter" placeholder="Min Weight">
+                <input type="number" id="maxWeightFilter" placeholder="Max Weight">
+
+                <!-- Custom Checkbox Filters -->
+                <h4>Custom Filters:</h4>
+                <label><input type="checkbox" id="flyingFilter"> Can Fly</label><br>
+                <label><input type="checkbox" id="strengthAbove50Filter"> Strength > 50</label><br>
+                <label><input type="checkbox" id="heroOnlyFilter"> Hero Only</label><br>
+
+                <!-- Apply Filters Button -->
+                <button onclick="updateBarChart()">Apply Filters</button>
+            </div>
+
+            <!-- Chart Area -->
+            <div class="chart-area">
+                <canvas id="barChart" width="800" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: Superhero Comparison -->
+    <div id="tab2" class="tab-content">
+        <div class="tab-layout">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <h3>Hero Selection</h3>
+                <label for="hero1">Hero 1:</label>
+                <select id="hero1"></select>
+
+                <label for="hero2">Hero 2:</label>
+                <select id="hero2"></select>
+
+                <button id="compareHeros" onclick="updateRadarChart()">Compare</button>
+            </div>
+
+            <!-- Hero 1 Container -->
+            <div id="hero1Details" class="hero-details">
+                <img id="hero1Image" src="" alt="Hero 1" />
+                <div id="hero1Info" class="hero-info"></div>
+            </div>
+
+            <!-- Chart Area -->
+            <div class="chart-area">
+                <canvas id="radarChart" width="500" height="400"></canvas>
+            </div>
+
+            <!-- Hero 2 Container -->
+            <div id="hero2Details" class="hero-details">
+                <img id="hero2Image" src="" alt="Hero 2" />
+                <div id="hero2Info" class="hero-info"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
