@@ -34,7 +34,7 @@ Superhero Analytics is a web-based visualization tool that allows users to explo
 
 1. Clone or download the repository to your local machine.
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/21caog1bif/InfoVisVA-Superhero-Analytics.git
    ```
 
 2. Place the `superheroes_data.csv` file in the same directory as the `index.html` file.
