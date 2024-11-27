@@ -53,11 +53,11 @@ Superhero Analytics is a web-based visualization tool that allows users to explo
 ```
 Superhero-Analytics/
 │
-├── index.html        # Main HTML file
-├── style.css         # Stylesheet for layout and design
-├── script.js         # JavaScript file for logic and interactivity
-├── superheroes_data.csv # CSV file containing superhero data
-└── README.md         # Project documentation
+├── index.html            # Main HTML file
+├── style.css             # Stylesheet for layout and design
+├── script.js             # JavaScript file for logic and interactivity
+├── superheroes_data.csv  # CSV file containing superhero data
+└── README.md             # Project documentation
 ```
 
 ---
@@ -117,7 +117,7 @@ The `superheroes_data.csv` file should be structured as follows:
 ## Known Issues
 
 - **Missing or Incorrect Data**: Ensure the `superheroes_data.csv` file is correctly formatted, as invalid or inconsistent data may cause visualization errors.
-- **Image Loading**: Images may not load if the URLs in the `url` column of the CSV are incorrect or inaccessible.
+- **Commas in the values of `superheroes_data.csv` file lead to problems with parsing
 
 ---
 
