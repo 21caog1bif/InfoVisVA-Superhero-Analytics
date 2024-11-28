@@ -6,12 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Superhero Analytics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <h1>Superhero Analytics</h1>
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle">
+        <label for="themeSwitcher">Theme:</label>
+        <select id="themeSwitcher">
+            <option value="dark">Dark Mode</option>
+            <option value="light">Light Mode</option>
+        </select>
+    </div>
 
     <!-- Tabs -->
     <div class="tab-container">
