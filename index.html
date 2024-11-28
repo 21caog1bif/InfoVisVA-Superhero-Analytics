@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_toggle-button.css">
 </head>
 
 <body>
@@ -34,6 +35,7 @@
     <div class="tab-container">
         <div class="tab active" onclick="openTab(event, 'tab1')">Attribute Visualization</div>
         <div class="tab" onclick="openTab(event, 'tab2')">Superhero Comparison</div>
+        <div class="tab" onclick="openTab(event, 'tab3')">Relatives Visualization</div>
     </div>
 
     <!-- Tab 1: Attribute Visualization -->
@@ -101,7 +103,7 @@
             </div>
         </div>
     </div>
-    
+
 
     <!-- Tab 2: Superhero Comparison -->
     <div id="tab2" class="tab-content">
@@ -154,13 +156,32 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
+
+    <!-- Tab 3: Relatives Visualization -->
+    <div id="tab3" class="tab-content">
+        <div class="tab-layout">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <h3>Select a Hero</h3>
+                <label for="heroDropdown">Hero:</label>
+                <select id="heroDropdown">
+                    <!-- Dynamisch gefüllt -->
+                </select>
+                <button onclick="visualizeRelatives()">Update Visualization</button>
+            </div>
+            <!-- Visualization Area -->
+            <div id="relationshipGraph" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+    
+
 
     <script src="main.js"></script>
     <script src="tab1.js"></script>
     <script src="tab2.js"></script>
+    <script src="tab3.js"></script>
 </body>
 
 </html>

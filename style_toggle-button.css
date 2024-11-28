@@ -1,0 +1,95 @@
+/*Toggle Button*/
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+.theme-toggle input {
+    display: none;
+}
+
+.theme-toggle label {
+    display: block;
+    width: 50px; /* Kleinere Breite für den Toggle */
+    height: 25px; /* Kleinere Höhe für den Toggle */
+    border-radius: 50px;
+    border: 2px solid rgba(255, 134, 134, 0.5);
+    background-color: #F3F3F3; /* Light Mode Hintergrund */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) inset;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.theme-toggle .circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white; /* Standard weiß für die Kugel */
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Kugel bewegt sich im Dark Mode */
+.theme-toggle input:checked + label .circle {
+    left: 27px; /* Position der Kugel im Dark Mode */
+    background-color: #2C2C2F; /* Dark Mode Hintergrund */
+}
+
+/* Sonne- und Mond-Icons */
+.theme-toggle svg {
+    width: 14px;
+    height: 14px;
+    position: absolute;
+    transition: all 0.3s ease;
+}
+
+/* Sonne (standardmäßig sichtbar im Light Mode) */
+.theme-toggle .sun {
+    opacity: 1;
+    transform: translateY(0);
+    color: #FFD600; /* Gelb für die Sonne */
+}
+
+/* Mond (standardmäßig versteckt im Light Mode) */
+.theme-toggle .moon {
+    opacity: 0;
+    transform: translateY(-20px); /* Mond außerhalb der Ansicht */
+    color: white; /* Weiß für den Mond */
+}
+
+/* Wenn Checkbox aktiviert ist (Dark Mode) */
+.theme-toggle input:checked + label {
+    background-color: #1F1F21; /* Dark Mode Hintergrund */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) inset;
+}
+
+.theme-toggle input:checked + label .circle {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.theme-toggle input:checked + label .circle .sun {
+    opacity: 0;
+    transform: translateY(20px); /* Sonne außerhalb der Ansicht */
+}
+
+.theme-toggle input:checked + label .circle .moon {
+    opacity: 1;
+    transform: translateY(0); /* Mond wird sichtbar */
+}
+
+/* Effekt bei Aktivierung */
+.theme-toggle label:active .circle {
+    width: 25px;
+}

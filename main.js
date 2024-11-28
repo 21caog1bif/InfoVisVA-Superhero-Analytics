@@ -53,6 +53,51 @@ function isValidValue(value) {
     return true;
 }
 
+// Methode um das dropdwond mit der selectorId mit allen Helden zu füllen
+function populateDropdown(selectorId, data, defaultText = null) {
+    const selector = document.getElementById(selectorId);
+    if (!selector) {
+        console.error(`Dropdown with ID "${selectorId}" not found.`);
+        return;
+    }
+
+    // Map zur Identifikation von doppelten Namen
+    const nameCount = {};
+    data.forEach(hero => {
+        nameCount[hero.name] = (nameCount[hero.name] || 0) + 1;
+    });
+
+    // Namen formatieren
+    const formattedHeroes = data.map(hero => {
+        const name = hero.name;
+        const fullName = hero["full-name"] || ""; // Falls es eine Spalte "full-name" gibt
+        const displayName = nameCount[name] > 1 && fullName ? `${name} (${fullName})` : name;
+        return {
+            displayName: displayName,
+            value: name
+        };
+    });
+
+    // Doppelte Einträge entfernen und Dropdown füllen
+    const uniqueHeroes = [...new Map(formattedHeroes.map(hero => [hero.displayName, hero])).values()];
+
+    selector.innerHTML = ""; // Vorherige Optionen entfernen
+
+    uniqueHeroes.forEach(hero => {
+        const option = document.createElement("option");
+        option.value = hero.displayName; // DisplayName als Value setzen
+        option.textContent = hero.displayName;
+        selector.appendChild(option);
+    });
+
+    // Standardwert setzen
+    if (defaultText) {
+        Array.from(selector.options).forEach(option => {
+            if (option.textContent === defaultText) option.selected = true;
+        });
+    }
+}
+
 
 async function loadCSV(filePath) {
     const response = await fetch(filePath);
@@ -81,10 +126,20 @@ async function main() {
     // Prüfe die Daten
     // console.log("Erste Einträge aus der CSV-Datei:", superheroData.slice(0, 5));
 
-    populateFilters(superheroData); // Tab 1 Filters
-    populateSelectors(superheroData); // Tab 2 Superhero Dropdowns
-    updateRadarChart(); // Standard-Batman-vs-Superman-RadarChart
-    updateBarChart(); // Tab 1 Balkendiagramm
+    // Tab 1: Filters
+    populateFilters(superheroData);
+
+    // Tab 2: Superhero Comparison
+    populateDropdown("hero1", superheroData, "Batman (Bruce Wayne)");
+    populateDropdown("hero2", superheroData, "Superman");
+
+    // Tab 3: Relationship Visualization
+    populateDropdown("heroDropdown", superheroData, "Batman (Bruce Wayne)");
+
+    // Initial visualizations
+    updateRadarChart();
+    updateBarChart();
+    visualizeRelatives();
 }
 
 main();
