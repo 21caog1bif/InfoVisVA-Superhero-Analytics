@@ -2,14 +2,45 @@ let superheroData = [];
 let barChart;
 let radarChart;
 
-// CSV-Daten laden
-async function loadCSV(filePath) {
-    const response = await fetch(filePath);
-    const data = await response.text();
-    const rows = data.split("\n").map(row => row.split(","));
-    const headers = rows.shift().map(header => header.trim());
-    return rows.map(row => Object.fromEntries(row.map((value, index) => [headers[index], value.trim()])));
+// CSV-Daten laden mit D3.js
+async function loadCSVWithD3(filePath) {
+    try {
+        const data = await d3.csv(filePath);
+        console.log("CSV data loaded with D3.js:", data);
+
+        return data.map(d => {
+            // Bereinige und normalisiere die Daten
+            for (let key in d) d[key] = d[key]?.trim() || null;
+            return d;
+        });
+    } catch (error) {
+        console.error("Error loading CSV data:", error);
+        return [];
+    }
 }
+
+// Theme Toggle
+document.addEventListener("DOMContentLoaded", () => {
+    const themeSwitcher = document.getElementById("themeSwitcher");
+    const body = document.body;
+
+    // Event Listener für den Dropdown-Wechsel
+    themeSwitcher.addEventListener("change", () => {
+        const selectedTheme = themeSwitcher.value;
+
+        if (selectedTheme === "dark") {
+            body.classList.remove("light-mode");
+            body.classList.add("dark-mode");
+        } else if (selectedTheme === "light") {
+            body.classList.remove("dark-mode");
+            body.classList.add("light-mode");
+        }
+    });
+
+    // Setze Standardmodus (Dark Mode)
+    themeSwitcher.value = "dark";
+});
+
 
 // Tabs umschalten
 function openTab(event, tabId) {
@@ -137,6 +168,7 @@ function updateBarChart() {
 
     const ctx = document.getElementById("barChart").getContext("2d");
     if (barChart) barChart.destroy();
+
     barChart = new Chart(ctx, {
         type: "bar",
         data: {
@@ -146,9 +178,64 @@ function updateBarChart() {
                 data: values,
                 backgroundColor: "rgba(75, 192, 192, 0.6)"
             }]
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    enabled: false, // Deaktiviert Standard-Tooltips
+                    external: function (context) {
+                        const tooltipModel = context.tooltip;
+
+                        // Tooltip-Element erstellen, falls es noch nicht existiert
+                        let tooltipEl = document.getElementById('chartjs-tooltip');
+                        if (!tooltipEl) {
+                            tooltipEl = document.createElement('div');
+                            tooltipEl.id = 'chartjs-tooltip';
+                            tooltipEl.style.position = 'absolute';
+                            tooltipEl.style.background = 'rgba(255, 99, 132, 0.2)';
+                            tooltipEl.style.border = '1px solid #ddd';
+                            tooltipEl.style.borderRadius = '8px';
+                            tooltipEl.style.padding = '10px';
+                            tooltipEl.style.pointerEvents = 'none';
+                            tooltipEl.style.transition = 'opacity 0.3s ease';
+                            document.body.appendChild(tooltipEl);
+                        }
+
+                        // Tooltip verstecken, falls keine Datenpunkte vorhanden sind
+                        if (tooltipModel.opacity === 0) {
+                            tooltipEl.style.opacity = 0;
+                            return;
+                        }
+
+                        // Daten des aktuellen Punktes abrufen
+                        const dataIndex = tooltipModel.dataPoints[0].dataIndex;
+                        const hero = filteredData[dataIndex];
+
+                        // Tooltip-Inhalt mit allen relevanten Informationen
+                        tooltipEl.innerHTML = `
+                            <strong>${hero.name}</strong><br>
+                            <img src="${hero.url}" alt="${hero.name}" style="width: 60px; height: 60px; border-radius: 5px;"><br>
+                            <strong>Full Name:</strong> ${hero["full-name"] || "N/A"}<br>
+                            <strong>Race:</strong> ${hero.race || "N/A"}<br>
+                            <strong>Gender:</strong> ${hero.gender || "N/A"}<br>
+                            <strong>Publisher:</strong> ${hero.publisher || "N/A"}<br>
+                            <strong>Alignment:</strong> ${hero.alignment || "N/A"}<br>
+                            <strong>Height:</strong> ${hero.height || "N/A"}<br>
+                            <strong>Weight:</strong> ${hero.weight || "N/A"}<br>
+                        `;
+
+                        // Tooltip-Position
+                        const canvasPosition = context.chart.canvas.getBoundingClientRect();
+                        tooltipEl.style.opacity = 1;
+                        tooltipEl.style.left = canvasPosition.left + window.pageXOffset + tooltipModel.caretX + 'px';
+                        tooltipEl.style.top = canvasPosition.top + window.pageYOffset + tooltipModel.caretY + 'px';
+                    }
+                }
+            }
         }
     });
 }
+
 
 // Tab 2: Dropdowns für Superhelden füllen
 function populateSelectors(data) {
@@ -207,10 +294,6 @@ function updateRadarChart() {
         console.error("Unable to find selected heroes in data.");
         return;
     }
-
-    // Debug: URLs überprüfen
-    console.log("Hero 1 Image URL:", hero1.url);
-    console.log("Hero 2 Image URL:", hero2.url);
 
     // Update Hero Images
     const hero1Image = document.getElementById("hero1Image");
@@ -308,10 +391,10 @@ async function loadCSV(filePath) {
 
 // Hauptfunktion
 async function main() {
-    superheroData = await loadCSV("superheroes_data.csv");
+    superheroData = await loadCSVWithD3("superheroes_data.csv");
 
     // Prüfe die Daten
-    console.log("Erste Einträge aus der CSV-Datei:", superheroData.slice(0, 5));
+    // console.log("Erste Einträge aus der CSV-Datei:", superheroData.slice(0, 5));
 
     populateFilters(superheroData); // Tab 1 Filters
     populateSelectors(superheroData); // Tab 2 Superhero Dropdowns
