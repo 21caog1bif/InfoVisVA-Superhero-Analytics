@@ -1,3 +1,52 @@
+.theme-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+#themeSwitcher {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:root {
+    --background-color: #121212; /* Standard: Dark Mode */
+    --text-color: #ffffff;
+    --sidebar-background: #1e1e1e;
+    --sidebar-border: #333;
+    --input-background: #2e2e2e;
+    --input-border: #555;
+    --button-background: #007bff;
+    --button-hover: #0056b3;
+    --tab-background: #1e1e1e;
+    --tab-active-background: #333;
+    --chart-background: #c4c4c4;
+}
+
+/* Light Mode */
+body.light-mode {
+    --background-color: #ffffff;
+    --text-color: #121212;
+    --sidebar-background: #f4f4f4;
+    --sidebar-border: #ddd;
+    --input-background: #ffffff;
+    --input-border: #ccc;
+    --button-background: #007bff;
+    --button-hover: #0056b3;
+    --tab-background: #f4f4f4;
+    --tab-active-background: #ddd;
+    --chart-background: #ffffff;
+}
+
 /* Grundlegendes Styling */
 body {
     font-family: Arial, sans-serif;
@@ -6,49 +55,57 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1 {
     text-align: center;
     margin: 0;
     padding: 20px;
-    background-color: #f4f4f4;
-    border-bottom: 2px solid #ddd;
+    background-color: var(--sidebar-background);
+    border-bottom: 2px solid var(--sidebar-border);
+    color: var(--text-color);
 }
 
 /* Tab Container Styling */
 .tab-container {
     display: flex;
     justify-content: center;
-    border-bottom: 2px solid #ddd;
-    background-color: #f9f9f9;
+    border-bottom: 2px solid var(--sidebar-border);
+    background-color: var(--tab-background);
 }
 
 .tab {
     padding: 10px 20px;
     cursor: pointer;
-    border: 1px solid #ddd;
+    border: 1px solid var(--sidebar-border);
     border-bottom: none;
-    background-color: #f9f9f9;
+    background-color: var(--tab-background);
     margin-bottom: -1px;
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .tab.active {
-    background-color: #fff;
+    background-color: var(--tab-active-background);
+    color: var(--text-color);
     border-top: 2px solid #007bff;
-    border-left: 2px solid #ddd;
-    border-right: 2px solid #ddd;
+    border-left: 2px solid var(--sidebar-border);
+    border-right: 2px solid var(--sidebar-border);
 }
 
 .tab-content {
     display: none;
     padding: 0;
     flex-grow: 1;
+    background-color: var(--background-color);
 }
 
 .tab-content.active {
     display: flex;
-    height: calc(100vh - 120px); /* Höhe abzüglich Header und Tab-Leiste */
+    height: calc(100vh - 120px);
 }
 
 /* Layout für Filter und Visualisierung */
@@ -60,42 +117,84 @@ h1 {
 
 /* Filter Sidebar */
 .filter-sidebar {
-    width: 250px;
+    width: 300px;
     padding: 20px;
-    background-color: #f9f9f9;
-    border-right: 2px solid #ddd;
-    overflow-y: auto; /* Scrollbar hinzufügen, falls Inhalt zu lang ist */
+    background-color: var(--sidebar-background);
+    border-right: 2px solid var(--sidebar-border);
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .filter-sidebar h3 {
     margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--text-color);
 }
 
 .filter-sidebar label {
     display: block;
-    margin-top: 10px;
+    margin-top: 15px;
     font-weight: bold;
+    font-size: 14px;
+    color: var(--text-color);
 }
 
 .filter-sidebar input,
-.filter-sidebar select,
-.filter-sidebar button {
-    width: 100%;
+.filter-sidebar select {
+    width: calc(100% - 10px);
     margin-top: 5px;
     padding: 8px;
     font-size: 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.filter-sidebar input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 8px;
+    cursor: pointer;
 }
 
 .filter-sidebar button {
-    background-color: #007bff;
+    background-color: var(--button-background);
     color: white;
     border: none;
     cursor: pointer;
-    margin-top: 15px;
+    margin-top: 20px;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 12px;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .filter-sidebar button:hover {
-    background-color: #0056b3;
+    background-color: var(--button-hover);
+    transform: scale(1.02);
+}
+
+.filter-sidebar button:active {
+    transform: scale(0.98);
+}
+
+/* Abschnitt für benutzerdefinierte Filter */
+.filter-sidebar .custom-filters {
+    margin-top: 20px;
+}
+
+.filter-sidebar .custom-filters label {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: normal;
+    color: var(--text-color);
 }
 
 /* Chart Area */
@@ -105,7 +204,7 @@ h1 {
     justify-content: center;
     align-items: center;
     padding: 20px;
-    background-color: #fff;
+    background-color: var(--chart-background);
 }
 
 canvas {
@@ -113,35 +212,3 @@ canvas {
     max-height: 600px;
     display: block;
 }
-
-.hero-image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 200px;
-}
-
-.hero-image-container img {
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 10px;
-}
-
-.hero-details {
-    text-align: center;
-    margin: 20px;
-    padding: 100px;
-}
-
-.hero-details img {
-    max-width: 150px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-.hero-info {
-    text-align: left;
-    font-size: 14px;
-    margin-top: 10px;
-}
-
