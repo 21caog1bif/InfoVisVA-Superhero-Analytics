@@ -43,7 +43,7 @@ function visualizeRelatives() {
     const nodes = [{
         id: heroDisplayName,
         label: heroDisplayName,
-        image: hero.url || "default-placeholder.png",
+        image: hero.url,
         isMain: true,
         status: "mainHero"
     }];
@@ -53,7 +53,7 @@ function visualizeRelatives() {
             id: rel.name,
             label: rel.name,
             extraInfo: rel.extraInfo.join(", "), // Zeigt die Infos in einem String
-            image: "default-placeholder.png", // Platzhalter für Bild, falls keins verfügbar ist
+            image: null, // Kein Bild für relatives
             isMain: false,
             status: rel.status
         });
@@ -114,14 +114,18 @@ function renderGraphWithD3(nodes, links) {
         deceased: "#ff6347" // Rot
     };
 
-    // Kraftsimulation initialisieren
     const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(150))
-        .force("charge", d3.forceManyBody().strength(-300))
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collision", d3.forceCollide().radius(50));
+        .force("link", d3.forceLink(links)
+            .id(d => d.id)
+            .distance(d => d.source.isMain ? 300 : 150) // Größere Distanz für Superhelden
+            .strength(1)) // Stärke der Anziehung
+        .force("charge", d3.forceManyBody()
+            .strength(-300)) // Abstoßung für alle Knoten
+        .force("center", d3.forceCenter(width / 2, height / 2)) // Zentrierung
+        .force("collision", d3.forceCollide()
+            .radius(d => (d.isMain ? 120 : 50)) // Mindestabstände: Held (120), Verwandte (50)
+            .strength(1)); // Stärke der Kollision
 
-    // Links zwischen den Knoten
     const link = svg.append("g")
         .attr("class", "links")
         .selectAll("line")
@@ -130,7 +134,6 @@ function renderGraphWithD3(nodes, links) {
         .attr("stroke-width", 2)
         .attr("stroke", "#999");
 
-    // Link-Beschriftungen
     const linkText = svg.append("g")
         .attr("class", "link-labels")
         .selectAll("text")
@@ -141,7 +144,6 @@ function renderGraphWithD3(nodes, links) {
         .attr("fill", "#fff")
         .text(d => d.relation);
 
-    // Knoten erstellen
     const node = svg.append("g")
         .attr("class", "nodes")
         .selectAll("g")
@@ -152,31 +154,28 @@ function renderGraphWithD3(nodes, links) {
             .on("drag", dragged)
             .on("end", dragEnded));
 
-    // Kreise als Rahmen für Bilder
     node.append("circle")
-        .attr("r", 40)
-        .attr("fill", "none")
+        .attr("r", d => (d.isMain ? 60 : 30)) // Größerer Radius für Held
+        .attr("fill", d => colorMap[d.status] || "#ccc")
         .attr("stroke", d => colorMap[d.status] || "#ccc")
         .attr("stroke-width", 4);
 
-    // Bilder in den Kreisen
-    node.append("image")
+    node.filter(d => d.isMain)
+        .append("image")
         .attr("xlink:href", d => d.image)
-        .attr("width", 80)
-        .attr("height", 80)
-        .attr("x", -40)
-        .attr("y", -40)
-        .attr("clip-path", "circle(40px at center)");
+        .attr("width", 160)
+        .attr("height", 160)
+        .attr("x", -80)
+        .attr("y", -80)
+        .attr("clip-path", "circle(60px at center)");
 
-    // Namen unter den Knoten
     node.append("text")
-        .attr("y", 55)
+        .attr("y", d => (d.isMain ? 75 : 40))
         .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
+        .attr("font-size", d => (d.isMain ? "14px" : "12px"))
         .attr("fill", "#fff")
         .text(d => d.label);
 
-    // Simulations-Tick für dynamische Positionen
     simulation.on("tick", () => {
         link.attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
@@ -189,7 +188,6 @@ function renderGraphWithD3(nodes, links) {
         node.attr("transform", d => `translate(${d.x}, ${d.y})`);
     });
 
-    // Drag-Handler
     function dragStarted(event, d) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
@@ -207,10 +205,9 @@ function renderGraphWithD3(nodes, links) {
         d.fy = null;
     }
 
-    // **Legende hinzufügen**
     const legend = svg.append("g")
         .attr("class", "legend")
-        .attr("transform", `translate(20, 20)`); // Position oben links
+        .attr("transform", `translate(20, 20)`);
 
     const legendData = [
         { label: "Main Hero", color: colorMap.mainHero },
@@ -238,6 +235,7 @@ function renderGraphWithD3(nodes, links) {
             .attr("fill", "#fff");
     });
 }
+
 
 
 function initTab3() {

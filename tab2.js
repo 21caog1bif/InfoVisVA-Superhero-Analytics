@@ -1,5 +1,4 @@
-// Tab 2: Dropdowns für Superhelden füllen
-
+// Tab 2
 function updateRadarChart() {
     // Abholen der ausgewählten Helden
     const hero1Selector = document.getElementById("hero1");
