@@ -1,25 +1,8 @@
-.theme-toggle {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-}
-
-#themeSwitcher {
-    padding: 5px 10px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: var(--input-background);
-    color: var(--text-color);
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
+/* ===================== */
+/* Theme Variables       */
+/* ===================== */
 :root {
-    --background-color: #121212; /* Standard: Dark Mode */
+    --background-color: #121212; /* Dark Mode */
     --text-color: #ffffff;
     --sidebar-background: #1e1e1e;
     --sidebar-border: #333;
@@ -40,14 +23,14 @@ body.light-mode {
     --sidebar-border: #ddd;
     --input-background: #ffffff;
     --input-border: #ccc;
-    --button-background: #007bff;
-    --button-hover: #0056b3;
     --tab-background: #f4f4f4;
     --tab-active-background: #ddd;
     --chart-background: #ffffff;
 }
 
-/* Grundlegendes Styling */
+/* ===================== */
+/* Basic Styling         */
+/* ===================== */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -66,10 +49,11 @@ h1 {
     padding: 20px;
     background-color: var(--sidebar-background);
     border-bottom: 2px solid var(--sidebar-border);
-    color: var(--text-color);
 }
 
-/* Tab Container Styling */
+/* ===================== */
+/* Tabs Styling          */
+/* ===================== */
 .tab-container {
     display: flex;
     justify-content: center;
@@ -84,13 +68,11 @@ h1 {
     border-bottom: none;
     background-color: var(--tab-background);
     margin-bottom: -1px;
-    color: var(--text-color);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .tab.active {
     background-color: var(--tab-active-background);
-    color: var(--text-color);
     border-top: 2px solid #007bff;
     border-left: 2px solid var(--sidebar-border);
     border-right: 2px solid var(--sidebar-border);
@@ -108,7 +90,9 @@ h1 {
     height: calc(100vh - 120px);
 }
 
-/* Layout für Filter und Visualisierung */
+/* ===================== */
+/* Layout: Filter & View */
+/* ===================== */
 .tab-layout {
     display: flex;
     width: 100%;
@@ -129,7 +113,6 @@ h1 {
     margin-bottom: 20px;
     font-size: 18px;
     font-weight: bold;
-    color: var(--text-color);
 }
 
 .filter-sidebar label {
@@ -137,7 +120,6 @@ h1 {
     margin-top: 15px;
     font-weight: bold;
     font-size: 14px;
-    color: var(--text-color);
 }
 
 .filter-sidebar input,
@@ -148,8 +130,8 @@ h1 {
     font-size: 14px;
     border: 1px solid var(--input-border);
     border-radius: 4px;
-    background-color: var(--input-background);
     color: var(--text-color);
+    background-color: var(--input-background);
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -162,8 +144,6 @@ h1 {
 .filter-sidebar button {
     background-color: var(--button-background);
     color: white;
-    border: none;
-    cursor: pointer;
     margin-top: 20px;
     padding: 10px;
     font-size: 16px;
@@ -183,7 +163,7 @@ h1 {
     transform: scale(0.98);
 }
 
-/* Abschnitt für benutzerdefinierte Filter */
+/* Benutzerdefinierte Filter */
 .filter-sidebar .custom-filters {
     margin-top: 20px;
 }
@@ -194,10 +174,11 @@ h1 {
     margin-top: 10px;
     font-size: 14px;
     font-weight: normal;
-    color: var(--text-color);
 }
 
-/* Chart Area */
+/* ===================== */
+/* Chart Area            */
+/* ===================== */
 .chart-area {
     flex-grow: 1;
     display: flex;
@@ -213,12 +194,14 @@ canvas {
     display: block;
 }
 
-/* Hero Comparison */
+/* ===================== */
+/* Hero Comparison       */
+/* ===================== */
 .hero-info {
-    flex: 1; /* Gleiche Breite für die beiden Seiten */
-    max-width: 300px; /* Begrenze die Breite */
-    background-color: var(--sidebar-background); /* Dynamisch basierend auf Modus */
-    color: var(--text-color); /* Dynamisch basierend auf Modus */
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    background-color: var(--sidebar-background);
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
@@ -228,7 +211,7 @@ canvas {
 .hero-info img {
     display: block;
     margin: 0 auto 10px;
-    max-width: 150px; /* Begrenze die Bildgröße */
+    max-width: 150px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
@@ -243,120 +226,63 @@ canvas {
 .hero-info td {
     padding: 8px;
     text-align: left;
-    border: 1px solid var(--sidebar-border); /* Dynamisch basierend auf Modus */
-    color: var(--text-color); /* Dynamisch basierend auf Modus */
+    border: 1px solid var(--sidebar-border);
 }
 
 .hero-info th {
-    background-color: var(--sidebar-border); /* Dynamisch basierend auf Modus */
+    background-color: var(--sidebar-border);
     font-weight: bold;
 }
 
 .hero-info tr:nth-child(even) {
-    background-color: var(--input-background); /* Dynamisch basierend auf Modus */
+    background-color: var(--input-background);
 }
 
 .hero-info tr:nth-child(odd) {
-    background-color: var(--sidebar-background); /* Dynamisch basierend auf Modus */
+    background-color: var(--sidebar-background);
 }
 
-
-
-
-
-
-/*Toggle Button*/
-.theme-toggle {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
+/* ===================== */
+/* Relationships         */
+/* ===================== */
+#relationshipGraph svg {
+    background-color: var(--background-color);
+    border: 1px solid var(--sidebar-border);
 }
 
-.theme-toggle input {
-    display: none;
-}
-
-.theme-toggle label {
-    display: block;
-    width: 50px; /* Kleinere Breite für den Toggle */
-    height: 25px; /* Kleinere Höhe für den Toggle */
-    border-radius: 50px;
-    border: 2px solid rgba(255, 134, 134, 0.5);
-    background-color: #F3F3F3; /* Light Mode Hintergrund */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) inset;
+.node {
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    stroke: var(--text-color);
+    stroke-width: 1.5px;
 }
 
-.theme-toggle .circle {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: white; /* Standard weiß für die Kugel */
-    position: absolute;
-    top: 50%;
-    left: 3px;
-    transform: translateY(-50%);
+.link {
+    stroke-opacity: 0.6;
+    stroke: var(--text-color);
+}
+
+.node text {
+    pointer-events: none;
+    font-size: 12px;
+    fill: var(--text-color);
+}
+
+.legend {
+    margin-top: 20px;
+}
+
+.legend div {
     display: flex;
     align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 5px;
 }
 
-/* Kugel bewegt sich im Dark Mode */
-.theme-toggle input:checked + label .circle {
-    left: 27px; /* Position der Kugel im Dark Mode */
-    background-color: #2C2C2F; /* Dark Mode Hintergrund */
+.legend span {
+    margin-right: 10px;
 }
 
-/* Sonne- und Mond-Icons */
-.theme-toggle svg {
-    width: 14px;
-    height: 14px;
-    position: absolute;
-    transition: all 0.3s ease;
-}
-
-/* Sonne (standardmäßig sichtbar im Light Mode) */
-.theme-toggle .sun {
-    opacity: 1;
-    transform: translateY(0);
-    color: #FFD600; /* Gelb für die Sonne */
-}
-
-/* Mond (standardmäßig versteckt im Light Mode) */
-.theme-toggle .moon {
-    opacity: 0;
-    transform: translateY(-20px); /* Mond außerhalb der Ansicht */
-    color: white; /* Weiß für den Mond */
-}
-
-/* Wenn Checkbox aktiviert ist (Dark Mode) */
-.theme-toggle input:checked + label {
-    background-color: #1F1F21; /* Dark Mode Hintergrund */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) inset;
-}
-
-.theme-toggle input:checked + label .circle {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-}
-
-.theme-toggle input:checked + label .circle .sun {
-    opacity: 0;
-    transform: translateY(20px); /* Sonne außerhalb der Ansicht */
-}
-
-.theme-toggle input:checked + label .circle .moon {
-    opacity: 1;
-    transform: translateY(0); /* Mond wird sichtbar */
-}
-
-/* Effekt bei Aktivierung */
-.theme-toggle label:active .circle {
-    width: 25px;
+#relationshipCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
