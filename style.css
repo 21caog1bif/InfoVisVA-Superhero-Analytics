@@ -2,7 +2,8 @@
 /* Theme Variables       */
 /* ===================== */
 :root {
-    --background-color: #121212; /* Dark Mode */
+    --background-color: #121212;
+    /* Dark Mode */
     --text-color: #ffffff;
     --sidebar-background: #1e1e1e;
     --sidebar-border: #333;
@@ -109,6 +110,74 @@ h1 {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
+/* ==================== */
+/* Tab 3 Timeline Section */
+/* ==================== */
+
+/* Container for the Timeline */
+.timeline-container {
+    border: 1px solid var(--sidebar-border);
+    background-color: var(--sidebar-background);
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+/* Header with Arrow for Toggle */
+.timeline-header {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-color);
+    user-select: none;
+}
+
+.timeline-header .arrow {
+    margin-right: 5px;
+    transition: transform 0.2s ease; /* Rotation Animation */
+}
+
+.timeline-header .arrow.open {
+    transform: rotate(90deg); /* Rotate arrow to point downwards */
+}
+
+/* Timeline List Styles */
+#timeline-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    max-height: 0; /* Collapsed by default */
+    overflow: hidden;
+    transition: max-height 0.3s ease; /* Smooth expand/collapse */
+}
+
+#timeline-list.visible {
+    max-height: 200px; /* Maximum height when expanded */
+    overflow-y: auto;
+}
+
+/* Individual Timeline Items */
+.filter-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+}
+
+.filter-sidebar ul li {
+    background-color: var(--sidebar-background);
+    color: var(--text-color);
+    border-bottom: 1px solid var(--sidebar-border);
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.filter-sidebar ul li:hover {
+    background-color: var(--tab-active-background);
+}
+
+
 .filter-sidebar h3 {
     margin-bottom: 20px;
     font-size: 18px;
@@ -145,6 +214,7 @@ h1 {
     background-color: var(--button-background);
     color: white;
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 10px;
     font-size: 16px;
     font-weight: bold;
@@ -243,7 +313,7 @@ canvas {
 }
 
 /* ===================== */
-/* Relationships         */
+/* Tab 3: Relatives      */
 /* ===================== */
 #relationshipGraph svg {
     background-color: var(--background-color);

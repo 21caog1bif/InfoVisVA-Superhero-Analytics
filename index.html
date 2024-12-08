@@ -122,6 +122,7 @@
 
             <!-- Hero 1 Container -->
             <div class="hero-info" id="hero1-info">
+                <h2 id="hero1-name" style="text-align: center;"></h2>
                 <img id="hero1Image" src="" alt="Hero 1">
                 <table>
                     <thead>
@@ -143,6 +144,7 @@
 
             <!-- Hero 2 Container -->
             <div class="hero-info" id="hero2-info">
+                <h2 id="hero2-name" style="text-align: center;"></h2>
                 <img id="hero2Image" src="" alt="Hero 2">
                 <table>
                     <thead>
@@ -170,12 +172,22 @@
                     <!-- Dynamisch gefüllt -->
                 </select>
                 <button onclick="visualizeRelatives()">Update Visualization</button>
+                <!-- Historie-Bereich -->
+                <div id="timeline-container">
+                    <div class="timeline-header" onclick="toggleTimeline()">
+                        <span id="timeline-arrow" class="arrow">></span>
+                        <span>Timeline</span>
+                    </div>
+                    <ul id="timeline-list" class="hidden">
+                        <!-- Dynamische Timeline-Einträge -->
+                    </ul>
+                </div>
             </div>
             <!-- Visualization Area -->
             <div id="relationshipGraph" style="width: 80%; height: 100%;"></div>
         </div>
     </div>
-    
+
 
 
     <script src="main.js"></script>

@@ -52,6 +52,10 @@ function updateRadarChart() {
     const hero1TableBody = document.getElementById("hero1-data");
     const hero2TableBody = document.getElementById("hero2-data");
 
+    // Update Hero Names
+    document.getElementById("hero1-name").innerHTML = hero1DisplayName.replace("(", "\n(")
+    document.getElementById("hero2-name").innerHTML = hero2DisplayName.replace("(", "\n(")
+
     const heroAttributes = [
         { label: "Full Name", key: "full-name" },
         { label: "Race", key: "race" },

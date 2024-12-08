@@ -28,6 +28,7 @@ document.getElementById("toggle").addEventListener("change", function () {
         document.body.classList.add("light-mode");
         document.body.classList.remove("dark-mode");
     }
+    renderGraphWithD3(nodes, links);
 });
 
 // Optional: Beim Laden der Seite standardmäßig Darkmode aktivieren
@@ -53,44 +54,57 @@ function isValidValue(value) {
     return true;
 }
 
-// Methode um das dropdwond mit der selectorId mit allen Helden zu füllen
+/**
+ * Dropdown befüllen
+ * @param {*} selectorId ID des zu befüllenden Dropdowns
+ * @param {*} data superheroData
+ * @param {*} defaultText Standardwert
+ * @returns 
+ */
 function populateDropdown(selectorId, data, defaultText = null) {
     const selector = document.getElementById(selectorId);
+
     if (!selector) {
         console.error(`Dropdown with ID "${selectorId}" not found.`);
         return;
     }
 
-    // Map zur Identifikation von doppelten Namen
+    // Bereinige das Dropdown (alle bisherigen Optionen entfernen)
+    selector.innerHTML = "";
+
+    // Map zur Identifikation von doppelten Helden-Namen (z.B. mehrere Spider-Men)
     const nameCount = {};
     data.forEach(hero => {
         nameCount[hero.name] = (nameCount[hero.name] || 0) + 1;
     });
 
-    // Namen formatieren
+    // Formatiere die Daten für das Dropdown
     const formattedHeroes = data.map(hero => {
         const name = hero.name;
-        const fullName = hero["full-name"] || ""; // Falls es eine Spalte "full-name" gibt
-        const displayName = nameCount[name] > 1 && fullName ? `${name} (${fullName})` : name;
+        const fullName = hero["full-name"] || "";
+        const displayName =
+            nameCount[name] > 1 && fullName // Wenn Heldenname mehrfach vorhanden, hänge den vollständigen Namen in Klammern an
+                ? `${name} (${fullName})`
+                : name;
+
         return {
-            displayName: displayName,
-            value: name
+            id: hero.id, // Eindeutige ID für den Helden
+            displayName: displayName, // Anzeigename für das Dropdown
         };
     });
 
-    // Doppelte Einträge entfernen und Dropdown füllen
-    const uniqueHeroes = [...new Map(formattedHeroes.map(hero => [hero.displayName, hero])).values()];
+    // Doppelte Helden entfernen und eindeutige Optionen erstellen
+    const uniqueHeroes = [...new Map(formattedHeroes.map(hero => [hero.id, hero])).values()];
 
-    selector.innerHTML = ""; // Vorherige Optionen entfernen
-
+    // Optionen zum Dropdown hinzufügen
     uniqueHeroes.forEach(hero => {
         const option = document.createElement("option");
-        option.value = hero.displayName; // DisplayName als Value setzen
-        option.textContent = hero.displayName;
+        option.value = hero.id; // Verwende die ID als Wert
+        option.textContent = hero.displayName; // Anzeigename im Dropdown
         selector.appendChild(option);
     });
 
-    // Standardwert setzen
+    // Falls ein Standardwert gesetzt werden soll
     if (defaultText) {
         Array.from(selector.options).forEach(option => {
             if (option.textContent === defaultText) option.selected = true;
@@ -99,29 +113,11 @@ function populateDropdown(selectorId, data, defaultText = null) {
 }
 
 
-async function loadCSV(filePath) {
-    const response = await fetch(filePath);
-    const data = await response.text();
-
-    // Parsing der CSV-Zeilen
-    const rows = data.split("\n").filter(row => row.trim() !== "");
-    const headers = rows.shift().split(",").map(header => header.trim());
-
-    // Parsing der einzelnen Zeilen
-    const mappedData = rows.map(row => {
-        const values = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g); // Erkennung von Komma-trennbaren Werten mit Anführungszeichen
-        return Object.fromEntries(values.map((value, index) => [
-            headers[index],
-            value.replace(/(^"|"$)/g, "").trim() // Entferne Anführungszeichen und trimme
-        ]));
-    });
-
-    return mappedData;
-}
-
 // Hauptfunktion
 async function main() {
     superheroData = await loadCSVWithD3("superheroes_data.csv");
+
+    console.log("Headers in CSV:", Object.keys(superheroData[0]));
 
     // Prüfe die Daten
     // console.log("Erste Einträge aus der CSV-Datei:", superheroData.slice(0, 5));
@@ -134,7 +130,7 @@ async function main() {
     populateDropdown("hero2", superheroData, "Superman");
 
     // Tab 3: Relationship Visualization
-    populateDropdown("heroDropdown", superheroData, "Batman (Bruce Wayne)");
+    populateDropdown("heroDropdown", superheroData, "Quicksilver");
 
     // Initial visualizations
     updateRadarChart();
