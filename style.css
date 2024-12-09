@@ -109,7 +109,6 @@ h1 {
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
-
 /* ==================== */
 /* Tab 3 Timeline Section */
 /* ==================== */
@@ -143,28 +142,24 @@ h1 {
 }
 
 /* Timeline List Styles */
-#timeline-list {
+#timeline-list, #group-timeline-list {
     list-style: none;
     padding: 0;
     margin: 10px 0 0;
     max-height: 0; /* Collapsed by default */
     overflow: hidden;
-    transition: max-height 0.3s ease; /* Smooth expand/collapse */
+    opacity: 0; /* Make invisible when collapsed */
+    transition: max-height 0.3s ease, opacity 0.3s ease; /* Smooth expand/collapse */
 }
 
-#timeline-list.visible {
+#timeline-list.visible, #group-timeline-list.visible {
     max-height: 200px; /* Maximum height when expanded */
     overflow-y: auto;
+    opacity: 1; /* Make visible when expanded */
 }
 
 /* Individual Timeline Items */
-.filter-sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 10px 0 0;
-}
-
-.filter-sidebar ul li {
+#timeline-list li, #group-timeline-list li {
     background-color: var(--sidebar-background);
     color: var(--text-color);
     border-bottom: 1px solid var(--sidebar-border);
@@ -173,7 +168,7 @@ h1 {
     transition: background-color 0.3s;
 }
 
-.filter-sidebar ul li:hover {
+#timeline-list li:hover, #group-timeline-list li:hover {
     background-color: var(--tab-active-background);
 }
 
@@ -355,4 +350,23 @@ canvas {
     width: 100%;
     height: 100%;
     display: block;
+}
+
+/* ===================== */
+/* Tab 4: Network        */
+/* ===================== */
+
+/* Full Network Tab */
+#fullNetworkGraph {
+    width: 100%;
+    height: 600px;
+    border: 1px solid var(--sidebar-border);
+    background-color: var(--chart-background);
+    margin-top: 10px;
+}
+
+.filter-sidebar select {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
 }

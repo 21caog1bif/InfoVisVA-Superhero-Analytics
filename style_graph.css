@@ -1,0 +1,107 @@
+/* ===================== */
+/* Graph Specific Styling*/
+/* ===================== */
+
+.chart-area {
+    background-color: var(--chart-background);
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Vertikale Zentrierung */
+    padding: 10px;
+}
+
+#fullNetworkGraph {
+    width: 100%;
+    height: 600px;
+    border: 1px solid var(--sidebar-border);
+    background-color: var(--chart-background);
+    margin-top: 10px;
+}
+
+#relationshipGraph svg {
+    background-color: var(--chart-background);
+    border: 1px solid var(--sidebar-border);
+}
+
+.node {
+    cursor: pointer;
+    stroke: var(--text-color);
+    stroke-width: 1.5px;
+}
+
+.link {
+    stroke-opacity: 0.6;
+    stroke: var(--text-color);
+}
+
+.node text {
+    pointer-events: none;
+    font-size: 12px;
+    fill: var(--text-color);
+}
+
+.legend {
+    margin-top: 20px;
+}
+
+.legend div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.legend span {
+    margin-right: 10px;
+}
+
+#relationshipCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ===================== */
+/* Radar Chart           */
+/* ===================== */
+.axis line {
+    stroke: #dcdcdc;
+    stroke-width: 1px;
+}
+
+.axis text {
+    font-size: 12px;
+    fill: #ffffff;
+}
+
+.radarArea {
+    fill-opacity: 0.6;
+    transition: fill-opacity 0.3s ease;
+}
+
+.radarArea:hover {
+    fill-opacity: 0.8;
+}
+
+.radarCircle {
+    fill-opacity: 0.8;
+    cursor: pointer;
+}
+
+.radarCircle:hover {
+    fill-opacity: 1;
+}
+
+
+.gridCircle {
+    fill: none;
+    stroke: #dcdcdc;
+    stroke-dasharray: 2 2;
+}
+
+.tooltip {
+    font-size: 12px;
+    text-anchor: middle;
+    fill: #737373;
+}
+

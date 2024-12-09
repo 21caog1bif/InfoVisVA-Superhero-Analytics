@@ -7,7 +7,8 @@
     <title>Superhero Analytics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_main.css">
+    <link rel="stylesheet" href="style_graph.css">
     <link rel="stylesheet" href="style_toggle-button.css">
 </head>
 
@@ -36,6 +37,7 @@
         <div class="tab active" onclick="openTab(event, 'tab1')">Attribute Visualization</div>
         <div class="tab" onclick="openTab(event, 'tab2')">Superhero Comparison</div>
         <div class="tab" onclick="openTab(event, 'tab3')">Relatives Visualization</div>
+        <div class="tab" onclick="openTab(event, 'tab4')">Full Network</div>
     </div>
 
     <!-- Tab 1: Attribute Visualization -->
@@ -122,9 +124,9 @@
 
             <!-- Hero 1 Container -->
             <div class="hero-info" id="hero1-info">
-                <h2 id="hero1-name" style="text-align: center;"></h2>
+                <h2 id="hero1-name" style="text-align: center; color: rgba(255, 99, 132, 1)"></h2>
                 <img id="hero1Image" src="" alt="Hero 1">
-                <table>
+                <table class="hero-table">
                     <thead>
                         <tr>
                             <th>Attribute</th>
@@ -139,14 +141,14 @@
 
             <!-- Radar Chart -->
             <div class="chart-area">
-                <canvas id="radarChart" width="500" height="400"></canvas>
+                <svg id="radarChart" width="500" height="400"></svg>
             </div>
 
             <!-- Hero 2 Container -->
             <div class="hero-info" id="hero2-info">
-                <h2 id="hero2-name" style="text-align: center;"></h2>
+                <h2 id="hero2-name" style="text-align: center; color: rgba(54, 162, 235, 1);"></h2>
                 <img id="hero2Image" src="" alt="Hero 2">
-                <table>
+                <table class="hero-table">
                     <thead>
                         <tr>
                             <th>Attribute</th>
@@ -161,6 +163,7 @@
         </div>
     </div>
 
+
     <!-- Tab 3: Relatives Visualization -->
     <div id="tab3" class="tab-content">
         <div class="tab-layout">
@@ -171,14 +174,14 @@
                 <select id="heroDropdown">
                     <!-- Dynamisch gefüllt -->
                 </select>
-                <button onclick="visualizeRelatives()">Update Visualization</button>
+                <button onclick="visualizeRelatives()">Update</button>
                 <!-- Historie-Bereich -->
                 <div id="timeline-container">
                     <div class="timeline-header" onclick="toggleTimeline()">
                         <span id="timeline-arrow" class="arrow">></span>
                         <span>Timeline</span>
                     </div>
-                    <ul id="timeline-list" class="hidden">
+                    <ul id="timeline-list" class="hidden, timeline-list">
                         <!-- Dynamische Timeline-Einträge -->
                     </ul>
                 </div>
@@ -189,11 +192,59 @@
     </div>
 
 
+    <!-- Tab 4: Full Network Visualization -->
+    <div id="tab4" class="tab-content">
+        <div class="tab-layout">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <h3>Select a Group</h3>
+                <label for="groupDropdown">Group Filter:</label>
+                <select id="groupDropdown">
+                    <!-- Dynamically filled -->
+                    <option value="all">All Groups</option>
+                </select>
+                <button onclick="renderFullNetwork()">Update</button>
+                <div id="group-timeline-container">
+                    <div class="timeline-header" onclick="toggleGroupTimeline()">
+                        <span id="group-timeline-arrow" class="arrow">></span>
+                        <span>Group Timeline</span>
+                    </div>
+                    <ul id="group-timeline-list" class="hidden, timeline-list"></ul>
+                </div>
+            </div>
+            <!-- Visualization Area -->
+            <div id="fullNetworkGraph" style="width: 80%; height: 100%;"></div>
+        </div>
+    </div>
+    <script>
+        function playAudio() {
+            var audio = new Audio();
+            audio.src = "sound.mp3"
+            audio.play()
+        }
+        const buttons = document.querySelectorAll("button");
+
+        // Event Listener zu jedem Button hinzufügen
+        buttons.forEach(button => {
+            button.addEventListener("click", playAudio);
+        });
+
+        // Alle Tabs auswählen
+        const tabs = document.querySelectorAll(".tab");
+
+        // Event Listener zu jedem Tab hinzufügen
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                playAudio(); // Sound abspielen
+            });
+        });
+    </script>
 
     <script src="main.js"></script>
     <script src="tab1.js"></script>
     <script src="tab2.js"></script>
     <script src="tab3.js"></script>
+    <script src="tab4.js"></script>
 </body>
 
 </html>

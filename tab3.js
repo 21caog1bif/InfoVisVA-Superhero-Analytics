@@ -32,18 +32,17 @@ function toggleTimeline() {
     const timelineList = document.getElementById("timeline-list");
     const arrow = document.getElementById("timeline-arrow");
 
-    if (timelineList.classList.contains("hidden")) {
-        // Timeline öffnen
-        timelineList.classList.remove("hidden");
-        timelineList.classList.add("visible");
-        arrow.classList.add("open");
-    } else {
+    if (timelineList.classList.contains("visible")) {
         // Timeline schließen
-        timelineList.classList.add("hidden");
         timelineList.classList.remove("visible");
         arrow.classList.remove("open");
+    } else {
+        // Timeline öffnen
+        timelineList.classList.add("visible");
+        arrow.classList.add("open");
     }
 }
+
 
 function visualizeRelatives() {
     const heroDropdown = document.getElementById("heroDropdown");
@@ -238,7 +237,7 @@ function renderGraphWithD3(nodes, links) {
         .enter().append("text")
         .attr("text-anchor", "middle")
         .attr("font-size", "12px")
-        .attr("fill", "#fff")
+        .attr("fill", "black")
         .text(d => d.relation);
 
     // Knoten erstellen
@@ -293,7 +292,7 @@ function renderGraphWithD3(nodes, links) {
         .attr("y", d => (d.isMain ? 75 : 40))
         .attr("text-anchor", "middle")
         .attr("font-size", d => (d.isMain ? "14px" : "12px"))
-        .attr("fill", "#fff")
+        .attr("fill", "black")
         .text(d => d.label);
 
     // Simulation aktualisieren
@@ -344,7 +343,7 @@ function renderGraphWithD3(nodes, links) {
             .attr("cx", 10)
             .attr("cy", 10)
             .attr("r", 10)
-            .attr("fill", "none")
+            .attr("fill", item.color)
             .attr("stroke", item.color)
             .attr("stroke-width", 4);
 
@@ -353,7 +352,7 @@ function renderGraphWithD3(nodes, links) {
             .attr("y", 15)
             .text(item.label)
             .attr("font-size", "12px")
-            .attr("fill", "#fff");
+            .attr("fill", "black");
     });
 
     // Event-Listener für Knoten

@@ -112,6 +112,15 @@ function populateDropdown(selectorId, data, defaultText = null) {
     }
 }
 
+// Helper function to extract numeric values for height and weight
+function extractMetric(value, unit) {
+    if (!value) return "N/A";
+
+    // Find the pattern matching the desired unit (e.g., 'cm' or 'kg')
+    const match = value.match(new RegExp(`\\d+\\s*${unit}`));
+    return match ? match[0].replace(unit, "").trim() + unit : "N/A"; // Return the numeric part
+}
+
 
 // Hauptfunktion
 async function main() {
@@ -124,18 +133,19 @@ async function main() {
 
     // Tab 1: Filters
     populateFilters(superheroData);
+    updateBarChart();
 
     // Tab 2: Superhero Comparison
     populateDropdown("hero1", superheroData, "Batman (Bruce Wayne)");
     populateDropdown("hero2", superheroData, "Superman");
+    updateRadarChart();
 
     // Tab 3: Relationship Visualization
     populateDropdown("heroDropdown", superheroData, "Quicksilver");
-
-    // Initial visualizations
-    updateRadarChart();
-    updateBarChart();
     visualizeRelatives();
+
+    // Tab 4: Full Network
+    initTab4();
 }
 
 main();
