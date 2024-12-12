@@ -40,10 +40,37 @@ window.onload = () => {
 
 // Tabs umschalten
 function openTab(event, tabId) {
-    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
-    event.currentTarget.classList.add("active");
-    document.getElementById(tabId).classList.add("active");
+    // Entferne die `active`-Klasse von allen Tabs
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+
+    // Aktiviere den geklickten Tab
+    if (event) {
+        event.currentTarget.classList.add('active');
+    }
+
+    // Verstecke alle Inhalte
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => content.style.display = 'none');
+
+    // Zeige den passenden Inhalt
+    const activeContent = document.getElementById(tabId);
+    if (activeContent) {
+        activeContent.style.display = 'block';
+    }
+}
+
+function switchToTab(tabId) {
+    // Finde den Tab mit der passenden ID oder verknüpften `onclick`
+    const targetTab = document.getElementById(tabId) || 
+                      Array.from(document.querySelectorAll('.tab')).find(tab => 
+                          tab.getAttribute('onclick')?.includes(tabId));
+    if (targetTab) {
+        // Simuliere einen Klick auf den Tab
+        openTab({ currentTarget: targetTab }, tabId.replace('-button', ''));
+    } else {
+        console.error(`Tab with ID ${tabId} not found.`);
+    }
 }
 
 function isValidValue(value) {
@@ -141,11 +168,12 @@ async function main() {
     updateRadarChart();
 
     // Tab 3: Relationship Visualization
-    populateDropdown("heroDropdown", superheroData, "Quicksilver");
+    populateDropdown("heroDropdown", superheroData, "Punisher");
     visualizeRelatives();
 
     // Tab 4: Full Network
-    initTab4();
+    populateGroupDropdown("groupDropdown");
+    updateNetworkChart("all");
 }
 
 main();

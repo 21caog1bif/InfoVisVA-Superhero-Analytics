@@ -6,22 +6,27 @@
     background-color: var(--chart-background);
     flex: 1;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center; /* Vertikale Zentrierung */
-    padding: 10px;
 }
 
-#fullNetworkGraph {
-    width: 100%;
-    height: 600px;
-    border: 1px solid var(--sidebar-border);
-    background-color: var(--chart-background);
-    margin-top: 10px;
+.chart-area button {
+    display: block;
+    margin-top: 10px; /* Abstand vom Diagramm */
+    padding: 8px 16px; /* Angenehme Größe */
+    background-color: var(--primary-color); /* Farbschema anpassen */
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+    transition: background-color 0.3s ease;
 }
 
-#relationshipGraph svg {
-    background-color: var(--chart-background);
-    border: 1px solid var(--sidebar-border);
+.chart-area button:hover {
+    background-color: var(--primary-color-hover);
 }
 
 .node {
@@ -42,6 +47,10 @@
 }
 
 .legend {
+    display: flex;
+    justify-content: center; /* Zentriert die Legende horizontal */
+    flex-wrap: wrap; /* Mehrere Zeilen erlauben, falls die Legende zu breit wird */
+    margin-bottom: 10px; /* Abstand zum Radar-Diagramm */
     margin-top: 20px;
 }
 
@@ -55,12 +64,6 @@
     margin-right: 10px;
 }
 
-#relationshipCanvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
 /* ===================== */
 /* Radar Chart           */
 /* ===================== */
@@ -71,7 +74,7 @@
 
 .axis text {
     font-size: 12px;
-    fill: #ffffff;
+    fill: var(--text-color);
 }
 
 .radarArea {
@@ -102,6 +105,6 @@
 .tooltip {
     font-size: 12px;
     text-anchor: middle;
-    fill: #737373;
+    background-color: var(--chart-background);
 }
 

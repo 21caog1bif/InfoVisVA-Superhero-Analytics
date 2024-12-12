@@ -70,17 +70,17 @@ function updateRadarChart() {
     heroAttributes.forEach(attr => {
         let hero1Value = hero1[attr.key] || "N/A";
         let hero2Value = hero2[attr.key] || "N/A";
-    
+
         // Special handling for height and weight
         if (attr.key === "height") {
-            hero1Value = extractMetric(hero1.height, "cm"); 
-            hero2Value = extractMetric(hero2.height, "cm"); 
+            hero1Value = extractMetric(hero1.height, "cm");
+            hero2Value = extractMetric(hero2.height, "cm");
         }
         if (attr.key === "weight") {
-            hero1Value = extractMetric(hero1.weight, "kg"); 
-            hero2Value = extractMetric(hero2.weight, "kg"); 
+            hero1Value = extractMetric(hero1.weight, "kg");
+            hero2Value = extractMetric(hero2.weight, "kg");
         }
-    
+
         // Add rows to the hero1 and hero2 tables
         const hero1Row = document.createElement("tr");
         hero1Row.innerHTML = `
@@ -88,7 +88,7 @@ function updateRadarChart() {
             <td>${hero1Value}</td>
         `;
         hero1TableBody.appendChild(hero1Row);
-    
+
         const hero2Row = document.createElement("tr");
         hero2Row.innerHTML = `
             <td>${attr.label}</td>
@@ -96,7 +96,7 @@ function updateRadarChart() {
         `;
         hero2TableBody.appendChild(hero2Row);
     });
-    
+
 
     // Radar Chart: Attribute-Daten
     const hero1Attributes = attributes.map(attr => parseFloat(hero1[attr]) || 0);
@@ -112,6 +112,7 @@ function updateRadarChart() {
 }
 
 function drawD3RadarChart(selector, labels, dataset) {
+
     const width = 500, height = 400;
     const radius = Math.min(width, height) / 2 - 40;
 
@@ -162,15 +163,25 @@ function drawD3RadarChart(selector, labels, dataset) {
         svg.append("line")
             .attr("x1", 0).attr("y1", 0)
             .attr("x2", x).attr("y2", y)
-            .attr("stroke", "black");
+            .attr("stroke", "black")
+            .on("mouseover", function () {
+                d3.select(this).style("stroke", "orange").style("stroke-width", 2);
+            })
+            .on("mouseout", function () {
+                d3.select(this).style("stroke", "black").style("stroke-width", 1);
+            });
 
         svg.append("text")
             .attr("x", x * 1.1)
             .attr("y", y * 1.1)
             .attr("text-anchor", x < 0 ? "end" : "start")
             .attr("alignment-baseline", "middle")
+            .style("cursor", "pointer")
             .style("fill", "black")
-            .text(label);
+            .text(label)
+            .on("click", () => {
+                alert(`Details zu ${label}`);
+            });
     });
 
     // Datenpfade
@@ -180,23 +191,47 @@ function drawD3RadarChart(selector, labels, dataset) {
         .curve(d3.curveLinearClosed); // Glatte Übergänge
 
     // Tooltip
-    const tooltip = svg.append("text")
+    const tooltip = d3.select("body")
+        .append("div")
         .attr("class", "tooltip")
         .style("opacity", 0)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
-        .attr("fill", "black");
+        .style("position", "absolute")
+        .style("background-color", "rgba(0, 0, 0, 0.8)")
+        .style("border-radius", "5px")
+        .style("padding", "8px")
+        .style("color", "white")
+        .style("pointer-events", "none")
+        .style("z-index", 1000);
+
+    // Funktion zum Anzeigen des Tooltips
+    function showTooltip(event, text) {
+        tooltip
+            .html(`${text}`)
+            .style("opacity", 1)
+            .style("left", `${event.pageX + 10}px`)
+            .style("top", `${event.pageY + 10}px`);
+        const [x, y] = d3.pointer(event);
+    }
+
+    // Funktion zum Ausblenden des Tooltips
+    function hideTooltip() {
+        tooltip
+            .transition()
+            .duration(200)
+            .style("opacity", 0);
+    }
 
     dataset.forEach((d, idx) => {
         const dataPoints = d.values.map((value, i) => ({ axis: labels[i], value }));
 
         // Hintergrundbereich
-        svg.append("path")
+        const path = svg.append("path")
             .datum(dataPoints)
             .attr("d", line)
             .attr("fill", idx === 0 ? "rgba(255, 99, 132, 0.5)" : "rgba(54, 162, 235, 0.5)")
             .attr("stroke", idx === 0 ? "rgba(255, 99, 132, 1)" : "rgba(54, 162, 235, 1)")
             .attr("stroke-width", 2)
+            .style("opacity", 0)
             .on("mouseover", function () {
                 d3.selectAll("path")
                     .transition().duration(200)
@@ -211,6 +246,11 @@ function drawD3RadarChart(selector, labels, dataset) {
                     .style("fill-opacity", 0.5);
             });
 
+        // Animation
+        path.transition()
+            .duration(1000)
+            .style("opacity", 1);
+
         // Punkte
         svg.selectAll(".circle" + idx)
             .data(dataPoints)
@@ -223,20 +263,48 @@ function drawD3RadarChart(selector, labels, dataset) {
             .style("fill", idx === 0 ? "rgba(255, 99, 132, 1)" : "rgba(54, 162, 235, 1)")
             .style("fill-opacity", 0.8)
             .on("mouseover", function (event, d) {
-                const [x, y] = d3.pointer(event);
-                tooltip
-                    .attr("x", x)
-                    .attr("y", y - 10)
-                    .text(`${d.axis}: ${d.value}`)
-                    .transition()
-                    .duration(200)
-                    .style("opacity", 1);
+                const text = (`${d.axis}: ${d.value}`)
+                showTooltip(event, text)
             })
-            .on("mouseout", function () {
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", 0);
+            .on("mousemove", function (event) {
+                tooltip
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY + 10}px`);
+            })
+            .on("mouseout", function (event) {
+                hideTooltip(event)
             });
     });
-}
 
+    // Legende
+    const legend = d3.select("#radarChartLegend") // Korrekte ID des Legenden-SVG
+        .attr("width", width)
+        .attr("height", 80) // Höhe der Legende
+        .append("g")
+        .attr("transform", `translate(${width / 2}, 20)`); // Zentriere die Legende horizontal
+
+    // Abstand zwischen den Einträgen
+    const spacing = 30; // Abstand zwischen den Kästchen
+
+    dataset.forEach((d, idx) => {
+        // Gruppe für jeden Eintrag (Rechteck + Text)
+        const legendItem = legend.append("g")
+            .attr("transform", `translate(${idx * spacing - spacing / 2}, 0)`); // horizontale Verschiebung
+
+        // Rechteck für die Farbe
+        legendItem.append("rect")
+            .attr("x", -7.5)
+            .attr("y", 0)
+            .attr("width", 15)
+            .attr("height", 15)
+            .style("fill", idx === 0 ? "rgba(255, 99, 132, 1)" : "rgba(54, 162, 235, 1)");
+
+        // Text links oder rechts vom Rechteck
+        legendItem.append("text")
+            .attr("x", idx === 0 ? -20 : 20) // Text links (negativ) oder rechts (positiv)
+            .attr("y", 12) // Vertikale Ausrichtung in der Mitte des Rechtecks
+            .attr("text-anchor", idx === 0 ? "end" : "start") // Text linksbündig oder rechtsbündig
+            .style("fill", "black")
+            .text(d.name);
+    });
+}

@@ -72,7 +72,6 @@ function visualizeRelatives() {
     const rawRelatives = splitRelatives(hero.relatives);
 
     const relatives = rawRelatives.map(rel => {
-        //console.log("ID: " + foundId, rel.name, rel.alias)
         const foundId = findHeroId(rel.name, rel.alias);
 
         const relatedHero = superheroData.find(h => h.id === foundId);
@@ -130,9 +129,9 @@ function splitRelatives(relatives) {
     let current = "";
     let depth = 0;
 
-    // Aufteilen bei Komma, Semikolon, "&", wenn nicht in Klammern
+    // Relatives bei Komma, Semikolon oder "&" trennen, wenn nicht innerhalb von Klammern
     for (let char of relatives) {
-        if ((char === "," || char === ";" || char === "&") && depth === 0) {
+        if ((char === "," || char === ";" || char === "&" || char === ".") && depth === 0) {
             result.push(current.trim());
             current = "";
         } else {
@@ -144,34 +143,27 @@ function splitRelatives(relatives) {
 
     if (current.trim()) result.push(current.trim());
 
+    // Verarbeitung jedes Teils, um Name und Zusatzinfos zu trennen
     return result.map(rel => {
-        const match = rel.match(/^(.*?)\s*\((.*?)\)$/); // Trenne Name und Zusatzinfos
+        const match = rel.match(/^(.*?)\s*\((.*?)\)$/); // Name und Zusatzinfo
         if (match) {
-            const name = match[1].trim();
+            const name = match[1].trim(); // Name des Verwandten
             const extraInfo = match[2]
-                .replace(/["']/g, "")
+                .replace(/["']/g, "") // Entferne Anführungszeichen
                 .split(",")
-                .map(info => info.trim());
-
-            const alias = extraInfo.find(info =>
-                superheroData.some(h => h.name === info || h["full-name"] === info)
-            );
-
-            const relation = extraInfo
-                .filter(info => info !== alias) // Entferne Alias
-                .join(", "); // Übrige Infos als Relation
+                .map(info => info.trim().toLowerCase()); // Trenne Zusatzinfos in ein Array
 
             return {
                 name: name,
-                alias: alias || null,
-                relation: relation || null
+                alias: null, // Alias bleibt leer, falls nicht verwendet
+                relation: extraInfo.join(", "), // Verknüpfte Zusatzinfos
             };
         } else {
-            // Kein Zusatzinfo, einfacher Name
+            // Kein Zusatzinfo, nur Name
             return {
                 name: rel.trim(),
                 alias: null,
-                relation: null
+                relation: null,
             };
         }
     }).filter(rel => rel.name); // Entferne ungültige Einträge
@@ -179,17 +171,27 @@ function splitRelatives(relatives) {
 
 // Hilfsmethode, um die ID der relative-Helden zu finden
 function findHeroId(name, alias) {
-    // Suche nach exakter Übereinstimmung des Namens
-    const heroByName = superheroData.find(h => h.name === name || h["full-name"] === name);
+    const lowerName = name.toLowerCase();
+    const lowerAlias = alias ? alias.toLowerCase() : null;
+
+    // Suche nach exakter Übereinstimmung des Namens (case-insensitive)
+    const heroByName = superheroData.find(
+        h => h.name.toLowerCase() === lowerName || 
+        h["full-name"]?.toLowerCase() === lowerName);
+
     if (heroByName) return heroByName.id;
 
-    // Suche nach Alias, falls Name nicht gefunden
-    if (alias) {
-        const heroByAlias = superheroData.find(h => h.name === alias || h["full-name"] === alias);
+    // Suche nach Alias, falls Name nicht gefunden (case-insensitive)
+    if (lowerAlias) {
+        const heroByAlias = superheroData.find(h =>
+            h.name.toLowerCase() === lowerAlias ||
+            h["full-name"].toLowerCase() === lowerAlias
+        );
         if (heroByAlias) return heroByAlias.id;
+
     }
 
-    return null;
+    return null; // Kein passender Held gefunden
 }
 
 function renderGraphWithD3(nodes, links) {
@@ -365,11 +367,3 @@ function renderGraphWithD3(nodes, links) {
         }
     });
 }
-
-function initTab3() {
-    const heroDropdown = document.getElementById("heroDropdown");
-    heroDropdown.addEventListener("change", visualizeRelatives);
-
-    visualizeRelatives();
-}
-
