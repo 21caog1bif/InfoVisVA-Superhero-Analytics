@@ -35,7 +35,7 @@ function applyFilters(data) {
     const minWeight = parseInt(document.getElementById("minWeightFilter").value);
     const maxWeight = parseInt(document.getElementById("maxWeightFilter").value);
 
-    const flyingFilter = document.getElementById("flyingFilter").checked;
+    //const flyingFilter = document.getElementById("flyingFilter").checked;
     const strengthAbove50Filter = document.getElementById("strengthAbove50Filter").checked;
     const heroOnlyFilter = document.getElementById("heroOnlyFilter").checked;
 
@@ -54,11 +54,11 @@ function applyFilters(data) {
         const weightMatch = (!minWeight || weightInKg >= minWeight) && (!maxWeight || weightInKg <= maxWeight);
 
         // Additional Filters
-        const flyingMatch = flyingFilter ? hero.can_fly && hero.can_fly.toLowerCase() === "true" : true;
+        //const flyingMatch = flyingFilter ? hero.can_fly && hero.can_fly.toLowerCase() === "true" : true;
         const strengthMatch = strengthAbove50Filter ? parseInt(hero.strength) > 50 : true;
         const heroMatch = heroOnlyFilter ? hero.alignment && hero.alignment.toLowerCase() === "good" : true;
 
-        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch && flyingMatch && strengthMatch && heroMatch;
+        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch && /**flyingMatch&&*/  strengthMatch && heroMatch;
     });
 }
 

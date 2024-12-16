@@ -36,6 +36,7 @@
         <div class="tab active" onclick="openTab(event, 'tab1')">Attribute Visualization</div>
         <div class="tab" onclick="openTab(event, 'tab2')">Superhero Comparison</div>
         <div class="tab" onclick="openTab(event, 'tab3')">Relatives Visualization</div>
+        <div class="tab" onclick="openTab(event, 'tab4')">Relatives Visualization</div>
     </div>
 
     <!-- Tab 1: Attribute Visualization -->
@@ -89,7 +90,7 @@
 
                 <!-- Custom Checkbox Filters -->
                 <h4>Custom Filters:</h4>
-                <label><input type="checkbox" id="flyingFilter"> Can Fly</label><br>
+                <!-- <label><input type="checkbox" id="flyingFilter"> Can Fly</label><br> -->
                 <label><input type="checkbox" id="strengthAbove50Filter"> Strength > 50</label><br>
                 <label><input type="checkbox" id="heroOnlyFilter"> Hero Only</label><br>
 
@@ -176,12 +177,28 @@
         </div>
     </div>
     
+    <div id="tab4" class="tab-content">
+        <div class="tab-layout">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <h3>Select a Hero</h3>
+                <label for="heroDropdown">Hero:</label>
+                <select id="heroDropdown">
+                    <!-- Dynamisch gefüllt -->
+                </select>
+                <button onclick="visualizeRelatives()">Update Visualization</button>
+            </div>
+            <!-- Visualization Area -->
+            <div id="relationshipGraph" style="width: 80%; height: 100%;"></div>
+        </div>
+    </div>
 
 
     <script src="main.js"></script>
     <script src="tab1.js"></script>
     <script src="tab2.js"></script>
     <script src="tab3.js"></script>
+    <script src="tab4.js"></script>
 </body>
 
 </html>

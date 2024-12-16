@@ -136,6 +136,9 @@ async function main() {
     // Tab 3: Relationship Visualization
     populateDropdown("heroDropdown", superheroData, "Batman (Bruce Wayne)");
 
+    //Tab 4:
+    populateDropdown("heroDropdown", superheroData, "Batman (Bruce Wayne)");
+
     // Initial visualizations
     updateRadarChart();
     updateBarChart();
