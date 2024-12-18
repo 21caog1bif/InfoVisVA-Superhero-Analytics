@@ -1,150 +1,254 @@
-function visualizeRelatives() {
-    const heroDropdown = document.getElementById("heroDropdown");
-    const heroDisplayName = heroDropdown.options[heroDropdown.selectedIndex].text;
+// Tab 4: Full Network Visualization with Group Nodes
 
-    const extractHero = (displayName) => {
-        const match = displayName.match(/^(.*?)(?: \((.*?)\))?$/);
-        return {
-            name: match[1]?.trim(),
-            fullName: match[2]?.trim()
-        };
-    };
+let currentGroupFilter = "all"; // Default to show all groups
 
-    const heroInfo = extractHero(heroDisplayName);
+let groupInfo = {}; // Speichert Gruppennamen und ihre IDs wie folgt:  "Avengers": { id: "group-0", count: 12 },
 
-    const hero = superheroData.find(h =>
-        h.name === heroInfo.name &&
-        (!heroInfo.fullName || h["full-name"] === heroInfo.fullName)
-    );
+let groupCounts = {};
 
-    if (!hero || !hero.relatives) {
-        console.warn(`No relationships found for the selected hero: ${heroDisplayName}`);
-        renderGraphWithD3([], []); // Leeren Graph anzeigen
+// Populate the group dropdown
+function populateGroupDropdown(selectorId) {
+    groupCounts = calculateGroupFrequencies();
+
+    const dropdown = document.getElementById(selectorId);
+
+    if (!dropdown) {
+        console.error(`Dropdown with ID "${selectorId}" not found.`);
         return;
     }
 
-    // Verwandte aus der Spalte 'relatives' extrahieren
-    const rawRelatives = splitRelatives(hero.relatives);
+    dropdown.innerHTML = ""; // Clear existing options
 
-    const relatives = rawRelatives.map(rel => {
-        const match = rel.match(/^(.*?)\s*\((.*?)\)$/); // Trenne Name und Zusatzinfos
-        const name = match ? match[1].trim() : rel.trim(); // Name der Person
-        const extraInfo = match ? match[2].split(",").map(info => info.trim()) : []; // Liste der Zusatzinfos
+    // Option für "all" hinzufügen
+    const allOption = document.createElement("option");
+    allOption.value = "all"; // Setze die ID auf "all"
+    allOption.textContent = "All Groups";
+    dropdown.appendChild(allOption);
 
-        return {
-            name: name,
-            extraInfo: extraInfo,
-            relation: extraInfo.find(info => !["deceased", "aka"].includes(info)) || "relation",
-            status: extraInfo.includes("deceased") ? "deceased" : "alive"
-        };
+    // Alle anderen Gruppen hinzufügen
+    Object.keys(groupInfo).forEach(group => {
+        const option = document.createElement("option");
+        option.value = groupInfo[group].id; // Verwende die Group ID
+        option.textContent = group; // Anzeigename der Gruppe
+        dropdown.appendChild(option);
     });
 
-    // Knoten erstellen
-    const nodes = [{
-        id: heroDisplayName,
-        label: heroDisplayName,
-        image: hero.url,
-        isMain: true,
-        status: "mainHero"
-    }];
+    console.log("populateDropdown: Dropdown Data");
+    console.log(dropdown.children);
+}
 
-    relatives.forEach(rel => {
-        nodes.push({
-            id: rel.name,
-            label: rel.name,
-            extraInfo: rel.extraInfo.join(", "), // Zeigt die Infos in einem String
-            image: null, // Kein Bild für relatives
-            isMain: false,
-            status: rel.status
+// Calculate the frequency of each group, only group names which are present multiple times will be used
+function calculateGroupFrequencies() {
+    const groupCounts = {};
+
+    superheroData.forEach(hero => {
+        if (!hero["group-affiliation"] || hero["group-affiliation"] === "-") return;
+
+        const groups = hero["group-affiliation"].split(/[,;]/).map(g => normalizeGroupName(g));
+        groups.forEach(group => {
+            if (!group || group === "-") return;
+            groupCounts[group] = (groupCounts[group] || 0) + 1;
         });
     });
 
-    // Links erstellen (Held -> Verwandte)
-    const links = relatives.map(rel => ({
-        source: heroDisplayName,
-        target: rel.name,
-        relation: rel.relation // Art der Beziehung
-    }));
+    // Alphabetische Sortierung und Zuweisung von Group IDs
+    const sortedGroups = Object.keys(groupCounts)
+        .filter(group => groupCounts[group] >= 2 && !group.startsWith("formerly ")) // Entferne "formerly"
+        .sort((a, b) => a.localeCompare(b));
+    sortedGroups.forEach((group, index) => {
+        groupInfo[group] = {
+            id: `group-${index}`, // Eindeutige Group ID
+            count: groupCounts[group], // Anzahl der zugehörigen Helden
+        };
+    });
 
-    // Graph rendern
-    renderGraphWithD3(nodes, links);
+    return groupCounts;
 }
 
-// Hilfsmethode, um die einzelnen Personen aus der 'relatives' Spalte zu extrahieren
-function splitRelatives(relatives) {
-    const result = [];
-    let current = '';
-    let depth = 0; // Tiefe der Klammern
 
-    for (let char of relatives) {
-        if ((char === ',' || char == '\n') && depth === 0) {
-            // Trenne, wenn ein Komma außerhalb der Klammern gefunden wird
-            result.push(current.trim());
-            current = '';
-        } else {
-            // Zeichen zur aktuellen Zeichenfolge hinzufügen
-            current += char;
+// Casing und "fromerly" präfix entfernen von Gruppennamen
+function normalizeGroupName(groupName) {
+    if (!groupName) return null;
 
-            if (char === '(') depth++;
-            if (char === ')') depth--;
+    let normalized = groupName.trim().toLowerCase(); // Entferne Leerzeichen und setze klein
+    if (normalized.startsWith("formerly ")) {
+        normalized = normalized.replace("formerly ", ""); // Entferne "formerly "
+    }
+    return normalized;
+}
+
+
+// Update the network based on the selected group filter
+function updateNetworkChart(selectedGroupId) {
+
+    const groupId = selectedGroupId ? selectedGroupId : document.getElementById("groupDropdown").value;
+
+    if (groupId === "all") currentGroupFilter = "all";
+    else {
+        // Finde die Gruppe basierend auf der übergebenen ID
+        const groupEntry = Object.entries(groupInfo).find(([groupName, groupData]) => groupData.id === groupId);
+        if (groupEntry) currentGroupFilter = groupEntry[0]; // Gruppennamen setzen
+        else {
+            console.error(`Gruppe mit ID ${groupId} nicht gefunden.`);
+            return;
         }
     }
 
-    // letzten Teil hinzufügen
-    if (current.trim()) result.push(current.trim());
+    // Füge die Gruppe zur Zeitachse hinzu
+    addGroupToTimeline(currentGroupFilter);
 
-    return result;
+    // Netzwerk neu rendern
+    const fullNetworkGraph = document.getElementById("fullNetworkGraph");
+    if (!fullNetworkGraph) {
+        console.error("Element mit ID 'fullNetworkGraph' nicht gefunden.");
+        return;
+    }
+
+    const width = fullNetworkGraph.clientWidth;
+    const height = fullNetworkGraph.clientHeight;
+
+    const nodes = prepareFullNetworkNodes(); // Bereite nur die relevanten Knoten vor
+    const links = prepareFullNetworkLinks(nodes); // Verknüpfe nur die relevanten Knoten
+
+    console.log("Aktueller Gruppenfilter:", currentGroupFilter);
+    console.log("Nodes:", nodes);
+    console.log("Links:", links);
+
+    renderNetworkWithGroupNodes(nodes, links, width, height);
+}
+
+// Prepare nodes including group nodes
+function prepareFullNetworkNodes() {
+    const nodes = [];
+
+    // Gruppenknoten hinzufügen (immer sichtbar)
+    Object.entries(groupInfo).forEach(([group, info]) => {
+        if (info.count >= 2 && (currentGroupFilter === "all" || group === currentGroupFilter)) {
+            nodes.push({
+                id: info.id,
+                label: group,
+                isGroup: true,
+            });
+        }
+    });
+
+    // Heldenknoten hinzufügen (basierend auf Gruppenfilter)
+    superheroData.forEach(hero => {
+        if (!hero["group-affiliation"] || hero["group-affiliation"] === "-") return;
+
+        const groups = hero["group-affiliation"]
+            .split(/[,;]/)
+            .map(g => normalizeGroupName(g))
+            .filter(group => group && groupCounts[group] >= 2);
+
+        if (groups.length > 0 && (currentGroupFilter === "all" || groups.includes(currentGroupFilter))) {
+            nodes.push({
+                id: hero.id,
+                label: hero.name || hero["full-name"],
+                image: hero.url || null,
+                groups, // Liste der Gruppen für Verbindungen
+            });
+        }
+    });
+
+    return nodes;
 }
 
 
-function renderGraphWithD3(nodes, links) {
-    d3.select("#relationshipGraph").select("svg").remove();
+// Prepare links including group-member relationships
+function prepareFullNetworkLinks(nodes) {
+    const links = [];
+    const nodeIds = new Set(nodes.map(node => node.id));
 
-    const width = document.getElementById("relationshipGraph").clientWidth;
-    const height = document.getElementById("relationshipGraph").clientHeight;
+    nodes.forEach(node => {
+        if (!node.groups) return; // Gruppenknoten überspringen
 
-    const svg = d3.select("#relationshipGraph")
+        console.log("prepareFullNetworkLinks: node.groups")
+        console.log(node.groups)
+
+        node.groups.forEach(group => {
+            const groupId = groupInfo[group]?.id; // Group ID holen
+
+            if (groupId && nodeIds.has(groupId)) {
+                // Prüfen, ob die Verbindung als "formerly" markiert ist
+                const isFormerly = superheroData.some(hero =>
+                    hero.id === node.id &&
+                    hero["group-affiliation"].toLowerCase().includes(`formerly ${group.toLowerCase()}`)
+                );
+
+                links.push({
+                    source: node.id,
+                    target: groupId, // Verknüpfung mit der Group ID
+                    isFormerly, // Kennzeichnung für die Darstellung
+                });
+            }
+        });
+    });
+
+    return links;
+}
+
+
+// Render the network with group nodes
+function renderNetworkWithGroupNodes(nodes, links, width, height) {
+    d3.select("#fullNetworkGraph").select("svg").remove();
+
+    const svg = d3.select("#fullNetworkGraph")
         .append("svg")
         .attr("width", width)
         .attr("height", height);
 
-    const colorMap = {
-        mainHero: "#FFD700", // Gelb
-        alive: "#1f77b4",   // Blau
-        deceased: "#ff6347" // Rot
-    };
+    const groupColors = generateGroupColors(nodes);
+
+    // Tooltip for group nodes
+    const tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("position", "absolute")
+        .style("background-color", "rgba(0, 0, 0, 0.8)")
+        .style("border-radius", "5px")
+        .style("padding", "8px")
+        .style("color", "white")
+        .style("pointer-events", "none")
+        .style("z-index", 1000);
+
+    const zoomContainer = svg.append("g");
 
     const simulation = d3.forceSimulation(nodes)
         .force("link", d3.forceLink(links)
             .id(d => d.id)
-            .distance(d => d.source.isMain ? 300 : 150) // Größere Distanz für Superhelden
-            .strength(1)) // Stärke der Anziehung
+            .distance(d => (d.source.isGroup || d.target.isGroup) ? 100 : 60) // Erhöhe die Distanz
+            .strength(0.8))
         .force("charge", d3.forceManyBody()
-            .strength(-300)) // Abstoßung für alle Knoten
-        .force("center", d3.forceCenter(width / 2, height / 2)) // Zentrierung
+            .strength(-100)) // Erhöhe die Abstoßung (stärker negativ)
+        .force("center", d3.forceCenter(width / 2, height / 2))
         .force("collision", d3.forceCollide()
-            .radius(d => (d.isMain ? 120 : 50)) // Mindestabstände: Held (120), Verwandte (50)
-            .strength(1)); // Stärke der Kollision
+            .radius(d => (d.isGroup ? 25 : 20))) // Größere Mindestabstände zwischen den Knoten
+        .on("tick", ticked);
 
-    const link = svg.append("g")
+
+    function ticked() {
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+        node.attr("transform", d => `translate(${d.x}, ${d.y})`);
+    }
+
+    const link = zoomContainer.append("g")
         .attr("class", "links")
         .selectAll("line")
         .data(links)
         .enter().append("line")
-        .attr("stroke-width", 2)
-        .attr("stroke", "#999");
+        .attr("stroke", d => d.isFormerly ? "gray" : "black") // "Formerly"-Links in Grau
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", d => d.isFormerly ? "5,5" : "0"); // "Formerly"-Links gestrichelt
 
-    const linkText = svg.append("g")
-        .attr("class", "link-labels")
-        .selectAll("text")
-        .data(links)
-        .enter().append("text")
-        .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
-        .attr("fill", "#fff")
-        .text(d => d.relation);
 
-    const node = svg.append("g")
+    const node = zoomContainer.append("g")
         .attr("class", "nodes")
         .selectAll("g")
         .data(nodes)
@@ -154,39 +258,102 @@ function renderGraphWithD3(nodes, links) {
             .on("drag", dragged)
             .on("end", dragEnded));
 
+    // Create circles for nodes
     node.append("circle")
-        .attr("r", d => (d.isMain ? 60 : 30)) // Größerer Radius für Held
-        .attr("fill", d => colorMap[d.status] || "#ccc")
-        .attr("stroke", d => colorMap[d.status] || "#ccc")
-        .attr("stroke-width", 4);
+        .attr("r", d => d.isGroup ? 8 : 15)
+        .attr("fill", d => d.isGroup ? groupColors[d.label] : "#ccc") // Groups get color, heroes get gray
+        .attr("stroke", "#fff")
+        .attr("stroke-width", d => d.isGroup ? 0 : 1.5)
+        .on("mouseover", function (event, d) {
+            if (d.isGroup) {
+                tooltip
+                    .html(`Group: ${d.label}`)
+                    .style("opacity", 1)
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY + 10}px`);
+            } else {
+                const formerlyGroups = d.groups.filter(group =>
+                    superheroData.some(hero => hero.id === d.id && hero["group-affiliation"].toLowerCase().includes(`formerly ${group.toLowerCase()}`)));
 
-    node.filter(d => d.isMain)
+                const groupText = d.groups.map(group =>
+                    formerlyGroups.includes(group) ? `<span style="color:gray">${group} (formerly)</span>` : group).join(", ");
+
+                tooltip
+                    .html(`Hero: ${d.label}<br>Group: ${groupText}`)
+                    .style("opacity", 1)
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY + 10}px`);
+
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr("r", 20) // Vergrößere den Kreis
+            }
+        })
+        .on("mousemove", function (event) {
+            tooltip
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY + 10}px`);
+        })
+        .on("mouseout", function (event, d) {
+            tooltip.style("opacity", 0);
+            if (!d.isGroup) {
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr("r", 15) // Setze die ursprüngliche Größe zurück
+            }
+
+        })
+        .on("click", (event, d) => {
+            tooltip.style("opacity", 0);
+
+            // Aktualisiere das Dropdown auf die ausgewählte Gruppe
+            const dropdown = document.getElementById("groupDropdown");
+            if (d.isGroup) {
+                dropdown.value = d.id; // Setze den Wert des Dropdowns
+                updateNetworkChart(d.id); // ID der Gruppe verwenden
+            }
+            else if (!d.isGroup && d.id) { // Nur für Heldenknoten
+                console.log(`Switching to relatives of hero with ID: ${d.id}`);
+                document.getElementById("heroDropdown").value = d.id; // Dropdown von Tab 3 aktualisieren
+                switchToTab("tab3-button");
+
+                // Visualisiere Verwandte
+                visualizeRelatives();
+
+                // Optional: Scrollen oder visuelles Feedback, um die Ansicht zu verdeutlichen
+                document.getElementById("relationshipGraph").scrollIntoView({ behavior: "smooth" });
+            }
+            else {
+                const primaryGroup = d.groups[0]; // Wähle die erste Gruppe
+                dropdown.value = groupInfo[primaryGroup]?.id || "all"; // Fallback auf "all"
+            }
+            tooltip.style("opacity", 0);
+        });
+
+
+    // Add images for nodes with images
+    node.filter(d => d.image)
         .append("image")
         .attr("xlink:href", d => d.image)
-        .attr("width", 160)
-        .attr("height", 160)
-        .attr("x", -80)
-        .attr("y", -80)
-        .attr("clip-path", "circle(60px at center)");
+        .attr("width", 40)
+        .attr("height", 40)
+        .attr("x", -20)
+        .attr("y", -20)
+        .attr("clip-path", "circle(15px at center)")
+        .style("pointer-events", "none");
 
-    node.append("text")
-        .attr("y", d => (d.isMain ? 75 : 40))
-        .attr("text-anchor", "middle")
-        .attr("font-size", d => (d.isMain ? "14px" : "12px"))
-        .attr("fill", "#fff")
-        .text(d => d.label);
+    const zoom = d3.zoom()
+        .scaleExtent([0.5, 3])
+        .on("zoom", (event) => {
+            zoomContainer.attr("transform", event.transform);
+        });
 
-    simulation.on("tick", () => {
-        link.attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
+    svg.call(zoom);
 
-        linkText.attr("x", d => (d.source.x + d.target.x) / 2)
-            .attr("y", d => (d.source.y + d.target.y) / 2);
-
-        node.attr("transform", d => `translate(${d.x}, ${d.y})`);
-    });
+    // Apply an initial zoom and translation
+    svg.call(zoom.transform, d3.zoomIdentity.translate(width / 4, height / 4).scale(1));
 
     function dragStarted(event, d) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -205,43 +372,66 @@ function renderGraphWithD3(nodes, links) {
         d.fy = null;
     }
 
-    const legend = svg.append("g")
-        .attr("class", "legend")
-        .attr("transform", `translate(20, 20)`);
-
-    const legendData = [
-        { label: "Main Hero", color: colorMap.mainHero },
-        { label: "Alive", color: colorMap.alive },
-        { label: "Deceased", color: colorMap.deceased }
-    ];
-
-    legendData.forEach((item, index) => {
-        const legendEntry = legend.append("g")
-            .attr("transform", `translate(0, ${index * 25})`);
-
-        legendEntry.append("circle")
-            .attr("cx", 10)
-            .attr("cy", 10)
-            .attr("r", 10)
-            .attr("fill", "none")
-            .attr("stroke", item.color)
-            .attr("stroke-width", 4);
-
-        legendEntry.append("text")
-            .attr("x", 30)
-            .attr("y", 15)
-            .text(item.label)
-            .attr("font-size", "12px")
-            .attr("fill", "#fff");
+    // Update view on window resize
+    window.addEventListener("resize", () => {
+        const newWidth = document.getElementById("fullNetworkGraph").clientWidth;
+        const newHeight = document.getElementById("fullNetworkGraph").clientHeight;
+        svg.attr("width", newWidth).attr("height", newHeight);
+        simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
+        simulation.alpha(1).restart();
     });
 }
 
+// Generate colors for groups
+function generateGroupColors(nodes) {
+    const uniqueGroups = Array.from(new Set(nodes.filter(node => node.isGroup).map(node => node.label)));
+    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    const groupColors = {};
 
+    uniqueGroups.forEach((group, index) => {
+        groupColors[group] = colorScale(index);
+    });
 
-function initTab3() {
-    const heroDropdown = document.getElementById("heroDropdown");
-    heroDropdown.addEventListener("change", visualizeRelatives);
-
-    visualizeRelatives();
+    return groupColors;
 }
 
+
+let groupHistory = []; // Zeitachse der angesehenen Gruppen
+
+// Funktion zum Hinzufügen einer Gruppe zur Zeitachse
+function addGroupToTimeline(groupName) {
+    const timelineList = document.getElementById("group-timeline-list");
+
+    // Prüfen, ob die Gruppe bereits in der Timeline ist
+    if (Array.from(timelineList.children).some(item => item.dataset.groupName === groupName)) {
+        return; // Überspringen, wenn bereits vorhanden
+    }
+
+    const listItem = document.createElement("li");
+    listItem.textContent = groupName === "all" ? "All Groups" : groupName; // Anzeigename setzen
+    listItem.dataset.groupName = groupName; // Datensatz für die Gruppe
+    listItem.onclick = () => {
+        const groupId = groupName === "all" ? "all" : groupInfo[groupName].id;
+        document.getElementById("groupDropdown").value = groupId; // Dropdown aktualisieren
+        updateNetworkChart(groupId); // Netzwerkfilter aktualisieren
+    };
+
+    timelineList.appendChild(listItem);
+    timelineList.classList.remove("hidden"); // Zeitachse sichtbar machen
+}
+
+
+function toggleGroupTimeline() {
+    const timelineList = document.getElementById("group-timeline-list");
+    const arrow = document.getElementById("group-timeline-arrow");
+
+    if (timelineList.classList.contains("visible")) {
+        // Timeline schließen
+        timelineList.classList.remove("visible");
+        arrow.classList.remove("open");
+    } else {
+        // Timeline öffnen
+        timelineList.classList.add("visible");
+        arrow.classList.add("open");
+    }
+}

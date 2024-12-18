@@ -1,48 +1,104 @@
+// Tab 3
+
+let heroHistory = []; // Zeitachse der angesehenen Helden
+
+// Funktion zum Hinzufügen eines Helden zur Zeitachse
+function addToTimeline(heroId) {
+    const timelineList = document.getElementById("timeline-list");
+
+    // Prüfen, ob der Held bereits in der Timeline ist
+    if (Array.from(timelineList.children).some(item => item.dataset.heroId === heroId)) {
+        return; // Überspringen, wenn bereits vorhanden
+    }
+
+    const hero = superheroData.find(h => h.id === heroId);
+
+    if (hero) {
+        const listItem = document.createElement("li");
+        listItem.textContent = hero.name || hero["full-name"];
+        listItem.dataset.heroId = heroId; // Attribut für ID
+        listItem.onclick = () => {
+            document.getElementById("heroDropdown").value = heroId;
+            visualizeRelatives(); // Visualisierung erneut aufrufen
+        };
+
+        timelineList.appendChild(listItem);
+        timelineList.classList.remove("hidden"); // Sicherstellen, dass die Liste sichtbar ist
+    }
+}
+
+// Funktion zum Umschalten der Zeitachse
+function toggleTimeline() {
+    const timelineList = document.getElementById("timeline-list");
+    const arrow = document.getElementById("timeline-arrow");
+
+    if (timelineList.classList.contains("visible")) {
+        // Timeline schließen
+        timelineList.classList.remove("visible");
+        arrow.classList.remove("open");
+    } else {
+        // Timeline öffnen
+        timelineList.classList.add("visible");
+        arrow.classList.add("open");
+    }
+}
+
+
 function visualizeRelatives() {
     const heroDropdown = document.getElementById("heroDropdown");
-    const heroDisplayName = heroDropdown.options[heroDropdown.selectedIndex].text;
+    const heroId = heroDropdown.value;
 
-    const extractHero = (displayName) => {
-        const match = displayName.match(/^(.*?)(?: \((.*?)\))?$/);
-        return {
-            name: match[1]?.trim(),
-            fullName: match[2]?.trim()
-        };
-    };
+    addToTimeline(heroId); // Eintrag in die Timeline
 
-    const heroInfo = extractHero(heroDisplayName);
+    const hero = superheroData.find(h => h.id === heroId);
 
-    const hero = superheroData.find(h =>
-        h.name === heroInfo.name &&
-        (!heroInfo.fullName || h["full-name"] === heroInfo.fullName)
-    );
-
-    if (!hero || !hero.relatives) {
-        console.warn(`No relationships found for the selected hero: ${heroDisplayName}`);
-        renderGraphWithD3([], []); // Leeren Graph anzeigen
+    if (!hero) {
+        console.error(`Hero with ID ${heroId} not found.`);
+        renderGraphWithD3([], []);
         return;
     }
 
-    // Verwandte aus der Spalte 'relatives' extrahieren
+    if (!hero.relatives || hero.relatives === "-") {
+        renderGraphWithD3([{
+            id: hero.id,
+            label: hero.name || hero["full-name"],
+            image: hero.url,
+            isMain: true,
+            status: "mainHero"
+        }], []);
+        return;
+    }
+
     const rawRelatives = splitRelatives(hero.relatives);
 
     const relatives = rawRelatives.map(rel => {
-        const match = rel.match(/^(.*?)\s*\((.*?)\)$/); // Trenne Name und Zusatzinfos
-        const name = match ? match[1].trim() : rel.trim(); // Name der Person
-        const extraInfo = match ? match[2].split(",").map(info => info.trim()) : []; // Liste der Zusatzinfos
+        const foundId = findHeroId(rel.name, rel.alias);
+
+        const relatedHero = superheroData.find(h => h.id === foundId);
+        const image = relatedHero ? relatedHero.url : null; // Bild nur für Helden
+        const label = relatedHero
+            ? relatedHero.name || relatedHero["full-name"] // Heldenname oder Full-Name
+            : rel.name;
+
+        const id = foundId
+            ? foundId // Verwende die ID aus der CSV
+            : `${rel.name}-${rel.relation}`.replace(/\s+/g, "-").toLowerCase(); // Generiere eigene ID
+
+        const status = rel.relation?.toLowerCase().includes("deceased") ? "deceased" : "alive";
 
         return {
-            name: name,
-            extraInfo: extraInfo,
-            relation: extraInfo.find(info => !["deceased", "aka"].includes(info)) || "relation",
-            status: extraInfo.includes("deceased") ? "deceased" : "alive"
+            id: id,
+            name: rel.name,
+            relation: rel.relation || "relation",
+            status: status,
+            image: image,
+            label: label
         };
     });
 
-    // Knoten erstellen
     const nodes = [{
-        id: heroDisplayName,
-        label: heroDisplayName,
+        id: hero.id,
+        label: hero.name || hero["full-name"],
         image: hero.url,
         isMain: true,
         status: "mainHero"
@@ -50,52 +106,93 @@ function visualizeRelatives() {
 
     relatives.forEach(rel => {
         nodes.push({
-            id: rel.name,
-            label: rel.name,
-            extraInfo: rel.extraInfo.join(", "), // Zeigt die Infos in einem String
-            image: null, // Kein Bild für relatives
+            id: rel.id,
+            label: rel.label,
+            image: rel.image,
             isMain: false,
-            status: rel.status
+            status: rel.status,
         });
     });
 
-    // Links erstellen (Held -> Verwandte)
     const links = relatives.map(rel => ({
-        source: heroDisplayName,
-        target: rel.name,
-        relation: rel.relation // Art der Beziehung
+        source: hero.id,
+        target: rel.id,
+        relation: rel.relation?.replace(/[\(\[,;]\s*deceased\s*[\)\],;]?/g, "").trim() // Entferne alle Varianten von "deceased"
     }));
 
-    // Graph rendern
     renderGraphWithD3(nodes, links);
 }
 
 // Hilfsmethode, um die einzelnen Personen aus der 'relatives' Spalte zu extrahieren
 function splitRelatives(relatives) {
     const result = [];
-    let current = '';
-    let depth = 0; // Tiefe der Klammern
+    let current = "";
+    let depth = 0;
 
+    // Relatives bei Komma, Semikolon oder "&" trennen, wenn nicht innerhalb von Klammern
     for (let char of relatives) {
-        if ((char === ',' || char == '\n') && depth === 0) {
-            // Trenne, wenn ein Komma außerhalb der Klammern gefunden wird
+        if ((char === "," || char === ";" || char === "&" || char === ".") && depth === 0) {
             result.push(current.trim());
-            current = '';
+            current = "";
         } else {
-            // Zeichen zur aktuellen Zeichenfolge hinzufügen
             current += char;
-
-            if (char === '(') depth++;
-            if (char === ')') depth--;
+            if (char === "(") depth++;
+            if (char === ")") depth--;
         }
     }
 
-    // letzten Teil hinzufügen
     if (current.trim()) result.push(current.trim());
 
-    return result;
+    // Verarbeitung jedes Teils, um Name und Zusatzinfos zu trennen
+    return result.map(rel => {
+        const match = rel.match(/^(.*?)\s*\((.*?)\)$/); // Name und Zusatzinfo
+        if (match) {
+            const name = match[1].trim(); // Name des Verwandten
+            const extraInfo = match[2]
+                .replace(/["']/g, "") // Entferne Anführungszeichen
+                .split(",")
+                .map(info => info.trim().toLowerCase()); // Trenne Zusatzinfos in ein Array
+
+            return {
+                name: name,
+                alias: null, // Alias bleibt leer, falls nicht verwendet
+                relation: extraInfo.join(", "), // Verknüpfte Zusatzinfos
+            };
+        } else {
+            // Kein Zusatzinfo, nur Name
+            return {
+                name: rel.trim(),
+                alias: null,
+                relation: null,
+            };
+        }
+    }).filter(rel => rel.name); // Entferne ungültige Einträge
 }
 
+// Hilfsmethode, um die ID der relative-Helden zu finden
+function findHeroId(name, alias) {
+    const lowerName = name.toLowerCase();
+    const lowerAlias = alias ? alias.toLowerCase() : null;
+
+    // Suche nach exakter Übereinstimmung des Namens (case-insensitive)
+    const heroByName = superheroData.find(
+        h => h.name.toLowerCase() === lowerName || 
+        h["full-name"]?.toLowerCase() === lowerName);
+
+    if (heroByName) return heroByName.id;
+
+    // Suche nach Alias, falls Name nicht gefunden (case-insensitive)
+    if (lowerAlias) {
+        const heroByAlias = superheroData.find(h =>
+            h.name.toLowerCase() === lowerAlias ||
+            h["full-name"].toLowerCase() === lowerAlias
+        );
+        if (heroByAlias) return heroByAlias.id;
+
+    }
+
+    return null; // Kein passender Held gefunden
+}
 
 function renderGraphWithD3(nodes, links) {
     d3.select("#relationshipGraph").select("svg").remove();
@@ -134,6 +231,7 @@ function renderGraphWithD3(nodes, links) {
         .attr("stroke-width", 2)
         .attr("stroke", "#999");
 
+    // Link-Beschriftungen erstellen
     const linkText = svg.append("g")
         .attr("class", "link-labels")
         .selectAll("text")
@@ -141,9 +239,10 @@ function renderGraphWithD3(nodes, links) {
         .enter().append("text")
         .attr("text-anchor", "middle")
         .attr("font-size", "12px")
-        .attr("fill", "#fff")
+        .attr("fill", "black")
         .text(d => d.relation);
 
+    // Knoten erstellen
     const node = svg.append("g")
         .attr("class", "nodes")
         .selectAll("g")
@@ -154,28 +253,51 @@ function renderGraphWithD3(nodes, links) {
             .on("drag", dragged)
             .on("end", dragEnded));
 
+    // Kreise erstellen
     node.append("circle")
-        .attr("r", d => (d.isMain ? 60 : 30)) // Größerer Radius für Held
+        .attr("r", d => (d.isMain ? 60 : 30)) // Größerer Kreis für den Haupthelden
         .attr("fill", d => colorMap[d.status] || "#ccc")
         .attr("stroke", d => colorMap[d.status] || "#ccc")
-        .attr("stroke-width", 4);
+        .attr("stroke-width", 4)
+        .on("mouseover", function (event, d) {
+            if (!d.isMain && d.image) { // Nur für Relatives
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr("r", 40) // Vergrößere den Kreis
+                    .attr("stroke", "#fff"); // Ändere die Umrandung
+            }
+        })
+        .on("mouseout", function (event, d) {
+            if (!d.isMain && d.image) { // Nur für Relatives
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr("r", 30) // Setze die ursprüngliche Größe zurück
+                    .attr("stroke", colorMap[d.status] || "#ccc");
+            }
+        });
 
-    node.filter(d => d.isMain)
+    // Bilder hinzufügen, falls verfügbar
+    node.filter(d => d.image)
         .append("image")
         .attr("xlink:href", d => d.image)
-        .attr("width", 160)
-        .attr("height", 160)
-        .attr("x", -80)
-        .attr("y", -80)
-        .attr("clip-path", "circle(60px at center)");
+        .attr("width", d => (d.isMain ? 160 : 80))
+        .attr("height", d => (d.isMain ? 160 : 80))
+        .attr("x", d => (d.isMain ? -80 : -40))
+        .attr("y", d => (d.isMain ? -80 : -40))
+        .attr("clip-path", d => `circle(${d.isMain ? 60 : 30}px at center)`)
+        .style("pointer-events", "none");
 
+    // Text für die Knoten (Label oder Superheldenname)
     node.append("text")
         .attr("y", d => (d.isMain ? 75 : 40))
         .attr("text-anchor", "middle")
         .attr("font-size", d => (d.isMain ? "14px" : "12px"))
-        .attr("fill", "#fff")
+        .attr("fill", "black")
         .text(d => d.label);
 
+    // Simulation aktualisieren
     simulation.on("tick", () => {
         link.attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
@@ -223,7 +345,7 @@ function renderGraphWithD3(nodes, links) {
             .attr("cx", 10)
             .attr("cy", 10)
             .attr("r", 10)
-            .attr("fill", "none")
+            .attr("fill", item.color)
             .attr("stroke", item.color)
             .attr("stroke-width", 4);
 
@@ -232,16 +354,16 @@ function renderGraphWithD3(nodes, links) {
             .attr("y", 15)
             .text(item.label)
             .attr("font-size", "12px")
-            .attr("fill", "#fff");
+            .attr("fill", "black");
+    });
+
+    // Event-Listener für Knoten
+    node.on("click", (event, d) => {
+        if (d.image) {
+            console.log(`Switching to hero with ID: ${d.id}`);
+            document.getElementById("heroDropdown").value = d.id;
+
+            visualizeRelatives();
+        }
     });
 }
-
-
-
-function initTab3() {
-    const heroDropdown = document.getElementById("heroDropdown");
-    heroDropdown.addEventListener("change", visualizeRelatives);
-
-    visualizeRelatives();
-}
-

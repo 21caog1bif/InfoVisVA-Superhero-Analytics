@@ -1,0 +1,353 @@
+/* ===================== */
+/* Theme Variables       */
+/* ===================== */
+:root {
+    --background-color: #1e1e1e;
+    --text-color: #ffffff;
+    --sidebar-border: #333;
+    --input-background: #2e2e2e;
+    --input-border: #555;
+    --button-background: #007bff;
+    --button-hover: #0056b3;
+    --tab-background: #1d1a1a;
+    --tab-active-background: #333;
+    --chart-background: #c4c4c4;
+}
+
+body.light-mode {
+    --background-color: #f4f4f4;
+    --text-color: #121212;
+    --sidebar-border: #ddd;
+    --input-background: #ffffff;
+    --input-border: #ccc;
+    --tab-background: #9d9c9a;
+    --tab-active-background: #ddd;
+    --chart-background: #ffffff;
+}
+
+/* ===================== */
+/* Basic Styling         */
+/* ===================== */
+@font-face {
+    font-family: "SuperCell Magic";
+    src: url("Supercell-Magic\ Regular.ttf") format("truetype");
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1 {
+    color: #fffffe;
+    /* Textfarbe */
+    font-family: "SuperCell Magic", sans-serif;
+    font-weight: bold;
+    text-shadow: -0.1rem -0.1rem 0 #222,
+        /* Schatteneffekt */
+        0.1rem -0.1rem 0 #222,
+        -0.1rem 0.1rem 0 #222,
+        0.1rem 0.1rem 0 #222,
+        0 0.3rem 0 rgba(0, 0, 0, 1);
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    background-color: var(--background-color);
+}
+
+/* ===================== */
+/* Tabs Styling          */
+/* ===================== */
+.tab-container {
+    display: flex;
+    justify-content: center;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid var(--sidebar-border);
+    border-bottom: none;
+    background-color: var(--tab-background);
+    margin: 0 5px;
+    border-radius: 8px 8px 0 0;
+    font-family: "SuperCell Magic", sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: -0.1rem -0.1rem 0 #222,
+        /* Schatteneffekt */
+        0.1rem -0.1rem 0 #222,
+        -0.1rem 0.1rem 0 #222,
+        0.1rem 0.1rem 0 #222,
+        0 0.3rem 0 rgba(0, 0, 0, 1);
+    color: #fff;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab.active {
+    background-color: var(--chart-background);
+    border: 1px solid var(--text-color);
+    border-left: 2px solid var(--sidebar-border);
+    border-right: 2px solid var(--sidebar-border);
+    border-bottom: none;
+}
+
+.tab-content {
+    display: none;
+    padding: 0;
+    flex-grow: 1;
+    background-color: var(--background-color);
+}
+
+.tab-content.active {
+    display: flex;
+    height: calc(100vh - 120px);
+}
+
+/* ===================== */
+/* Layout: Filter & View */
+/* ===================== */
+.tab-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.filter-sidebar {
+    width: 300px;
+    padding: 20px;
+    background-color: var(--background-color);
+    border-right: 2px solid var(--sidebar-border);
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.filter-sidebar h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.filter-sidebar label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.filter-sidebar input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.filter-sidebar input,
+.filter-sidebar select {
+    width: calc(100% - 10px);
+    margin-top: 5px;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--text-color);
+    background-color: var(--input-background);
+}
+
+/* ===================== */
+/* Button Styling        */
+/* ===================== */
+
+.filter-sidebar button {
+    position: relative;
+    background: #7ec62d;
+    /* Hauptfarbe des Buttons */
+    color: #fffffe;
+    /* Textfarbe */
+    font-family: "SuperCell Magic", sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: -0.1rem -0.1rem 0 #222,
+        /* Schatteneffekt */
+        0.1rem -0.1rem 0 #222,
+        -0.1rem 0.1rem 0 #222,
+        0.1rem 0.1rem 0 #222,
+        0 0.3rem 0 rgba(0, 0, 0, 1);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 10px 10px;
+    text-align: center;
+    border: 0.2rem solid #98de4e;
+    /* Grüne Umrandung */
+    border-radius: 1rem;
+    width: 100%;
+    box-shadow: -0.1rem -0.1rem 0 #222,
+        0.1rem -0.1rem 0 #222,
+        -0.1rem 0.1rem 0 #222,
+        0.1rem 0.1rem 0 #222,
+        0 0.3rem 0 #222,
+        0 0.5rem 0 rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.filter-sidebar button::after {
+    content: "";
+    position: absolute;
+    width: 95%;
+    height: 40%;
+    /* Dynamische Höhe angepasst */
+    left: 50%;
+    top: 10%;
+    border-radius: 0.6rem;
+    transform: translateX(-50%);
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.2), #dcf684);
+    /* Glanz */
+    z-index: 0;
+    pointer-events: none;
+    /* Sicherstellen, dass der Glanz nicht interaktiv ist */
+}
+
+.filter-sidebar button:hover {
+    background: linear-gradient(to bottom, #98de4e, #7ec62d);
+    /* Aufhellender Verlauf */
+    box-shadow: -0.2rem -0.2rem 0 #222,
+        0.2rem -0.2rem 0 #222,
+        -0.2rem 0.2rem 0 #222,
+        0.2rem 0.2rem 0 #222,
+        0 0.4rem 0 rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+    /* Leichtes Heben beim Hover */
+}
+
+.filter-sidebar button:active {
+    transform: translateY(2px);
+    /* Button drückt sich nach unten */
+    box-shadow: inset -0.2rem -0.2rem 0 #222,
+        inset 0.2rem -0.2rem 0 #222,
+        inset -0.2rem 0.2rem 0 #222,
+        inset 0.2rem 0.2rem 0 #222;
+}
+
+
+
+/* ===================== */
+/* Timeline Section      */
+/* ===================== */
+.timeline-container {
+    border: 1px solid var(--sidebar-border);
+    background-color: var( --background-color);
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.timeline-header {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-color);
+}
+
+.timeline-header .arrow {
+    margin-right: 5px;
+    transition: transform 0.2s ease;
+}
+
+.timeline-header .arrow.open {
+    transform: rotate(90deg);
+}
+
+#timeline-list,
+#group-timeline-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+#timeline-list.visible,
+#group-timeline-list.visible {
+    max-height: 200px;
+    overflow-y: auto;
+    opacity: 1;
+}
+
+#timeline-list li,
+#group-timeline-list li {
+    background-color: var( --background-color);
+    color: var(--text-color);
+    border-bottom: 1px solid var(--sidebar-border);
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#timeline-list li:hover,
+#group-timeline-list li:hover {
+    background-color: var(--tab-active-background);
+}
+
+
+
+
+/* Hero Info Container */
+.hero-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: var( --background-color);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    width: 20%;
+    /* Gleiche Breite für beide Spalten */
+}
+
+.hero-info img {
+    display: block;
+    margin: 0 auto 10px;
+    max-width: 150px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Tabellen Styling */
+.hero-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.hero-table th,
+.hero-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--sidebar-border);
+}
+
+.hero-table th {
+    background-color: var(--sidebar-border);
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+.hero-table tr:nth-child(even) {
+    background-color: var(--input-background);
+}
+
+.hero-table tr:nth-child(odd) {
+    background-color: var( --background-color);
+}

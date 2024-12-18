@@ -7,7 +7,8 @@
     <title>Superhero Analytics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_main.css">
+    <link rel="stylesheet" href="style_graph.css">
     <link rel="stylesheet" href="style_toggle-button.css">
 </head>
 
@@ -33,10 +34,11 @@
 
     <!-- Tabs -->
     <div class="tab-container">
-        <div class="tab active" onclick="openTab(event, 'tab1')">Attribute Visualization</div>
-        <div class="tab" onclick="openTab(event, 'tab2')">Superhero Comparison</div>
-        <div class="tab" onclick="openTab(event, 'tab3')">Relatives Visualization</div>
-        <div class="tab" onclick="openTab(event, 'tab4')">Relatives Visualization</div>
+        <div class="tab active" onclick="openTab(event, 'tab1')">Attributes</div>
+        <div class="tab" onclick="openTab(event, 'tab2')">Comparison</div>
+        <div id="tab3-button" class="tab" onclick="openTab(event, 'tab3')">Relatives</div>
+        <div class="tab" onclick="openTab(event, 'tab4')">Groups</div>
+        <div class="tab" onclick="openTab(event, 'tab5')">Bubble Chart</div>
     </div>
 
     <!-- Tab 1: Attribute Visualization -->
@@ -123,8 +125,9 @@
 
             <!-- Hero 1 Container -->
             <div class="hero-info" id="hero1-info">
+                <h2 id="hero1-name" style="text-align: center;"></h2>
                 <img id="hero1Image" src="" alt="Hero 1">
-                <table>
+                <table class="hero-table">
                     <thead>
                         <tr>
                             <th>Attribute</th>
@@ -139,13 +142,15 @@
 
             <!-- Radar Chart -->
             <div class="chart-area">
-                <canvas id="radarChart" width="500" height="400"></canvas>
+                <svg id="radarChartLegend"></svg>
+                <svg id="radarChart"></svg>
             </div>
 
             <!-- Hero 2 Container -->
             <div class="hero-info" id="hero2-info">
+                <h2 id="hero2-name" style="text-align: center;"></h2>
                 <img id="hero2Image" src="" alt="Hero 2">
-                <table>
+                <table class="hero-table">
                     <thead>
                         <tr>
                             <th>Attribute</th>
@@ -160,6 +165,7 @@
         </div>
     </div>
 
+
     <!-- Tab 3: Relatives Visualization -->
     <div id="tab3" class="tab-content">
         <div class="tab-layout">
@@ -170,35 +176,153 @@
                 <select id="heroDropdown">
                     <!-- Dynamisch gefüllt -->
                 </select>
-                <button onclick="visualizeRelatives()">Update Visualization</button>
+                <button onclick="visualizeRelatives()">Update</button>
+                <!-- Historie-Bereich -->
+                <div id="timeline-container">
+                    <div class="timeline-header" onclick="toggleTimeline()">
+                        <span id="timeline-arrow" class="arrow">></span>
+                        <span>Timeline</span>
+                    </div>
+                    <ul id="timeline-list" class="hidden, timeline-list">
+                        <!-- Dynamische Timeline-Einträge -->
+                    </ul>
+                </div>
             </div>
             <!-- Visualization Area -->
-            <div id="relationshipGraph" style="width: 80%; height: 100%;"></div>
+            <div class="chart-area">
+                <div id="relationshipGraph" style="width: 100%; height: 100%;"></div>
+            </div>
         </div>
     </div>
-    
+
+
+    <!-- Tab 4: Full Network Visualization -->
     <div id="tab4" class="tab-content">
         <div class="tab-layout">
             <!-- Filter Sidebar -->
             <div class="filter-sidebar">
-                <h3>Select a Hero</h3>
-                <label for="heroDropdown">Hero:</label>
-                <select id="heroDropdown">
-                    <!-- Dynamisch gefüllt -->
+                <h3>Select a Group</h3>
+                <label for="groupDropdown">Group Filter:</label>
+                <select id="groupDropdown">
+                    <!-- Dynamically filled -->
+                    <option value="all">All Groups</option>
                 </select>
-                <button onclick="visualizeRelatives()">Update Visualization</button>
+                <button onclick="updateNetworkChart()">Update</button>
+                <div id="group-timeline-container">
+                    <div class="timeline-header" onclick="toggleGroupTimeline()">
+                        <span id="group-timeline-arrow" class="arrow">></span>
+                        <span>Group Timeline</span>
+                    </div>
+                    <ul id="group-timeline-list" class="hidden, timeline-list"></ul>
+                </div>
             </div>
             <!-- Visualization Area -->
-            <div id="relationshipGraph" style="width: 80%; height: 100%;"></div>
+            <div class="chart-area">
+                <div id="fullNetworkGraph" style="width: 100%; height: 100%;"></div>
+            </div>
+            
         </div>
     </div>
 
+
+    <!-- Tab 5: Bubble Chart -->
+    <div id="tab5" class="tab-content active">
+        <div class="tab-layout">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <h3>Filters</h3>
+
+                <!-- Attribute Selector -->
+                <label for="attributeSelector">Attribute:</label>
+                <select id="attributeSelector">
+                    <option value="intelligence">Intelligence</option>
+                    <option value="strength">Strength</option>
+                    <option value="speed">Speed</option>
+                    <option value="durability">Durability</option>
+                    <option value="power">Power</option>
+                    <option value="combat">Combat</option>
+                </select>
+
+                <!-- Race Selector -->
+                <label for="raceFilter">Race:</label>
+                <select id="raceFilter">
+                    <option value="">All</option>
+                </select>
+
+                <!-- Gender Selector -->
+                <label for="genderFilter">Gender:</label>
+                <select id="genderFilter">
+                    <option value="">All</option>
+                </select>
+
+                <!-- Alignment Selector -->
+                <label for="alignmentFilter">Alignment:</label>
+                <select id="alignmentFilter">
+                    <option value="">All</option>
+                    <option value="good">Good</option>
+                    <option value="bad">Bad</option>
+                    <option value="neutral">Neutral</option>
+                </select>
+
+                <!-- Height Filter -->
+                <label for="heightFilter">Height (cm):</label>
+                <input type="number" id="minHeightFilter" placeholder="Min Height">
+                <input type="number" id="maxHeightFilter" placeholder="Max Height">
+
+                <!-- Weight Filter -->
+                <label for="weightFilter">Weight (kg):</label>
+                <input type="number" id="minWeightFilter" placeholder="Min Weight">
+                <input type="number" id="maxWeightFilter" placeholder="Max Weight">
+
+                <!-- Custom Checkbox Filters -->
+                <h4>Custom Filters:</h4>
+                <!-- <label><input type="checkbox" id="flyingFilter"> Can Fly</label><br> -->
+                <label><input type="checkbox" id="strengthAbove50Filter"> Strength > 50</label><br>
+                <label><input type="checkbox" id="heroOnlyFilter"> Hero Only</label><br>
+
+                <!-- Apply Filters Button -->
+                <button onclick="updateBarChart()">Apply Filters</button>
+            </div>
+
+            <!-- Chart Area -->
+            <div class="chart-area">
+                <canvas id="barChart" width="800" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        function playAudio() {
+            var audio = new Audio();
+            audio.src = "sound.mp3"
+            audio.play()
+        }
+        const buttons = document.querySelectorAll("button");
+
+        // Event Listener zu jedem Button hinzufügen
+        buttons.forEach(button => {
+            button.addEventListener("click", playAudio);
+        });
+
+        // Alle Tabs auswählen
+        const tabs = document.querySelectorAll(".tab");
+
+        // Event Listener zu jedem Tab hinzufügen
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                playAudio(); // Sound abspielen
+            });
+        });
+    </script>
 
     <script src="main.js"></script>
     <script src="tab1.js"></script>
     <script src="tab2.js"></script>
     <script src="tab3.js"></script>
     <script src="tab4.js"></script>
+    <script src="tab5.js"></script>
 </body>
 
 </html>
