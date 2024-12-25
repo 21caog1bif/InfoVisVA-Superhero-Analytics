@@ -59,6 +59,17 @@
                     <option value="combat">Combat</option>
                 </select>
 
+                    <!-- Dynamic Slider for the Selected Attribute -->
+            <div id="attributeSlider">
+                <label for="minAttributeFilter">Min Value:</label>
+                <input type="range" id="minAttributeFilter" min="0" max="100" step="1">
+                <span id="minValueDisplay">0</span>
+                <label for="maxAttributeFilter">Max Value:</label>
+                <input type="range" id="maxAttributeFilter" min="0" max="100" step="1">
+                <span id="maxValueDisplay">100</span>
+              
+            </div>
+
                 <!-- Race Selector -->
                 <label for="raceFilter">Race:</label>
                 <select id="raceFilter">
@@ -90,10 +101,18 @@
                 <input type="number" id="minWeightFilter" placeholder="Min Weight">
                 <input type="number" id="maxWeightFilter" placeholder="Max Weight">
 
+                <div id="attributeSlider">
+                    <label for="sizeInput">Größe:</label>
+                    <input type="number" id="sizeInput" min="100" max="250" step="1" value="160">
+                
+                    <label for="weightInput">Gewicht:</label>
+                    <input type="number" id="weightInput" min="30" max="200" step="1" value="70">
+                </div>
+                
+
                 <!-- Custom Checkbox Filters -->
                 <h4>Custom Filters:</h4>
                 <!-- <label><input type="checkbox" id="flyingFilter"> Can Fly</label><br> -->
-                <label><input type="checkbox" id="strengthAbove50Filter"> Strength > 50</label><br>
                 <label><input type="checkbox" id="heroOnlyFilter"> Hero Only</label><br>
 
                 <!-- Apply Filters Button -->
@@ -225,71 +244,63 @@
     </div>
 
 
+
     <!-- Tab 5: Bubble Chart -->
-    <div id="tab5" class="tab-content active">
-        <div class="tab-layout">
-            <!-- Filter Sidebar -->
-            <div class="filter-sidebar">
-                <h3>Filters</h3>
+<div id="tab5" class="tab-content">
+    <div class="tab-layout">
+        <!-- Filter Sidebar -->
+        <div class="filter-sidebar">
+            <h3>Filtersf</h3>
 
-                <!-- Attribute Selector -->
-                <label for="attributeSelector">Attribute:</label>
-                <select id="attributeSelector">
-                    <option value="intelligence">Intelligence</option>
-                    <option value="strength">Strength</option>
-                    <option value="speed">Speed</option>
-                    <option value="durability">Durability</option>
-                    <option value="power">Power</option>
-                    <option value="combat">Combat</option>
-                </select>
+            <!-- Attribute Selector -->
+            <label for="attributeSelector">Attribute:</label>
+            <select id="attributeSelector">
+                <option value="intelligence">Intelligence</option>
+                <option value="strength">Strength</option>
+                <option value="speed">Speed</option>
+                <option value="durability">Durability</option>
+                <option value="power">Power</option>
+                <option value="combat">Combat</option>
+            </select>
 
-                <!-- Race Selector -->
-                <label for="raceFilter">Race:</label>
-                <select id="raceFilter">
-                    <option value="">All</option>
-                </select>
+            <!-- Race Selector -->
+            <label for="raceFilterBubble">Race:</label>
+            <select id="raceFilter">
+                <option value="">All</option>
+            </select>
 
-                <!-- Gender Selector -->
-                <label for="genderFilter">Gender:</label>
-                <select id="genderFilter">
-                    <option value="">All</option>
-                </select>
+            <!-- Gender Selector -->
+            <label for="genderFilterBubble">Gender:</label>
+            <select id="genderFilter">
+                <option value="">All</option>
+            </select>
 
-                <!-- Alignment Selector -->
-                <label for="alignmentFilter">Alignment:</label>
-                <select id="alignmentFilter">
-                    <option value="">All</option>
-                    <option value="good">Good</option>
-                    <option value="bad">Bad</option>
-                    <option value="neutral">Neutral</option>
-                </select>
+            <!-- Alignment Selector -->
+            <label for="alignmentFilterBubble">Alignment:</label>
+            <select id="alignmentFilter">
+                <option value="">All</option>
+                <option value="good">Good</option>
+                <option value="bad">Bad</option>
+                <option value="neutral">Neutral</option>
+            </select>
 
-                <!-- Height Filter -->
-                <label for="heightFilter">Height (cm):</label>
-                <input type="number" id="minHeightFilter" placeholder="Min Height">
-                <input type="number" id="maxHeightFilter" placeholder="Max Height">
+            <!-- Custom Checkbox Filters -->
+            <h4>Custom Filters:</h4>
+            <label><input type="checkbox" id="strengthAbove50Filter"> Strength > 50</label><br>
+            <label><input type="checkbox" id="heroOnlyFilter"> Hero Only</label><br>
 
-                <!-- Weight Filter -->
-                <label for="weightFilter">Weight (kg):</label>
-                <input type="number" id="minWeightFilter" placeholder="Min Weight">
-                <input type="number" id="maxWeightFilter" placeholder="Max Weight">
+            <!-- Apply Filters Button -->
+            <button onclick="updateBubbleChart()">Apply Filters</button>
+        </div>
 
-                <!-- Custom Checkbox Filters -->
-                <h4>Custom Filters:</h4>
-                <!-- <label><input type="checkbox" id="flyingFilter"> Can Fly</label><br> -->
-                <label><input type="checkbox" id="strengthAbove50Filter"> Strength > 50</label><br>
-                <label><input type="checkbox" id="heroOnlyFilter"> Hero Only</label><br>
-
-                <!-- Apply Filters Button -->
-                <button onclick="updateBarChart()">Apply Filters</button>
-            </div>
-
-            <!-- Chart Area -->
-            <div class="chart-area">
-                <canvas id="barChart" width="800" height="400"></canvas>
-            </div>
+        <!-- Chart Area -->
+        <div class="chart-area">
+            <!-- Bubble Chart Container -->
+            <div id="bubbleChartContainer" style="width: 800px; height: 400px;"></div>
         </div>
     </div>
+</div>
+
 
 
 

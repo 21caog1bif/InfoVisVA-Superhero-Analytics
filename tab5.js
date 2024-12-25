@@ -1,14 +1,16 @@
-// Tab 1: Dropdowns für Filter füllen
-function populateFilters(data) {
+function populateFiltersBubble(data) {
     const raceDropdown = document.getElementById("raceFilter");
     const genderDropdown = document.getElementById("genderFilter");
 
     // Eindeutige Werte extrahieren und bereinigen
     const uniqueRaces = [...new Set(data.map(hero => hero.race).filter(value => isValidValue(value)))].sort();
-    console.log("Unique races from data:", uniqueRaces);
     const uniqueGenders = [...new Set(data.map(hero => hero.gender).filter(value => isValidValue(value)))].sort();
 
-    // Dropdowns mit Werten füllen
+    // Dropdowns zurücksetzen und die Standardoption hinzufügen
+    raceDropdown.innerHTML = "<option value=''>Alle</option>";
+    genderDropdown.innerHTML = "<option value=''>Alle</option>";
+
+    // Dropdowns mit den einzigartigen Werten befüllen
     uniqueRaces.forEach(race => {
         const option = document.createElement("option");
         option.value = race.toLowerCase();
@@ -23,160 +25,113 @@ function populateFilters(data) {
         genderDropdown.appendChild(option);
     });
 }
-
-// Tab 1: Filter anwenden und Balkendiagramm aktualisieren
-function applyFilters(data) {
-    const attribute = document.getElementById("attributeSelector").value;
-    const raceFilter = document.getElementById("raceFilter").value.toLowerCase();
-    const genderFilter = document.getElementById("genderFilter").value.toLowerCase();
-    const alignmentFilter = document.getElementById("alignmentFilter").value.toLowerCase();
-    const minHeight = parseInt(document.getElementById("minHeightFilter").value);
-    const maxHeight = parseInt(document.getElementById("maxHeightFilter").value);
-    const minWeight = parseInt(document.getElementById("minWeightFilter").value);
-    const maxWeight = parseInt(document.getElementById("maxWeightFilter").value);
-
-    //const flyingFilter = document.getElementById("flyingFilter").checked;
-    const strengthAbove50Filter = document.getElementById("strengthAbove50Filter").checked;
-    const heroOnlyFilter = document.getElementById("heroOnlyFilter").checked;
-
-    return data.filter(hero => {
-        // Race, Gender, and Alignment Filters
-        const raceMatch = raceFilter ? hero.race && hero.race.toLowerCase() === raceFilter : true;
-        const genderMatch = genderFilter ? hero.gender && hero.gender.toLowerCase() === genderFilter : true;
-        const alignmentMatch = alignmentFilter ? hero.alignment && hero.alignment.toLowerCase() === alignmentFilter : true;
-
-        // Height Filter (normalize to cm)
-        const heightInCm = parseHeight(hero.height);
-        const heightMatch = (!minHeight || heightInCm >= minHeight) && (!maxHeight || heightInCm <= maxHeight);
-
-        // Weight Filter (normalize to kg)
-        const weightInKg = parseWeight(hero.weight);
-        const weightMatch = (!minWeight || weightInKg >= minWeight) && (!maxWeight || weightInKg <= maxWeight);
-
-        // Additional Filters
-        //const flyingMatch = flyingFilter ? hero.can_fly && hero.can_fly.toLowerCase() === "true" : true;
-        const strengthMatch = strengthAbove50Filter ? parseInt(hero.strength) > 50 : true;
-        const heroMatch = heroOnlyFilter ? hero.alignment && hero.alignment.toLowerCase() === "good" : true;
-
-        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch &&  strengthMatch && heroMatch;
-    });
-}
-
-
-function parseHeight(height) {
-    if (!height || height === '-' || height === 'null') return null;
-
-    // Check for "feet and inches" format (e.g., "6'8\"")
-    const feetInchesMatch = height.match(/(\d+)'(\d*)"/);
-    if (feetInchesMatch) {
-        const feet = parseInt(feetInchesMatch[1]);
-        const inches = parseInt(feetInchesMatch[2] || 0);
-        return Math.round((feet * 30.48) + (inches * 2.54)); // Convert to cm
-    }
-
-    // Check for "cm" format
-    const cmMatch = height.match(/(\d+)\s*cm/);
-    if (cmMatch) return parseInt(cmMatch[1]);
-
-    // Check for "meters" format
-    const metersMatch = height.match(/(\d+(\.\d+)?)\s*meters?/);
-    if (metersMatch) return Math.round(parseFloat(metersMatch[1]) * 100); // Convert to cm
-
-    return null; // Return null if no valid format is found
-}
-
-function parseWeight(weight) {
-    if (!weight || weight === '-' || weight === 'null') return null;
-
-    // Check for "lb" format (e.g., "200 lb")
-    const lbMatch = weight.match(/(\d+)\s*lb/);
-    if (lbMatch) return Math.round(parseInt(lbMatch[1]) * 0.453592); // Convert to kg
-
-    // Check for "kg" format
-    const kgMatch = weight.match(/(\d+)\s*kg/);
-    if (kgMatch) return parseInt(kgMatch[1]);
-
-    return null; // Return null if no valid format is found
-}
-
-function updateBarChart() {
+function updateBubbleChart() {
+    // Daten filtern mithilfe der applyFilters-Funktion
     const filteredData = applyFilters(superheroData);
+
+    // Attribut auswählen
     const attribute = document.getElementById("attributeSelector").value;
 
-    const labels = filteredData.map(hero => hero.name);
-    const values = filteredData.map(hero => parseFloat(hero[attribute]) || 0);
+    // Container für den Bubble Chart bereinigen
+    const bubbleContainer = d3.select("#bubbleChartContainer");
+    bubbleContainer.selectAll("*").remove();
 
-    const ctx = document.getElementById("barChart").getContext("2d");
-    if (barChart) barChart.destroy();
+    // Chart-Dimensionen
+    const margin = { top: 50, right: 100, bottom: 50, left: 60 };
+    const width = 800 - margin.left - margin.right;
+    const height = 600 - margin.top - margin.bottom;
 
-    barChart = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: `${attribute} of Superheroes`,
-                data: values,
-                backgroundColor: "rgba(75, 192, 192, 0.6)"
-            }]
-        },
-        options: {
-            plugins: {
-                tooltip: {
-                    enabled: false, // Disable default tooltips
-                    external: function (context) {
-                        const tooltipModel = context.tooltip;
+    // Tooltip erstellen
+    const tooltip = d3.select("body")
+    .append("div")
+    .attr("id", "tooltip")
+    .style("position", "absolute")
+    .style("opacity", 0)
+    .style("background", "#333") // Dunklerer Hintergrund
+    .style("color", "#fff") // Helle Schriftfarbe für besseren Kontrast
+    .style("padding", "10px")
+    .style("border", "1px solid #ddd")
+    .style("border-radius", "4px")
+    .style("pointer-events", "none")
+    .style("box-shadow", "0 4px 6px rgba(0, 0, 0, 0.1)"); // Etwas Schatten für bessere Sichtbarkeit
 
-                        // Create tooltip element if it doesn't exist
-                        let tooltipEl = document.getElementById('chartjs-tooltip');
-                        if (!tooltipEl) {
-                            tooltipEl = document.createElement('div');
-                            tooltipEl.id = 'chartjs-tooltip';
-                            tooltipEl.style.position = 'absolute';
-                            tooltipEl.style.background = 'rgba(0, 0, 0, 0.8)'; // Always dark background
-                            tooltipEl.style.color = '#ffffff'; // Always white text
-                            tooltipEl.style.border = '1px solid #ffffff'; // Optional: border for better visibility
-                            tooltipEl.style.borderRadius = '8px';
-                            tooltipEl.style.padding = '10px';
-                            tooltipEl.style.pointerEvents = 'none';
-                            tooltipEl.style.transition = 'opacity 0.3s ease';
-                            tooltipEl.style.fontSize = '12px';
-                            tooltipEl.style.fontFamily = 'Arial, sans-serif';
-                            document.body.appendChild(tooltipEl);
-                        }
 
-                        // Hide tooltip if no data
-                        if (tooltipModel.opacity === 0) {
-                            tooltipEl.style.opacity = 0;
-                            return;
-                        }
+    // SVG erstellen
+    const svg = bubbleContainer.append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-                        // Get data of the current point
-                        const dataIndex = tooltipModel.dataPoints[0].dataIndex;
-                        const hero = filteredData[dataIndex];
+    // Skalen definieren
+    const xScale = d3.scaleLinear()
+        .domain([0, d3.max(filteredData, d => parseFloat(d[attribute]) || 0)])
+        .range([0, width]);
 
-                        // Set tooltip content
-                        tooltipEl.innerHTML = `
-                            <strong>${hero.name}</strong><br>
-                            <img src="${hero.url}" alt="${hero.name}" style="width: 60px; height: 60px; border-radius: 5px; margin-bottom: 5px;"><br>
-                            <strong>Full Name:</strong> ${hero["full-name"] || "N/A"}<br>
-                            <strong>Race:</strong> ${hero.race || "N/A"}<br>
-                            <strong>Gender:</strong> ${hero.gender || "N/A"}<br>
-                            <strong>Publisher:</strong> ${hero.publisher || "N/A"}<br>
-                            <strong>Alignment:</strong> ${hero.alignment || "N/A"}<br>
-                            <strong>Height:</strong> ${hero.height || "N/A"}<br>
-                            <strong>Weight:</strong> ${hero.weight || "N/A"}<br>
-                        `;
+    const yScale = d3.scaleBand()
+        .domain(filteredData.map(d => d.name))
+        .range([0, height])
+        .padding(0.5);
 
-                        // Tooltip positioning
-                        const canvasPosition = context.chart.canvas.getBoundingClientRect();
-                        tooltipEl.style.opacity = 1;
-                        tooltipEl.style.left = canvasPosition.left + window.pageXOffset + tooltipModel.caretX + 'px';
-                        tooltipEl.style.top = canvasPosition.top + window.pageYOffset + tooltipModel.caretY + 'px';
-                    }
-                }
-            }
-        }
-    });
+    const sizeScale = d3.scaleSqrt()
+        .domain([0, d3.max(filteredData, d => parseFloat(d[attribute]) || 0)])
+        .range([5, 40]);
+
+    const colorScale = d3.scaleOrdinal()
+        .domain(["Male", "Female", "Other"])
+        .range(["#4e79a7", "#f28e2b", "#e15759"]);
+
+    // Blasen hinzufügen
+    svg.selectAll("circle")
+        .data(filteredData)
+        .enter()
+        .append("circle")
+        .attr("cx", d => xScale(parseFloat(d[attribute]) || 0))
+        .attr("cy", d => yScale(d.name) + yScale.bandwidth() / 2)
+        .attr("r", d => sizeScale(parseFloat(d[attribute]) || 0))
+        .attr("fill", d => colorScale(d.gender || "Other"))
+        .attr("stroke", "white")
+        .attr("stroke-width", 2)
+        .style("opacity", 0.8)
+        // On Mouseover für Blasen
+svg.selectAll("circle")
+.on("mouseover", function (event, d) {
+    tooltip.style("opacity", 1)
+        .html(`
+            <strong>${d.name}</strong><br>
+            Race: ${d.race || "N/A"}<br>
+            Gender: ${d.gender || "N/A"}<br>
+            ${attribute}: ${d[attribute] || "N/A"}
+        `)
+        .style("left", `${event.pageX + 10}px`)
+        .style("top", `${event.pageY + 10}px`);
+    d3.select(this).attr("fill", "orange"); // Optional: Highlight die Blase beim Hover
+})
+        .on("mouseout", function () {
+            tooltip.style("opacity", 0);
+            d3.select(this).attr("fill", d => colorScale(d.gender || "Other")); // Blase zurücksetzen
+        });
+
+    // Achsen hinzufügen
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
+
+    // X-Achse hinzufügen
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0, ${height})`)
+        .call(xAxis);
+
+    // Y-Achse hinzufügen
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+    // Achsentitel hinzufügen
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", -10)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "18px")
+        .text(`Bubble Chart: ${attribute} of Superheroes`);
 }
-
-
