@@ -244,51 +244,58 @@
     </div>
 
 
-
-    <!-- Tab 5: Bubble Chart -->
+<!-- Tab 5: Bubble Chart -->
 <div id="tab5" class="tab-content">
     <div class="tab-layout">
         <!-- Filter Sidebar -->
         <div class="filter-sidebar">
-            <h3>Filtersf</h3>
+            <h3>Bubble Chart Filters</h3>
 
-            <!-- Attribute Selector -->
-            <label for="attributeSelector">Attribute:</label>
-            <select id="attributeSelector">
+            <!-- X-Axis Selector -->
+            <label for="bubbleXAxisSelector">X-Axis:</label>
+            <select id="bubbleXAxisSelector">
                 <option value="intelligence">Intelligence</option>
                 <option value="strength">Strength</option>
                 <option value="speed">Speed</option>
                 <option value="durability">Durability</option>
                 <option value="power">Power</option>
                 <option value="combat">Combat</option>
+                <option value="height">Height</option>
+                <option value="weight">Weight</option>
             </select>
 
-            <!-- Race Selector -->
-            <label for="raceFilterBubble">Race:</label>
-            <select id="raceFilter">
-                <option value="">All</option>
+            <!-- Y-Axis Selector -->
+            <label for="bubbleYAxisSelector">Y-Axis:</label>
+            <select id="bubbleYAxisSelector">
+                <option value="intelligence">Intelligence</option>
+                <option value="strength">Strength</option>
+                <option value="speed">Speed</option>
+                <option value="durability">Durability</option>
+                <option value="power">Power</option>
+                <option value="combat">Combat</option>
+                <option value="height">Height</option>
+                <option value="weight">Weight</option>
             </select>
 
-            <!-- Gender Selector -->
-            <label for="genderFilterBubble">Gender:</label>
-            <select id="genderFilter">
-                <option value="">All</option>
+            <!-- Bubble Size Selector -->
+            <label for="bubbleSizeSelector">Bubble Size:</label>
+            <select id="bubbleSizeSelector">
+                <option value="power">Power</option>
+                <option value="strength">Strength</option>
+                <option value="speed">Speed</option>
+                <option value="durability">Durability</option>
             </select>
 
-            <!-- Alignment Selector -->
-            <label for="alignmentFilterBubble">Alignment:</label>
-            <select id="alignmentFilter">
-                <option value="">All</option>
-                <option value="good">Good</option>
-                <option value="bad">Bad</option>
-                <option value="neutral">Neutral</option>
+            <!-- Color Grouping Selector -->
+            <label for="bubbleColorSelector">Color Grouping:</label>
+            <select id="bubbleColorSelector">
+                <option value="alignment">Alignment</option>
+                <option value="gender">Gender</option>
+                <option value="race">Race</option>
+                <option value="publisher">Publisher</option>
             </select>
 
-            <!-- Custom Checkbox Filters -->
-            <h4>Custom Filters:</h4>
-            <label><input type="checkbox" id="strengthAbove50Filter"> Strength > 50</label><br>
-            <label><input type="checkbox" id="heroOnlyFilter"> Hero Only</label><br>
-
+          
             <!-- Apply Filters Button -->
             <button onclick="updateBubbleChart()">Apply Filters</button>
         </div>
@@ -300,6 +307,7 @@
         </div>
     </div>
 </div>
+
 
 
 
@@ -335,5 +343,4 @@
     <script src="tab4.js"></script>
     <script src="tab5.js"></script>
 </body>
-
 </html>

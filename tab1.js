@@ -41,7 +41,7 @@ function applyFilters(data) {
     const maxAttribute = parseInt(document.getElementById("maxAttributeFilter").value);
 
     // Zusätzliche Filter
-    const strengthAbove50Filter = document.getElementById("strengthAbove50Filter").checked;
+    //const strengthAbove50Filter = document.getElementById("strengthAbove50Filter").checked;
     const heroOnlyFilter = document.getElementById("heroOnlyFilter").checked;
 
     return data.filter(hero => {
@@ -69,10 +69,10 @@ function applyFilters(data) {
         }
 
         // Additional Filters
-        const strengthMatch = strengthAbove50Filter ? parseInt(hero.strength) > 50 : true;
+        //const strengthMatch = strengthAbove50Filter ? parseInt(hero.strength) > 50 : true;
         const heroMatch = heroOnlyFilter ? hero.alignment && hero.alignment.toLowerCase() === "good" : true;
 
-        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch && attributeMatch && strengthMatch && heroMatch;
+        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch && attributeMatch && heroMatch;
     });
 }
 
