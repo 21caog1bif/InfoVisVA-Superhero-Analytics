@@ -47,11 +47,18 @@ function updateRadarChart() {
     hero2Image.alt = hero2.name;
 
     // Update Hero Details Tables
+
+ 
+
     const hero1TableBody = document.getElementById("hero1-data");
     const hero2TableBody = document.getElementById("hero2-data");
 
-    document.getElementById("hero1-name").innerText = hero1DisplayName.replace("(", "\n(");
-    document.getElementById("hero2-name").innerText = hero2DisplayName.replace("(", "\n(");
+    console.log("Hero 1 Display Name:", hero1DisplayName);
+console.log("Hero 2 Display Name:", hero2DisplayName);
+
+  
+
+
 
     const heroAttributes = [
         { label: "Full Name", key: "full-name" },
@@ -276,35 +283,43 @@ function drawD3RadarChart(selector, labels, dataset) {
             });
     });
 
-    // Legende
-    const legend = d3.select("#radarChartLegend") // Korrekte ID des Legenden-SVG
-        .attr("width", width)
-        .attr("height", 80) // Höhe der Legende
-        .append("g")
-        .attr("transform", `translate(${width / 2}, 20)`); // Zentriere die Legende horizontal
+  // Wählen Sie das Legenden-SVG und fügen Sie es hinzu (nur einmal)
+const legend = d3.select("#radarChartLegend") // Korrekte ID des Legenden-SVG
+.attr("width", width)
+.attr("height", 80) // Höhe der Legende
 
-    // Abstand zwischen den Einträgen
-    const spacing = 30; // Abstand zwischen den Kästchen
+// Lösche alle bestehenden Legenden-Einträge (wird nur einmal gemacht)
+legend.selectAll("*").remove();
 
-    dataset.forEach((d, idx) => {
-        // Gruppe für jeden Eintrag (Rechteck + Text)
-        const legendItem = legend.append("g")
-            .attr("transform", `translate(${idx * spacing - spacing / 2}, 0)`); // horizontale Verschiebung
+// Erstelle eine Gruppe für die Legende, die zentriert wird
+const legendGroup = legend.append("g")
+.attr("transform", `translate(${width / 2}, 20)`); // Zentriere die Legende horizontal
 
-        // Rechteck für die Farbe
-        legendItem.append("rect")
-            .attr("x", -7.5)
-            .attr("y", 0)
-            .attr("width", 15)
-            .attr("height", 15)
-            .style("fill", idx === 0 ? "rgba(255, 99, 132, 1)" : "rgba(54, 162, 235, 1)");
+// Abstand zwischen den Einträgen
+const spacing = 30; // Abstand zwischen den Kästchen
 
-        // Text links oder rechts vom Rechteck
-        legendItem.append("text")
-            .attr("x", idx === 0 ? -20 : 20) // Text links (negativ) oder rechts (positiv)
-            .attr("y", 12) // Vertikale Ausrichtung in der Mitte des Rechtecks
-            .attr("text-anchor", idx === 0 ? "end" : "start") // Text linksbündig oder rechtsbündig
-            .style("fill", "black")
-            .text(d.name);
-    });
-}
+// Gehe die dataset durch und erstelle die Legenden-Einträge
+dataset.forEach((d, idx) => {
+// Gruppe für jeden Eintrag (Rechteck + Text)
+const legendItem = legendGroup.append("g")
+    .attr("transform", `translate(${idx * spacing - spacing / 2}, 0)`); // horizontale Verschiebung
+
+// Rechteck für die Farbe
+legendItem.append("rect")
+    .attr("x", -7.5)
+    .attr("y", 0)
+    .attr("width", 15)
+    .attr("height", 15)
+    .style("fill", idx === 0 ? "rgba(255, 99, 132, 1)" : "rgba(54, 162, 235, 1)");
+
+// Text links oder rechts vom Rechteck
+legendItem.append("text")
+    .attr("x", idx === 0 ? -20 : 20) // Text links (negativ) oder rechts (positiv)
+    .attr("y", 12) // Vertikale Ausrichtung in der Mitte des Rechtecks
+    .attr("text-anchor", idx === 0 ? "end" : "start") // Text linksbündig oder rechtsbündig
+    .style("fill", "black")
+    .text(d.name);
+});
+
+
+}   
