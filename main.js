@@ -151,8 +151,8 @@ function extractMetric(value, unit) {
 
 // Hauptfunktion
 async function main() {
-    superheroData = await loadCSVWithD3("superheroes_data.csv");
-
+    superheroData = await loadCSVWithD3("merged_data3_2.csv");
+//superheroes_data.csv
     console.log("Headers in CSV:", Object.keys(superheroData[0]));
 
     // Prüfe die Daten

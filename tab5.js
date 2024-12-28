@@ -55,8 +55,21 @@ function updateBubbleChart() {
     // SVG erstellen
     const svg = bubbleContainer.append("svg")
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
+        .attr("height", height + margin.top + margin.bottom);
+
+    // Zoom-Handler definieren
+    const zoom = d3.zoom()
+        .scaleExtent([1, 10]) // Zoomstufen: 1x bis 10x
+        .translateExtent([[0, 0], [width, height]]) // Bereich der Übersetzung
+        .on("zoom", (event) => {
+            zoomGroup.attr("transform", event.transform);
+        });
+
+    // Zoom auf das SVG anwenden
+    svg.call(zoom);
+
+    // Gruppenelement für Zoom erstellen
+    const zoomGroup = svg.append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     // Skalen definieren
@@ -77,7 +90,7 @@ function updateBubbleChart() {
         .range(d3.schemeTableau10);
 
     // Blasen hinzufügen
-    svg.selectAll("circle")
+    zoomGroup.selectAll("circle")
         .data(filteredData)
         .enter()
         .append("circle")
@@ -106,54 +119,28 @@ function updateBubbleChart() {
             d3.select(this).attr("fill", d => colorScale(d[colorGrouping] || "Other"));
         });
 
-    // Legende hinzufügen
-    const legend = svg.append("g")
-        .attr("class", "legend")
-        .attr("transform", `translate(${width + 30}, 20)`);
-
-    const legendItems = colorScale.domain();
-    const legendWidth = 20;
-    const legendHeight = 20;
-
-    legendItems.forEach((item, index) => {
-        const legendItem = legend.append("g")
-            .attr("transform", `translate(0, ${index * (legendHeight + 5)})`);
-
-        legendItem.append("rect")
-            .attr("width", legendWidth)
-            .attr("height", legendHeight)
-            .attr("fill", colorScale(item));
-
-        legendItem.append("text")
-            .attr("x", legendWidth + 5)
-            .attr("y", legendHeight / 2)
-            .attr("dy", ".35em")
-            .attr("font-size", "12px")
-            .text(item);
-    });
-
     // Achsen hinzufügen
     const xAxisCall = d3.axisBottom(xScale);
     const yAxisCall = d3.axisLeft(yScale);
 
-    svg.append("g")
+    zoomGroup.append("g")
         .attr("class", "x axis")
         .attr("transform", `translate(0, ${height})`)
         .call(xAxisCall);
 
-    svg.append("g")
+    zoomGroup.append("g")
         .attr("class", "y axis")
         .call(yAxisCall);
 
     // Achsentitel hinzufügen
-    svg.append("text")
+    zoomGroup.append("text")
         .attr("x", width / 2)
         .attr("y", height + 40)
         .attr("text-anchor", "middle")
         .attr("font-size", "16px")
         .text(xAxis);
 
-    svg.append("text")
+    zoomGroup.append("text")
         .attr("x", -height / 2)
         .attr("y", -40)
         .attr("text-anchor", "middle")
