@@ -31,22 +31,6 @@ function addToTimeline(heroId) {
     }
 }
 
-// Funktion zum Umschalten der Zeitachse
-function toggleTimeline() {
-    const timelineList = document.getElementById("timeline-list");
-    const arrow = document.getElementById("timeline-arrow");
-
-    if (timelineList.classList.contains("visible")) {
-        // Timeline schließen
-        timelineList.classList.remove("visible");
-        arrow.classList.remove("open");
-    } else {
-        // Timeline öffnen
-        timelineList.classList.add("visible");
-        arrow.classList.add("open");
-    }
-}
-
 /**
  * Visualisiert die Verwandten eines Helden
  */

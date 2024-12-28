@@ -135,7 +135,9 @@
 
             <!-- Hero 1 Container -->
             <div class="hero-info" id="hero1-info">
-                <h2 id="hero1-name" style="text-align: center;"></h2>
+                <header>
+                    <h2 id="hero1-name"></h2>
+                </header>
                 <img id="hero1Image" src="" alt="Hero 1">
                 <table class="hero-table">
                     <thead>
@@ -158,7 +160,9 @@
 
             <!-- Hero 2 Container -->
             <div class="hero-info" id="hero2-info">
-                <h2 id="hero2-name" style="text-align: center;"></h2>
+                <header>
+                    <h2 id="hero2-name"></h2>
+                </header>
                 <img id="hero2Image" src="" alt="Hero 2">
                 <table class="hero-table">
                     <thead>
@@ -195,10 +199,7 @@
 
                 <!-- Historie-Bereich -->
                 <div id="timeline-container">
-                    <div class="timeline-header" onclick="toggleTimeline()">
-                        <span id="timeline-arrow" class="arrow">></span>
-                        <span>Timeline</span>
-                    </div>
+                    <h3>Timeline</h3>
                     <ul id="timeline-list" class="hidden, timeline-list">
                         <!-- Dynamische Timeline-Einträge -->
                     </ul>
@@ -249,10 +250,7 @@
                 <hr>
 
                 <div id="group-timeline-container">
-                    <div class="timeline-header" onclick="toggleGroupTimeline()">
-                        <span id="group-timeline-arrow" class="arrow">></span>
-                        <span>Group Timeline</span>
-                    </div>
+                    <h3>Group Timeline</h3>
                     <ul id="group-timeline-list" class="hidden, timeline-list"></ul>
                 </div>
             </div>
@@ -303,6 +301,8 @@
             const activeContent = document.getElementById(tabId);
             if (activeContent) {
                 activeContent.style.display = 'block';
+
+                if (tabId === 'tab4') initializeZoom(); // Zoom für Tab 4 neu initialisieren
             }
         }
 

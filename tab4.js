@@ -173,7 +173,8 @@ function prepareFullNetworkNodes() {
         if (groups.length > 0 && (currentGroupFilter === "all" || groups.includes(currentGroupFilter))) {
             nodes.push({
                 id: hero.id,
-                label: hero.name || hero["full-name"],
+                heroName: hero.name,
+                fullName: hero["full-name"],
                 image: hero.url || null,
                 groups, // Liste der Gruppen für Verbindungen
             });
@@ -311,7 +312,7 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
                     formerlyGroups.includes(group) ? `<span style="color:gray">${group} (formerly)</span>` : group).join(", ");
 
                 tooltip
-                    .html(`Hero: ${d.label}<br>Group: ${groupText}`)
+                    .html(`Hero: ${d.heroName}<br>Name: ${d.fullName}<br>Group: ${groupText}`)
                     .style("opacity", 1)
                     .style("left", `${event.pageX + 10}px`)
                     .style("top", `${event.pageY + 10}px`);
@@ -382,13 +383,6 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
         .attr("clip-path", "circle(15px at center)")
         .style("pointer-events", "none");
 
-    const margin = 2000; // Erhöhe den Rand, um mehr Bewegungsfreiheit zu erlauben
-    const zoomBounds = {
-        xMin: -margin,
-        xMax: width + margin,
-        yMin: -margin,
-        yMax: height + margin
-    };
 
     const zoom = d3.zoom()
         .scaleExtent([0.1, 5]) // Erlaubt weiteres Hinein- und Herauszoomen
@@ -441,10 +435,12 @@ function generateGroupColors(nodes) {
 function highlightHero() {
     const heroId = document.getElementById("currentHeroDropdown").value
     d3.selectAll(".nodes g").each(function (d) {
-        const isMatch = d.id === heroId; // Prüfen, ob die ID mit dem ausgewählten Helden übereinstimmt
+        if(!d.isGroup){
+            const isMatch = d.id === heroId; // Prüfen, ob die ID mit dem ausgewählten Helden übereinstimmt
         d3.select(this).select("circle")
             .attr("stroke", isMatch ? "red" : "#fff") // Highlighten, falls Treffer
             .attr("stroke-width", isMatch ? 10 : 1.5);
+        }
     });
 
     // Finde den Knoten des ausgewählten Helden
@@ -474,6 +470,23 @@ function highlightHero() {
     }
 }
 
+let currentZoomTransform = d3.zoomIdentity; // Initialer Zoom-Zustand
+
+function initializeZoom() {
+    const svg = d3.select("#fullNetworkGraph svg");
+    const zoomContainer = svg.select("g"); // G-Element, das die Knoten und Links enthält
+
+    const zoom = d3.zoom()
+        .scaleExtent([0.1, 5]) // Min und Max Zoom-Level
+        .on("zoom", (event) => {
+            zoomContainer.attr("transform", event.transform);
+            currentZoomTransform = event.transform; // Aktuellen Zustand speichern
+        });
+
+    // Initialisiere den Zoom und setze den gespeicherten Zustand
+    svg.call(zoom);
+    svg.call(zoom.transform, currentZoomTransform); // Wende den gespeicherten Zustand an
+}
 
 function populateCurrentHeroDropdown(selectorId, nodes) {
     const selector = document.getElementById(selectorId);
@@ -487,16 +500,40 @@ function populateCurrentHeroDropdown(selectorId, nodes) {
     selector.innerHTML = "";
 
     // Filtere nur Heldenknoten (keine Gruppen)
-    const heroNodes = nodes.filter(node => !node.isGroup && node.label);
+    const heroNodes = nodes.filter(node => !node.isGroup);
 
-    // Sortiere Helden alphabetisch
-    const sortedHeroes = heroNodes.sort((a, b) => a.label.localeCompare(b.label));
+    // Map zur Identifikation von doppelten Heldennamen
+    const nameCount = {};
+    heroNodes.forEach(hero => {
+        nameCount[hero.heroName] = (nameCount[hero.heroName] || 0) + 1;
+    });
 
-    // Füge die Helden als Optionen hinzu
-    sortedHeroes.forEach(hero => {
+    // Formatiere die Daten für das Dropdown
+    const formattedHeroes = heroNodes.map(hero => {
+        const name = hero.heroName; // Primärer Name des Helden
+        const fullName = hero.fullName || ""; // Vollständiger Name (falls vorhanden)
+        const displayName =
+            nameCount[name] > 1 && fullName // Wenn der Name mehrfach vorhanden ist, hänge den vollständigen Namen an
+                ? `${name} (${fullName})`
+                : name;
+
+        return {
+            id: hero.id, // Eindeutige ID für den Helden
+            displayName: displayName, // Anzeigename für das Dropdown
+        };
+    });
+
+    // Doppelte Einträge entfernen und eindeutige Optionen erstellen
+    const uniqueHeroes = [...new Map(formattedHeroes.map(hero => [hero.id, hero])).values()];
+
+    // Sortiere die Helden alphabetisch basierend auf dem Anzeigenamen
+    uniqueHeroes.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    // Optionen zum Dropdown hinzufügen
+    uniqueHeroes.forEach(hero => {
         const option = document.createElement("option");
         option.value = hero.id; // Verwende die ID als Wert
-        option.textContent = hero.label; // Name des Helden
+        option.textContent = hero.displayName; // Anzeigename im Dropdown
         selector.appendChild(option);
     });
 
@@ -531,20 +568,4 @@ function addGroupToTimeline(groupName) {
 
     timelineList.appendChild(listItem);
     timelineList.classList.remove("hidden"); // Zeitachse sichtbar machen
-}
-
-
-function toggleGroupTimeline() {
-    const timelineList = document.getElementById("group-timeline-list");
-    const arrow = document.getElementById("group-timeline-arrow");
-
-    if (timelineList.classList.contains("visible")) {
-        // Timeline schließen
-        timelineList.classList.remove("visible");
-        arrow.classList.remove("open");
-    } else {
-        // Timeline öffnen
-        timelineList.classList.add("visible");
-        arrow.classList.add("open");
-    }
 }

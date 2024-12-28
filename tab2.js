@@ -98,21 +98,14 @@ function updateRadarChart() {
 function updateHeroTables(hero1, hero2, hero1DisplayName, hero2DisplayName) {
 
     // Update Hero Images
-    const hero1Image = document.getElementById("hero1Image");
-    const hero2Image = document.getElementById("hero2Image");
+    document.getElementById("hero1Image").src = hero1.url;
+    document.getElementById("hero2Image").src = hero2.url;
 
-    hero1Image.src = hero1.url || ""; // Fallback, falls kein Bild vorhanden
-    hero1Image.alt = hero1.name;
-
-    hero2Image.src = hero2.url || ""; // Fallback, falls kein Bild vorhanden
-    hero2Image.alt = hero2.name;
-
-    // Update Hero Details Tables
-    const hero1TableBody = document.getElementById("hero1-data");
-    const hero2TableBody = document.getElementById("hero2-data");
-
-    document.getElementById("hero1-name").innerText = hero1DisplayName.replace("(", "\n(");
-    document.getElementById("hero2-name").innerText = hero2DisplayName.replace("(", "\n(");
+    // Update Hero Names
+    const hero1Name = hero1DisplayName.includes("(") ? hero1DisplayName.replace("(", "\n(") : hero1DisplayName + "\n";
+    const hero2Name = hero2DisplayName.includes("(") ? hero2DisplayName.replace("(", "\n(") : hero2DisplayName + "\n";
+    document.getElementById("hero1-name").innerText = hero1Name;
+    document.getElementById("hero2-name").innerText = hero2Name;
 
     const heroAttributes = [
         { label: "Full Name", key: "full-name" },
@@ -124,6 +117,10 @@ function updateHeroTables(hero1, hero2, hero1DisplayName, hero2DisplayName) {
         { label: "Weight", key: "weight" },
         { label: "First Appearance", key: "first-appearance" }
     ];
+
+    // Update Hero Details Tables
+    const hero1TableBody = document.getElementById("hero1-data");
+    const hero2TableBody = document.getElementById("hero2-data");
 
     hero1TableBody.innerHTML = ""; // Clear previous data
     hero2TableBody.innerHTML = ""; // Clear previous data
@@ -172,12 +169,12 @@ function drawRadarChart(selector, labels, dataset) {
 
     const container = d3.select(selector).node().parentNode; // chart-area als Eltern-Element
     const containerWidth = container.getBoundingClientRect().width;
-    
+
     const padding = { right: 100, left: 100 }; // Padding für Text
     const width = Math.max(containerWidth * 0.7, 500); // Setze Mindestbreite auf 500px
     const height = width * 0.8; // Dynamische Höhe basierend auf der Breite
     const radius = Math.min(width - padding.left - padding.right, height) / 2;
-    const angleSlice = (2 * Math.PI) / labels.length;    
+    const angleSlice = (2 * Math.PI) / labels.length;
 
     const rScale = d3.scaleLinear()
         .range([0, radius])
@@ -377,7 +374,7 @@ function createLegend(selector, dataset) {
             .attr("y", 0)
             .attr("width", 15)
             .attr("height", 15)
-            .style("fill", idx === 0 ? "rgba(255, 99, 132, 1)" : "rgba(54, 162, 235, 1)");
+            .style("fill", idx === 0 ? "rgba(54, 162, 235, 1)" : "rgba(255, 99, 132, 1)");
 
         // Text links oder rechts vom Rechteck
         legendItem.append("text")
