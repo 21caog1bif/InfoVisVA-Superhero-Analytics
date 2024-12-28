@@ -1,15 +1,16 @@
-// Tab 3
+// Tab 3: Network Visualization with Relative Nodes
 
 let heroHistory = []; // Zeitachse der angesehenen Helden
 
-// Funktion zum Hinzufügen eines Helden zur Zeitachse
+/**
+ * Fügt einen Helden zur Zeitachse hinzu
+ * @param {string} heroId - Die ID des Helden
+ */
 function addToTimeline(heroId) {
     const timelineList = document.getElementById("timeline-list");
 
     // Prüfen, ob der Held bereits in der Timeline ist
-    if (Array.from(timelineList.children).some(item => item.dataset.heroId === heroId)) {
-        return; // Überspringen, wenn bereits vorhanden
-    }
+    if (Array.from(timelineList.children).some(item => item.dataset.heroId === heroId)) return; // Überspringen, wenn bereits vorhanden
 
     const hero = superheroData.find(h => h.id === heroId);
 
@@ -23,43 +24,34 @@ function addToTimeline(heroId) {
         };
 
         timelineList.appendChild(listItem);
-        timelineList.classList.remove("hidden"); // Sicherstellen, dass die Liste sichtbar ist
-    }
-}
-
-// Funktion zum Umschalten der Zeitachse
-function toggleTimeline() {
-    const timelineList = document.getElementById("timeline-list");
-    const arrow = document.getElementById("timeline-arrow");
-
-    if (timelineList.classList.contains("visible")) {
-        // Timeline schließen
-        timelineList.classList.remove("visible");
-        arrow.classList.remove("open");
+        timelineList.classList.remove("hidden");
     } else {
-        // Timeline öffnen
-        timelineList.classList.add("visible");
-        arrow.classList.add("open");
+        handleError(`Hero with ID ${heroId} not found.`);
+        return;
     }
 }
 
-
+/**
+ * Visualisiert die Verwandten eines Helden
+ */
 function visualizeRelatives() {
     const heroDropdown = document.getElementById("heroDropdown");
     const heroId = heroDropdown.value;
-
-    addToTimeline(heroId); // Eintrag in die Timeline
+    addToTimeline(heroId);
 
     const hero = superheroData.find(h => h.id === heroId);
 
     if (!hero) {
-        console.error(`Hero with ID ${heroId} not found.`);
-        renderGraphWithD3([], []);
+        handleError(`Hero with ID ${heroId} not found.`);
+        renderGraph([], []);
         return;
     }
 
+    // Entferne Fehler, wenn alles korrekt ist
+    handleError(null);
+
     if (!hero.relatives || hero.relatives === "-") {
-        renderGraphWithD3([{
+        renderGraph([{
             id: hero.id,
             label: hero.name || hero["full-name"],
             image: hero.url,
@@ -69,22 +61,23 @@ function visualizeRelatives() {
         return;
     }
 
-    const rawRelatives = splitRelatives(hero.relatives);
+    const rawRelatives = splitRelatives(hero.relatives, heroId);
+
+    console.log("rawRelatives:")
+    console.log(rawRelatives)
 
     const relatives = rawRelatives.map(rel => {
-        const foundId = findHeroId(rel.name, rel.alias);
-
-        const relatedHero = superheroData.find(h => h.id === foundId);
+        const relatedHero = superheroData.find(h => h.id === rel.heroID);
         const image = relatedHero ? relatedHero.url : null; // Bild nur für Helden
         const label = relatedHero
             ? relatedHero.name || relatedHero["full-name"] // Heldenname oder Full-Name
             : rel.name;
 
-        const id = foundId
-            ? foundId // Verwende die ID aus der CSV
+        const id = rel.heroID
+            ? rel.heroID // Verwende die ID aus der CSV
             : `${rel.name}-${rel.relation}`.replace(/\s+/g, "-").toLowerCase(); // Generiere eigene ID
 
-        const status = rel.relation?.toLowerCase().includes("deceased") ? "deceased" : "alive";
+        const status = rel.isAlive ? "alive" : "deceased";
 
         return {
             id: id,
@@ -120,19 +113,34 @@ function visualizeRelatives() {
         relation: rel.relation?.replace(/[\(\[,;]\s*deceased\s*[\)\],;]?/g, "").trim() // Entferne alle Varianten von "deceased"
     }));
 
-    renderGraphWithD3(nodes, links);
+    renderGraph(nodes, links);
 }
 
-// Hilfsmethode, um die einzelnen Personen aus der 'relatives' Spalte zu extrahieren
-function splitRelatives(relatives) {
+/**
+ * Teilt die Verwandten in Einträge auf und erkennt, ob die Verwandten gleichzeitig auch Helden sind. Dann wird die entsprechende ID in heroID eingetragen.
+ * @param {string} relatives - Die "relatives"-Daten.
+ * @param {string} mainHeroId - Die ID des Haupthelden, um zu schauen, dass der Verwandte und der Held nicht identisch sind.
+ * @returns {Array} - Aufgeteilte und normalisierte Verwandte.
+ */
+function splitRelatives(relatives, mainHeroId) {
+    if (!relatives || relatives === "-") return [];
+
+    const normalized = relatives
+        .replace(/&/g, ", ") // Replace "&" with a comma
+        .replace(/;\s*/g, ", ") // Replace semicolons with commas
+        .replace(/\s*,\s*/g, ", ") // Trim spaces around commas
+        .replace(/\s*\(\s*/g, " (") // Standardize parentheses spacing
+        .replace(/\s*\)\s*/g, ")") // Standardize closing parentheses
+        .replace(/["']/g, "") // Remove all single and double quotes
+        .trim();
+
     const result = [];
     let current = "";
     let depth = 0;
 
-    // Relatives bei Komma, Semikolon oder "&" trennen, wenn nicht innerhalb von Klammern
-    for (let char of relatives) {
-        if ((char === "," || char === ";" || char === "&" || char === ".") && depth === 0) {
-            result.push(current.trim());
+    for (let char of normalized) {
+        if (char === "," && depth === 0) {
+            if (current.trim()) result.push(current.trim());
             current = "";
         } else {
             current += char;
@@ -140,61 +148,83 @@ function splitRelatives(relatives) {
             if (char === ")") depth--;
         }
     }
-
     if (current.trim()) result.push(current.trim());
 
-    // Verarbeitung jedes Teils, um Name und Zusatzinfos zu trennen
     return result.map(rel => {
-        const match = rel.match(/^(.*?)\s*\((.*?)\)$/); // Name und Zusatzinfo
+        if (/^\s*(deceased|stillborn|unknown)\s*$/i.test(rel)) return null;
+
+        let name = rel;
+        let relation = "";
+        let isAlive = true;
+        let heroID = null;
+
+        // Handle multiple parentheses
+        const match = rel.match(/^(.+?)\s*\((.+?)\)$/);
         if (match) {
-            const name = match[1].trim(); // Name des Verwandten
-            const extraInfo = match[2]
-                .replace(/["']/g, "") // Entferne Anführungszeichen
-                .split(",")
-                .map(info => info.trim().toLowerCase()); // Trenne Zusatzinfos in ein Array
-
-            return {
-                name: name,
-                alias: null, // Alias bleibt leer, falls nicht verwendet
-                relation: extraInfo.join(", "), // Verknüpfte Zusatzinfos
-            };
-        } else {
-            // Kein Zusatzinfo, nur Name
-            return {
-                name: rel.trim(),
-                alias: null,
-                relation: null,
-            };
+            name = match[1].trim();
+            relation = match[2]
+                .replace(/["']/g, "") // Remove quotes
+                .split(/\),\s*|\),|\(/) // Split nested parentheses
+                .map(info => info.trim())
+                .filter(info => info && !["deceased", "stillborn", "unknown"].includes(info.toLowerCase()))
+                .join(", ");
         }
-    }).filter(rel => rel.name); // Entferne ungültige Einträge
+
+        if (/deceased|stillborn|unknown/i.test(rel)) isAlive = false; // Determine isAlive status based on keywords
+        
+        const potentialHeroName = relation.split(",")[0]?.trim(); // Extract first entry from relation as potential hero name
+        let potentialHeroName2 = null;
+
+        // Handle cases where the name contains a hyphen (e.g., "Susan Richards - Invisible Woman")
+        let splitNameParts = name.split("-");
+        if (splitNameParts.length > 1) {
+            splitNameParts = splitNameParts.map(part => part.trim());
+            name = splitNameParts[0]; // Keep the first part as the main name
+            potentialHeroName2 = splitNameParts[1]
+        }
+
+        // Check if this relative is a hero (case-insensitive)
+        const hero = superheroData.find(hero => {
+            const lowerName = name.toLowerCase();
+            const lowerPotentialHeroName = potentialHeroName?.toLowerCase() || "";
+            const lowerPotentialHeroName2 = potentialHeroName2?.toLowerCase() || "";
+            return (
+                hero.name.toLowerCase() === lowerName ||
+                hero.name.toLowerCase() === lowerPotentialHeroName ||
+                hero.name.toLowerCase() === lowerPotentialHeroName2 ||
+                (hero.aliases &&
+                    hero.aliases
+                        .toLowerCase()
+                        .split(", ")
+                        .includes(lowerName))
+            );
+        });
+
+        if (hero && hero.id !== mainHeroId) {
+            heroID = hero.id;
+
+            relation = relation // remove hero name out of relation
+                .split(/,\s*/)
+                .filter(rel => rel.toLowerCase() !== hero.name.toLowerCase())
+                .join(", ");
+        }
+
+        return {
+            name: name,
+            relation: relation || "relation",
+            isAlive: isAlive,
+            heroID: heroID,
+        };
+    })
+        .filter(rel => rel);
 }
 
-// Hilfsmethode, um die ID der relative-Helden zu finden
-function findHeroId(name, alias) {
-    const lowerName = name.toLowerCase();
-    const lowerAlias = alias ? alias.toLowerCase() : null;
-
-    // Suche nach exakter Übereinstimmung des Namens (case-insensitive)
-    const heroByName = superheroData.find(
-        h => h.name.toLowerCase() === lowerName || 
-        h["full-name"]?.toLowerCase() === lowerName);
-
-    if (heroByName) return heroByName.id;
-
-    // Suche nach Alias, falls Name nicht gefunden (case-insensitive)
-    if (lowerAlias) {
-        const heroByAlias = superheroData.find(h =>
-            h.name.toLowerCase() === lowerAlias ||
-            h["full-name"].toLowerCase() === lowerAlias
-        );
-        if (heroByAlias) return heroByAlias.id;
-
-    }
-
-    return null; // Kein passender Held gefunden
-}
-
-function renderGraphWithD3(nodes, links) {
+/**
+ * Rendert ein Netzwerkdiagramm basierend auf Knoten und Verbindungen.
+ * @param {Array<Object>} nodes - Die Knoten im Diagramm. Jedes Objekt sollte Eigenschaften wie `id`, `label`, `status`, `image`, usw. enthalten.
+ * @param {Array<Object>} links - Die Verbindungen zwischen den Knoten. Jedes Objekt sollte `source`, `target` und `relation` enthalten.
+ */
+function renderGraph(nodes, links) {
     d3.select("#relationshipGraph").select("svg").remove();
 
     const width = document.getElementById("relationshipGraph").clientWidth;
@@ -362,7 +392,7 @@ function renderGraphWithD3(nodes, links) {
         if (d.image) {
             console.log(`Switching to hero with ID: ${d.id}`);
             document.getElementById("heroDropdown").value = d.id;
-
+            playAudio();
             visualizeRelatives();
         }
     });

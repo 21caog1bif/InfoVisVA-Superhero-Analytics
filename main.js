@@ -1,6 +1,5 @@
 let superheroData = [];
 let barChart;
-let radarChart;
 
 // CSV-Daten laden mit D3.js
 async function loadCSVWithD3(filePath) {
@@ -19,46 +18,6 @@ async function loadCSVWithD3(filePath) {
     }
 }
 
-// Theme Toggle
-document.getElementById("toggle").addEventListener("change", function () {
-    if (this.checked) {
-        document.body.classList.add("dark-mode");
-        document.body.classList.remove("light-mode");
-    } else {
-        document.body.classList.add("light-mode");
-        document.body.classList.remove("dark-mode");
-    }
-    renderGraphWithD3(nodes, links);
-});
-
-// Optional: Beim Laden der Seite standardmäßig Darkmode aktivieren
-window.onload = () => {
-    document.getElementById("toggle").checked = true; // Toggle einschalten
-    document.body.classList.add("dark-mode");
-};
-
-
-// Tabs umschalten
-function openTab(event, tabId) {
-    // Entferne die `active`-Klasse von allen Tabs
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => tab.classList.remove('active'));
-
-    // Aktiviere den geklickten Tab
-    if (event) {
-        event.currentTarget.classList.add('active');
-    }
-
-    // Verstecke alle Inhalte
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabContents.forEach(content => content.style.display = 'none');
-
-    // Zeige den passenden Inhalt
-    const activeContent = document.getElementById(tabId);
-    if (activeContent) {
-        activeContent.style.display = 'block';
-    }
-}
 
 function switchToTab(tabId) {
     // Finde den Tab mit der passenden ID oder verknüpften `onclick`
@@ -70,6 +29,28 @@ function switchToTab(tabId) {
         openTab({ currentTarget: targetTab }, tabId.replace('-button', ''));
     } else {
         console.error(`Tab with ID ${tabId} not found.`);
+    }
+}
+
+/**
+ * Universelle Fehlerbehandlungsfunktion für dynamische Fehlermeldungen.
+ * @param {string} errorMessage - Die Fehlermeldung (oder null, um die Meldung auszublenden).
+ */
+function handleError(errorMessage) {
+    const activeTab = document.querySelector('.tab-content.active');
+    const errorContainer = activeTab ? activeTab.querySelector('#global-error-message') : null;
+
+    if (!errorContainer) {
+        console.error("Fehlercontainer nicht gefunden.");
+        return;
+    }
+
+    if (errorMessage) {
+        errorContainer.innerHTML = errorMessage;
+        errorContainer.style.display = "block";
+        console.error("error message", errorMessage);
+    } else {
+        errorContainer.style.display = "none";
     }
 }
 
@@ -151,12 +132,18 @@ function extractMetric(value, unit) {
 
 // Hauptfunktion
 async function main() {
-    superheroData = await loadCSVWithD3("merged_data3_2.csv");
-//superheroes_data.csv
-    console.log("Headers in CSV:", Object.keys(superheroData[0]));
 
-    // Prüfe die Daten
-    // console.log("Erste Einträge aus der CSV-Datei:", superheroData.slice(0, 5));
+    try {
+        superheroData = await loadCSVWithD3("superheroes_data.csv");
+    } catch {
+        handleError("Fehler beim Laden der CSV-Daten. Bitte versuchen Sie es später erneut.");
+        return;
+    }
+
+    if (!superheroData || superheroData.length === 0) {
+        handleError("Keine gültigen Daten gefunden. Bitte überprüfen Sie die CSV-Datei.");
+        return;
+    }
 
     // Tab 1: Filters
     populateFilters(superheroData);
@@ -166,10 +153,11 @@ async function main() {
     // Tab 2: Superhero Comparison
     populateDropdown("hero1", superheroData, "Batman (Bruce Wayne)");
     populateDropdown("hero2", superheroData, "Superman");
+    handleHeroSelection(); // Initiale Validierung
     updateRadarChart();
 
     // Tab 3: Relationship Visualization
-    populateDropdown("heroDropdown", superheroData, "Punisher");
+    populateDropdown("heroDropdown", superheroData, "Quicksilver");
     visualizeRelatives();
 
     // Tab 4: Full Network

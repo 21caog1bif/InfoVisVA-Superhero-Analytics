@@ -1,3 +1,34 @@
+// Tab 2: Radar Chart - Hero Comparison
+
+/**
+ * Validiert die Heldenauswahl und verhindert, dass derselbe Held zweimal ausgewählt wird.
+ */
+function handleHeroSelection() {
+    // Dropdowns für die Helden auswählen
+    const hero1Selector = document.getElementById("hero1");
+    const hero2Selector = document.getElementById("hero2");
+
+    if (!hero1Selector || !hero2Selector) {
+        handleError("Dropdowns für Helden konnten nicht gefunden werden.");
+        return;
+    }
+
+    // IDs der ausgewählten Helden abrufen
+    const hero1Id = hero1Selector.value;
+    const hero2Id = hero2Selector.value;
+
+    // Optionen im anderen Dropdown basierend auf der Auswahl deaktivieren
+    Array.from(hero2Selector.options).forEach(option => { option.disabled = option.value === hero1Id; });
+    Array.from(hero1Selector.options).forEach(option => { option.disabled = option.value === hero2Id; });
+}
+
+// Füge Event-Listener für beide Dropdowns hinzu
+document.getElementById("hero1").addEventListener("change", handleHeroSelection);
+document.getElementById("hero2").addEventListener("change", handleHeroSelection);
+
+/**
+ * Aktualisiert das Radar Chart und die Heldeninformationen.
+ */
 function updateRadarChart() {
     // Abholen der ausgewählten Helden
     const hero1Selector = document.getElementById("hero1");
@@ -32,33 +63,49 @@ function updateRadarChart() {
     );
 
     if (!hero1 || !hero2) {
-        console.error("Unable to find selected heroes in data.");
+        handleError("Einer oder beide Helden konnten nicht gefunden werden. Bitte wählen Sie gültige Helden aus.", "error-message");
         return;
     }
 
+    // Entferne die Fehlermeldung, wenn alles korrekt ist
+    handleError(null, "error-message");
+
+    // Tabellen und Bilder aktualisieren
+    updateHeroTables(hero1, hero2, hero1DisplayName, hero2DisplayName);
+
+    // Radar Chart: Attribute-Daten
+    const hero1Attributes = attributes.map(attr => parseFloat(hero1[attr]) || 0);
+    const hero2Attributes = attributes.map(attr => parseFloat(hero2[attr]) || 0);
+
+    let data = [
+        { name: hero1DisplayName, values: hero1Attributes },
+        { name: hero2DisplayName, values: hero2Attributes }
+    ];
+
+    createLegend("#radarChartLegend", data); // Legende erstellen
+    let radarData = data.sort((b, a) => a.values.reduce((sum, val) => sum + val, 0) - b.values.reduce((sum, val) => sum + val, 0)); // Sortieren, dass kleineres Netz oben angezeigt wird
+    drawRadarChart("#radarChart", attributes, radarData); // Radar-Chart mit D3.js zeichnen
+}
+
+
+/**
+ * Aktualisiert die Tabellen und Bilder mit Heldeninformationen.
+ * @param {Object} hero1 - Der erste Held.
+ * @param {Object} hero2 - Der zweite Held.
+ * @param {string} hero1DisplayName - Der Anzeigename des ersten Helden.
+ * @param {string} hero2DisplayName - Der Anzeigename des zweiten Helden.
+ */
+function updateHeroTables(hero1, hero2, hero1DisplayName, hero2DisplayName) {
+
     // Update Hero Images
-    const hero1Image = document.getElementById("hero1Image");
-    const hero2Image = document.getElementById("hero2Image");
+    document.getElementById("hero1Image").src = hero1.url;
+    document.getElementById("hero2Image").src = hero2.url;
 
-    hero1Image.src = hero1.url || ""; // Fallback, falls kein Bild vorhanden
-    hero1Image.alt = hero1.name;
-
-    hero2Image.src = hero2.url || ""; // Fallback, falls kein Bild vorhanden
-    hero2Image.alt = hero2.name;
-
-    // Update Hero Details Tables
-
- 
-
-    const hero1TableBody = document.getElementById("hero1-data");
-    const hero2TableBody = document.getElementById("hero2-data");
-
-    console.log("Hero 1 Display Name:", hero1DisplayName);
-console.log("Hero 2 Display Name:", hero2DisplayName);
-
-  
-
-
+    // Update Hero Names
+    const hero1Name = hero1DisplayName.includes("(") ? hero1DisplayName.replace("(", "\n(") : hero1DisplayName + "\n";
+    const hero2Name = hero2DisplayName.includes("(") ? hero2DisplayName.replace("(", "\n(") : hero2DisplayName + "\n";
+    document.getElementById("hero1-name").innerText = hero1Name;
+    document.getElementById("hero2-name").innerText = hero2Name;
 
     const heroAttributes = [
         { label: "Full Name", key: "full-name" },
@@ -70,6 +117,10 @@ console.log("Hero 2 Display Name:", hero2DisplayName);
         { label: "Weight", key: "weight" },
         { label: "First Appearance", key: "first-appearance" }
     ];
+
+    // Update Hero Details Tables
+    const hero1TableBody = document.getElementById("hero1-data");
+    const hero2TableBody = document.getElementById("hero2-data");
 
     hero1TableBody.innerHTML = ""; // Clear previous data
     hero2TableBody.innerHTML = ""; // Clear previous data
@@ -103,26 +154,26 @@ console.log("Hero 2 Display Name:", hero2DisplayName);
         `;
         hero2TableBody.appendChild(hero2Row);
     });
-
-
-    // Radar Chart: Attribute-Daten
-    const hero1Attributes = attributes.map(attr => parseFloat(hero1[attr]) || 0);
-    const hero2Attributes = attributes.map(attr => parseFloat(hero2[attr]) || 0);
-
-    const data = [
-        { name: hero1DisplayName, values: hero1Attributes },
-        { name: hero2DisplayName, values: hero2Attributes }
-    ];
-
-    // Radar-Chart mit D3.js zeichnen
-    drawD3RadarChart("#radarChart", attributes, data);
 }
 
-function drawD3RadarChart(selector, labels, dataset) {
 
-    const width = 500, height = 400;
-    const radius = Math.min(width, height) / 2 - 40;
+/**
+ * Zeichnet ein Radar-Chart mit D3.js.
+ * @param {string} selector - Die ID des Containers, in dem das Chart gezeichnet wird.
+ * @param {Array<string>} labels - Die Achsenbeschriftungen des Charts (z. B. Attribute wie "Strength", "Speed").
+ * @param {Array<Object>} dataset - Die Daten für das Chart, bestehend aus Objekten mit `name` und `values`:
+ *  - `name` (string): Der Name des Datensatzes (z. B. der Name des Helden).
+ *  - `values` (Array<number>): Die Werte des Datensatzes entsprechend den Labels (z. B. [80, 90, 70]).
+ */
+function drawRadarChart(selector, labels, dataset) {
 
+    const container = d3.select(selector).node().parentNode; // chart-area als Eltern-Element
+    const containerWidth = container.getBoundingClientRect().width;
+
+    const padding = { right: 100, left: 100 }; // Padding für Text
+    const width = Math.max(containerWidth * 0.7, 500); // Setze Mindestbreite auf 500px
+    const height = width * 0.8; // Dynamische Höhe basierend auf der Breite
+    const radius = Math.min(width - padding.left - padding.right, height) / 2;
     const angleSlice = (2 * Math.PI) / labels.length;
 
     const rScale = d3.scaleLinear()
@@ -282,44 +333,55 @@ function drawD3RadarChart(selector, labels, dataset) {
                 hideTooltip(event)
             });
     });
+}
 
-  // Wählen Sie das Legenden-SVG und fügen Sie es hinzu (nur einmal)
-const legend = d3.select("#radarChartLegend") // Korrekte ID des Legenden-SVG
-.attr("width", width)
-.attr("height", 80) // Höhe der Legende
+/**
+ * Erstellt eine Legende für einen D3-Chart.
+ * @param {string} selector - Der CSS-Selektor für das Legenden-SVG.
+ * @param {Array} dataset - Das Datenset für die Legende, mit { name: string }-Einträgen.
+ * @param {number} width - Die Breite des Legendencontainers.
+ * @param {number} itemSpacing - Der Abstand zwischen den Legenden-Einträgen.
+ */
+function createLegend(selector, dataset) {
 
-// Lösche alle bestehenden Legenden-Einträge (wird nur einmal gemacht)
-legend.selectAll("*").remove();
+    const container = d3.select(selector).node().parentNode; // chart-area als Eltern-Element
+    const containerWidth = container.getBoundingClientRect().width;
 
-// Erstelle eine Gruppe für die Legende, die zentriert wird
-const legendGroup = legend.append("g")
-.attr("transform", `translate(${width / 2}, 20)`); // Zentriere die Legende horizontal
+    const width = containerWidth * 0.7 || 500;  // Fallback auf 500, falls keine Größe verfügbar ist
 
-// Abstand zwischen den Einträgen
-const spacing = 30; // Abstand zwischen den Kästchen
+    // Entferne vorherigen Legendeninhalt
+    const legendContainer = d3.select(selector);
+    legendContainer.selectAll("*").remove();
 
-// Gehe die dataset durch und erstelle die Legenden-Einträge
-dataset.forEach((d, idx) => {
-// Gruppe für jeden Eintrag (Rechteck + Text)
-const legendItem = legendGroup.append("g")
-    .attr("transform", `translate(${idx * spacing - spacing / 2}, 0)`); // horizontale Verschiebung
+    // Initialisiere die Legende
+    const legend = legendContainer
+        .attr("width", width)
+        .attr("height", 80)
+        .append("g")
+        .attr("transform", `translate(${width / 2}, 20)`); // Zentriere die Legende horizontal
 
-// Rechteck für die Farbe
-legendItem.append("rect")
-    .attr("x", -7.5)
-    .attr("y", 0)
-    .attr("width", 15)
-    .attr("height", 15)
-    .style("fill", idx === 0 ? "rgba(255, 99, 132, 1)" : "rgba(54, 162, 235, 1)");
+    // Abstand zwischen den Einträgen
+    const spacing = 30; // Abstand zwischen den Kästchen
 
-// Text links oder rechts vom Rechteck
-legendItem.append("text")
-    .attr("x", idx === 0 ? -20 : 20) // Text links (negativ) oder rechts (positiv)
-    .attr("y", 12) // Vertikale Ausrichtung in der Mitte des Rechtecks
-    .attr("text-anchor", idx === 0 ? "end" : "start") // Text linksbündig oder rechtsbündig
-    .style("fill", "black")
-    .text(d.name);
-});
+    dataset.forEach((d, idx) => {
+        // Gruppe für jeden Eintrag (Rechteck + Text)
+        const legendItem = legend.append("g")
+            .attr("transform", `translate(${idx * spacing - spacing / 2}, 0)`); // horizontale Verschiebung
 
+        // Rechteck für die Farbe
+        legendItem.append("rect")
+            .attr("x", -7.5)
+            .attr("y", 0)
+            .attr("width", 15)
+            .attr("height", 15)
+            .style("fill", idx === 0 ? "rgba(54, 162, 235, 1)" : "rgba(255, 99, 132, 1)");
 
-}   
+        // Text links oder rechts vom Rechteck
+        legendItem.append("text")
+            .attr("x", idx === 0 ? -20 : 20) // Text links (negativ) oder rechts (positiv)
+            .attr("y", 12) // Vertikale Ausrichtung in der Mitte des Rechtecks
+            .attr("text-anchor", idx === 0 ? "end" : "start") // Text linksbündig oder rechtsbündig
+            .style("fill", "black")
+            .text(d.name.replace(/\s*\(.*?\)\s*$/, "")); // Entferne full-name in Klammer
+    });
+}

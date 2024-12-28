@@ -29,13 +29,19 @@ function populateGroupDropdown(selectorId) {
     Object.keys(groupInfo).forEach(group => {
         const option = document.createElement("option");
         option.value = groupInfo[group].id; // Verwende die Group ID
-        option.textContent = group; // Anzeigename der Gruppe
+        option.textContent = group // Anzeigename im Dropdown (bereits formatiert in normalizeGroupName)
         dropdown.appendChild(option);
     });
 
     console.log("populateDropdown: Dropdown Data");
     console.log(dropdown.children);
 }
+
+function updateStatsPanel(nodes, links) {
+    document.getElementById("statsNodes").textContent = `Total Nodes: ${nodes.length}`;
+    document.getElementById("statsLinks").textContent = `Total Links: ${links.length}`;
+}
+
 
 // Calculate the frequency of each group, only group names which are present multiple times will be used
 function calculateGroupFrequencies() {
@@ -44,7 +50,7 @@ function calculateGroupFrequencies() {
     superheroData.forEach(hero => {
         if (!hero["group-affiliation"] || hero["group-affiliation"] === "-") return;
 
-        const groups = hero["group-affiliation"].split(/[,;]/).map(g => normalizeGroupName(g));
+        const groups = hero["group-affiliation"].split(/[,;]+/).map(g => normalizeGroupName(g));
         groups.forEach(group => {
             if (!group || group === "-") return;
             groupCounts[group] = (groupCounts[group] || 0) + 1;
@@ -53,8 +59,9 @@ function calculateGroupFrequencies() {
 
     // Alphabetische Sortierung und Zuweisung von Group IDs
     const sortedGroups = Object.keys(groupCounts)
-        .filter(group => groupCounts[group] >= 2 && !group.startsWith("formerly ")) // Entferne "formerly"
+        .filter(group => groupCounts[group] >= 2) // Nur Gruppen mit 2+ Mitgliedern
         .sort((a, b) => a.localeCompare(b));
+
     sortedGroups.forEach((group, index) => {
         groupInfo[group] = {
             id: `group-${index}`, // Eindeutige Group ID
@@ -66,15 +73,31 @@ function calculateGroupFrequencies() {
 }
 
 
+function toTitleCase(groupName) {
+    return groupName
+        .split(/[\s-]/) // Split nach Leerzeichen oder Bindestrichen
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Jedes Wort großschreiben
+        .join(" "); // Wieder zusammenfügen (mit Leerzeichen)
+}
+
+
 // Casing und "fromerly" präfix entfernen von Gruppennamen
 function normalizeGroupName(groupName) {
     if (!groupName) return null;
 
-    let normalized = groupName.trim().toLowerCase(); // Entferne Leerzeichen und setze klein
-    if (normalized.startsWith("formerly ")) {
-        normalized = normalized.replace("formerly ", ""); // Entferne "formerly "
-    }
-    return normalized;
+    // Entferne Präfixe wie "(Formerly)", "(Current)" usw.
+    let normalized = groupName
+        .replace(/\(.*?\)/g, "") // Entferne alles in Klammern
+        .replace(/formerly |former |current |ally of |leader of /gi, "") // Entferne bekannte Präfixe
+        .trim(); // Entferne überflüssige Leerzeichen
+
+    // Setze Gruppennamen auf konsistente Kleinschreibung
+    normalized = normalized.toLowerCase();
+
+    // Entferne Sonderzeichen und Duplikate
+    normalized = normalized.replace(/[^a-z0-9\s-]/g, ""); // Entferne unerwünschte Zeichen
+
+    return toTitleCase(normalized);
 }
 
 
@@ -114,6 +137,12 @@ function updateNetworkChart(selectedGroupId) {
     console.log("Nodes:", nodes);
     console.log("Links:", links);
 
+    // Fülle das Helden-Dropdown basierend auf den sichtbaren Helden
+    populateCurrentHeroDropdown("currentHeroDropdown", nodes);
+
+    // Aktualisiere das Statistikpanel
+    updateStatsPanel(nodes, links);
+
     renderNetworkWithGroupNodes(nodes, links, width, height);
 }
 
@@ -144,7 +173,8 @@ function prepareFullNetworkNodes() {
         if (groups.length > 0 && (currentGroupFilter === "all" || groups.includes(currentGroupFilter))) {
             nodes.push({
                 id: hero.id,
-                label: hero.name || hero["full-name"],
+                heroName: hero.name,
+                fullName: hero["full-name"],
                 image: hero.url || null,
                 groups, // Liste der Gruppen für Verbindungen
             });
@@ -162,9 +192,6 @@ function prepareFullNetworkLinks(nodes) {
 
     nodes.forEach(node => {
         if (!node.groups) return; // Gruppenknoten überspringen
-
-        console.log("prepareFullNetworkLinks: node.groups")
-        console.log(node.groups)
 
         node.groups.forEach(group => {
             const groupId = groupInfo[group]?.id; // Group ID holen
@@ -262,7 +289,7 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
     node.append("circle")
         .attr("r", d => d.isGroup ? 8 : 15)
         .attr("fill", d => d.isGroup ? groupColors[d.label] : "#ccc") // Groups get color, heroes get gray
-        .attr("stroke", "#fff")
+        .attr("stroke", d => d.isGroup ? "black" : "#fff")
         .attr("stroke-width", d => d.isGroup ? 0 : 1.5)
         .on("mouseover", function (event, d) {
             if (d.isGroup) {
@@ -271,6 +298,12 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
                     .style("opacity", 1)
                     .style("left", `${event.pageX + 10}px`)
                     .style("top", `${event.pageY + 10}px`);
+
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr("r", 10) // Vergrößere den Kreis
+                    .attr("stroke-width", 2)
             } else {
                 const formerlyGroups = d.groups.filter(group =>
                     superheroData.some(hero => hero.id === d.id && hero["group-affiliation"].toLowerCase().includes(`formerly ${group.toLowerCase()}`)));
@@ -279,7 +312,7 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
                     formerlyGroups.includes(group) ? `<span style="color:gray">${group} (formerly)</span>` : group).join(", ");
 
                 tooltip
-                    .html(`Hero: ${d.label}<br>Group: ${groupText}`)
+                    .html(`Hero: ${d.heroName}<br>Name: ${d.fullName}<br>Group: ${groupText}`)
                     .style("opacity", 1)
                     .style("left", `${event.pageX + 10}px`)
                     .style("top", `${event.pageY + 10}px`);
@@ -297,13 +330,18 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
         })
         .on("mouseout", function (event, d) {
             tooltip.style("opacity", 0);
-            if (!d.isGroup) {
+            if (d.isGroup) {
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .attr("r", 8) // Setze die ursprüngliche Größe zurück
+                    .attr("stroke-width", 0)
+            } else {
                 d3.select(this)
                     .transition()
                     .duration(200)
                     .attr("r", 15) // Setze die ursprüngliche Größe zurück
             }
-
         })
         .on("click", (event, d) => {
             tooltip.style("opacity", 0);
@@ -318,6 +356,7 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
                 console.log(`Switching to relatives of hero with ID: ${d.id}`);
                 document.getElementById("heroDropdown").value = d.id; // Dropdown von Tab 3 aktualisieren
                 switchToTab("tab3-button");
+                playAudio();
 
                 // Visualisiere Verwandte
                 visualizeRelatives();
@@ -344,16 +383,14 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
         .attr("clip-path", "circle(15px at center)")
         .style("pointer-events", "none");
 
+
     const zoom = d3.zoom()
-        .scaleExtent([0.5, 3])
+        .scaleExtent([0.1, 5]) // Erlaubt weiteres Hinein- und Herauszoomen
         .on("zoom", (event) => {
             zoomContainer.attr("transform", event.transform);
         });
 
     svg.call(zoom);
-
-    // Apply an initial zoom and translation
-    svg.call(zoom.transform, d3.zoomIdentity.translate(width / 4, height / 4).scale(1));
 
     function dragStarted(event, d) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -395,6 +432,119 @@ function generateGroupColors(nodes) {
     return groupColors;
 }
 
+function highlightHero() {
+    const heroId = document.getElementById("currentHeroDropdown").value
+    d3.selectAll(".nodes g").each(function (d) {
+        if(!d.isGroup){
+            const isMatch = d.id === heroId; // Prüfen, ob die ID mit dem ausgewählten Helden übereinstimmt
+        d3.select(this).select("circle")
+            .attr("stroke", isMatch ? "red" : "#fff") // Highlighten, falls Treffer
+            .attr("stroke-width", isMatch ? 10 : 1.5);
+        }
+    });
+
+    // Finde den Knoten des ausgewählten Helden
+    const heroNode = d3.selectAll(".nodes g").filter(d => d.id === heroId);
+
+    if (!heroNode.empty()) {
+        const { x, y } = heroNode.datum(); // Extrahiere die x- und y-Koordinaten des Knotens
+
+        const svg = d3.select("#fullNetworkGraph svg");
+        const zoomContainer = svg.select("g"); // Das G-Element, in dem die Knoten und Links liegen
+        const width = svg.node().clientWidth;
+        const height = svg.node().clientHeight;
+
+        // Berechne die neue Transformation für Zoom und Pan
+        const zoomTransform = d3.zoomIdentity
+            .translate(width / 2, height / 2) // Zentriere die Ansicht
+            .scale(1.5) // Zoom-Stufe
+            .translate(-x, -y); // Verschiebe auf den Helden
+
+        // Wende die Transformation direkt an
+        zoomContainer.transition()
+            .duration(750)
+            .attr("transform", zoomTransform);
+
+        // Aktualisiere den Zoom-Status
+        svg.call(d3.zoom().transform, zoomTransform);
+    }
+}
+
+let currentZoomTransform = d3.zoomIdentity; // Initialer Zoom-Zustand
+
+function initializeZoom() {
+    const svg = d3.select("#fullNetworkGraph svg");
+    const zoomContainer = svg.select("g"); // G-Element, das die Knoten und Links enthält
+
+    const zoom = d3.zoom()
+        .scaleExtent([0.1, 5]) // Min und Max Zoom-Level
+        .on("zoom", (event) => {
+            zoomContainer.attr("transform", event.transform);
+            currentZoomTransform = event.transform; // Aktuellen Zustand speichern
+        });
+
+    // Initialisiere den Zoom und setze den gespeicherten Zustand
+    svg.call(zoom);
+    svg.call(zoom.transform, currentZoomTransform); // Wende den gespeicherten Zustand an
+}
+
+function populateCurrentHeroDropdown(selectorId, nodes) {
+    const selector = document.getElementById(selectorId);
+
+    if (!selector) {
+        console.error(`Dropdown with ID "${selectorId}" not found.`);
+        return;
+    }
+
+    // Bereinige das Dropdown (alle bisherigen Optionen entfernen)
+    selector.innerHTML = "";
+
+    // Filtere nur Heldenknoten (keine Gruppen)
+    const heroNodes = nodes.filter(node => !node.isGroup);
+
+    // Map zur Identifikation von doppelten Heldennamen
+    const nameCount = {};
+    heroNodes.forEach(hero => {
+        nameCount[hero.heroName] = (nameCount[hero.heroName] || 0) + 1;
+    });
+
+    // Formatiere die Daten für das Dropdown
+    const formattedHeroes = heroNodes.map(hero => {
+        const name = hero.heroName; // Primärer Name des Helden
+        const fullName = hero.fullName || ""; // Vollständiger Name (falls vorhanden)
+        const displayName =
+            nameCount[name] > 1 && fullName // Wenn der Name mehrfach vorhanden ist, hänge den vollständigen Namen an
+                ? `${name} (${fullName})`
+                : name;
+
+        return {
+            id: hero.id, // Eindeutige ID für den Helden
+            displayName: displayName, // Anzeigename für das Dropdown
+        };
+    });
+
+    // Doppelte Einträge entfernen und eindeutige Optionen erstellen
+    const uniqueHeroes = [...new Map(formattedHeroes.map(hero => [hero.id, hero])).values()];
+
+    // Sortiere die Helden alphabetisch basierend auf dem Anzeigenamen
+    uniqueHeroes.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    // Optionen zum Dropdown hinzufügen
+    uniqueHeroes.forEach(hero => {
+        const option = document.createElement("option");
+        option.value = hero.id; // Verwende die ID als Wert
+        option.textContent = hero.displayName; // Anzeigename im Dropdown
+        selector.appendChild(option);
+    });
+
+    // Füge einen Standardwert hinzu
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Select a Hero";
+    defaultOption.selected = true;
+    selector.prepend(defaultOption);
+}
+
 
 let groupHistory = []; // Zeitachse der angesehenen Gruppen
 
@@ -418,20 +568,4 @@ function addGroupToTimeline(groupName) {
 
     timelineList.appendChild(listItem);
     timelineList.classList.remove("hidden"); // Zeitachse sichtbar machen
-}
-
-
-function toggleGroupTimeline() {
-    const timelineList = document.getElementById("group-timeline-list");
-    const arrow = document.getElementById("group-timeline-arrow");
-
-    if (timelineList.classList.contains("visible")) {
-        // Timeline schließen
-        timelineList.classList.remove("visible");
-        arrow.classList.remove("open");
-    } else {
-        // Timeline öffnen
-        timelineList.classList.add("visible");
-        arrow.classList.add("open");
-    }
 }
