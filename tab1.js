@@ -1,5 +1,6 @@
 // Tab 1: Dropdowns für Filter füllen
 function populateFilters(data) {
+    console.log(`TEST`); // Debugging
     const raceDropdown = document.getElementById("raceFilter");
     const genderDropdown = document.getElementById("genderFilter");
 
@@ -15,7 +16,7 @@ function populateFilters(data) {
         option.textContent = race;
         raceDropdown.appendChild(option);
     });
-
+    console.log(`TEST2`); // Debugging
     uniqueGenders.forEach(gender => {
         const option = document.createElement("option");
         option.value = gender.toLowerCase();
@@ -24,7 +25,64 @@ function populateFilters(data) {
     });
 }
 
+function applyFilters(data) {
+    console.log(`APPLY`); // Debugging
+    const attribute = document.getElementById("attributeSelector").value;
+    const raceFilter = document.getElementById("raceFilter").value.toLowerCase();
+    const genderFilter = document.getElementById("genderFilter").value.toLowerCase();
+    const alignmentFilter = document.getElementById("alignmentFilter").value.toLowerCase();
+    const minHeight = parseInt(document.getElementById("minHeightFilter").value);
+    const maxHeight = parseInt(document.getElementById("maxHeightFilter").value);
+    const minWeight = parseInt(document.getElementById("minWeightFilter").value);
+    const maxWeight = parseInt(document.getElementById("maxWeightFilter").value);
+
+    // Filter für Sliderwerte des Attributs
+    const minAttribute = parseInt(document.getElementById("minAttributeFilter").value);
+    const maxAttribute = parseInt(document.getElementById("maxAttributeFilter").value);
+
+    // Zusätzliche Filter
+    //const strengthAbove50Filter = document.getElementById("strengthAbove50Filter").checked;
+    const heroOnlyFilter = document.getElementById("heroOnlyFilter").checked;
+
+    return data.filter(hero => {
+        // Race, Gender, and Alignment Filters
+        const raceMatch = raceFilter ? hero.race && hero.race.toLowerCase() === raceFilter : true;
+        const genderMatch = genderFilter ? hero.gender && hero.gender.toLowerCase() === genderFilter : true;
+        const alignmentMatch = alignmentFilter ? hero.alignment && hero.alignment.toLowerCase() === alignmentFilter : true;
+
+        // Height Filter (normalize to cm)
+        const heightInCm = parseHeight(hero.height);
+        const heightMatch = (!minHeight || heightInCm >= minHeight) && (!maxHeight || heightInCm <= maxHeight);
+
+        // Weight Filter (normalize to kg)
+        const weightInKg = parseWeight(hero.weight);
+        const weightMatch = (!minWeight || weightInKg >= minWeight) && (!maxWeight || weightInKg <= maxWeight);
+
+        // Attribute Filter (based on selected attribute and slider values)
+        let attributeMatch = true;
+        if (hero[attribute] !== undefined) {
+            const heroAttributeValue = parseInt(hero[attribute]);
+            console.log(`Hero ${hero.name} ${attribute}: ${heroAttributeValue}`); // Debugging
+            attributeMatch = heroAttributeValue >= minAttribute && heroAttributeValue <= maxAttribute;
+            //attributeMatch = heroAttributeValue >= minAttribute;
+
+        }
+
+        // Additional Filters
+        //const strengthMatch = strengthAbove50Filter ? parseInt(hero.strength) > 50 : true;
+        const heroMatch = heroOnlyFilter ? hero.alignment && hero.alignment.toLowerCase() === "good" : true;
+
+        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch && attributeMatch && heroMatch;
+    });
+}
+
+
 // Tab 1: Filter anwenden und Balkendiagramm aktualisieren
+/**
+ * 
+ * @param {*} data 
+ * @returns 
+ 
 function applyFilters(data) {
     const attribute = document.getElementById("attributeSelector").value;
     const raceFilter = document.getElementById("raceFilter").value.toLowerCase();
@@ -35,7 +93,7 @@ function applyFilters(data) {
     const minWeight = parseInt(document.getElementById("minWeightFilter").value);
     const maxWeight = parseInt(document.getElementById("maxWeightFilter").value);
 
-    const flyingFilter = document.getElementById("flyingFilter").checked;
+    //const flyingFilter = document.getElementById("flyingFilter").checked;
     const strengthAbove50Filter = document.getElementById("strengthAbove50Filter").checked;
     const heroOnlyFilter = document.getElementById("heroOnlyFilter").checked;
 
@@ -54,13 +112,13 @@ function applyFilters(data) {
         const weightMatch = (!minWeight || weightInKg >= minWeight) && (!maxWeight || weightInKg <= maxWeight);
 
         // Additional Filters
-        const flyingMatch = flyingFilter ? hero.can_fly && hero.can_fly.toLowerCase() === "true" : true;
+        //const flyingMatch = flyingFilter ? hero.can_fly && hero.can_fly.toLowerCase() === "true" : true;
         const strengthMatch = strengthAbove50Filter ? parseInt(hero.strength) > 50 : true;
         const heroMatch = heroOnlyFilter ? hero.alignment && hero.alignment.toLowerCase() === "good" : true;
 
-        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch && flyingMatch && strengthMatch && heroMatch;
+        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch &&  strengthMatch && heroMatch;
     });
-}
+}*/
 
 
 function parseHeight(height) {
@@ -100,7 +158,17 @@ function parseWeight(weight) {
 }
 
 function updateBarChart() {
+    console.log(`TEST6`); // Debugging
     const filteredData = applyFilters(superheroData);
+    console.log(`TEST7`); // Debugging
+
+    console.log(`MIN VALUE: `,parseInt(document.getElementById("minAttributeFilter").value));
+
+    if (filteredData.length === 0) {
+        console.log("No data after applying filters."); // Debugging, falls keine Daten übrig sind
+    } else {
+        console.log("Filtered Data:", filteredData); // Debugging
+    }
     const attribute = document.getElementById("attributeSelector").value;
 
     const labels = filteredData.map(hero => hero.name);

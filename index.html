@@ -38,6 +38,7 @@
         <div class="tab" onclick="openTab(event, 'tab2')">Comparison</div>
         <div id="tab3-button" class="tab" onclick="openTab(event, 'tab3')">Relatives</div>
         <div class="tab" onclick="openTab(event, 'tab4')">Groups</div>
+        <div class="tab" onclick="openTab(event, 'tab5')">Bubble Chart</div>
     </div>
 
     <!-- Tab 1: Attribute Visualization -->
@@ -63,6 +64,17 @@
                     <option value="power">Power</option>
                     <option value="combat">Combat</option>
                 </select>
+
+                    <!-- Dynamic Slider for the Selected Attribute -->
+            <div id="attributeSlider">
+                <label for="minAttributeFilter">Min Value:</label>
+                <input type="range" id="minAttributeFilter" min="0" max="100" step="1">
+                <span id="minValueDisplay">0</span>
+                <label for="maxAttributeFilter">Max Value:</label>
+                <input type="range" id="maxAttributeFilter" min="0" max="100" step="1">
+                <span id="maxValueDisplay">100</span>
+              
+            </div>
 
                 <!-- Race Selector -->
                 <label for="raceFilter">Race:</label>
@@ -95,10 +107,11 @@
                 <input type="number" id="minWeightFilter" placeholder="Min Weight">
                 <input type="number" id="maxWeightFilter" placeholder="Max Weight">
 
+                
+
                 <!-- Custom Checkbox Filters -->
                 <h4>Custom Filters:</h4>
-                <label><input type="checkbox" id="flyingFilter"> Can Fly</label><br>
-                <label><input type="checkbox" id="strengthAbove50Filter"> Strength > 50</label><br>
+                <!-- <label><input type="checkbox" id="flyingFilter"> Can Fly</label><br> -->
                 <label><input type="checkbox" id="heroOnlyFilter"> Hero Only</label><br>
 
                 <!-- Apply Filters Button -->
@@ -263,6 +276,74 @@
     </div>
 
 
+<!-- Tab 5: Bubble Chart -->
+<div id="tab5" class="tab-content">
+    <div class="tab-layout">
+        <!-- Filter Sidebar -->
+        <div class="filter-sidebar">
+            <h3>Bubble Chart Filters</h3>
+
+            <!-- X-Axis Selector -->
+            <label for="bubbleXAxisSelector">X-Axis:</label>
+            <select id="bubbleXAxisSelector">
+                <option value="intelligence">Intelligence</option>
+                <option value="strength">Strength</option>
+                <option value="speed">Speed</option>
+                <option value="durability">Durability</option>
+                <option value="power">Power</option>
+                <option value="combat">Combat</option>
+                <option value="height">Height</option>
+                <option value="weight">Weight</option>
+            </select>
+
+            <!-- Y-Axis Selector -->
+            <label for="bubbleYAxisSelector">Y-Axis:</label>
+            <select id="bubbleYAxisSelector">
+                <option value="intelligence">Intelligence</option>
+                <option value="strength">Strength</option>
+                <option value="speed">Speed</option>
+                <option value="durability">Durability</option>
+                <option value="power">Power</option>
+                <option value="combat">Combat</option>
+                <option value="height">Height</option>
+                <option value="weight">Weight</option>
+            </select>
+
+            <!-- Bubble Size Selector -->
+            <label for="bubbleSizeSelector">Bubble Size:</label>
+            <select id="bubbleSizeSelector">
+                <option value="power">Power</option>
+                <option value="strength">Strength</option>
+                <option value="speed">Speed</option>
+                <option value="durability">Durability</option>
+            </select>
+
+            <!-- Color Grouping Selector -->
+            <label for="bubbleColorSelector">Color Grouping:</label>
+            <select id="bubbleColorSelector">
+                <option value="alignment">Alignment</option>
+                <option value="gender">Gender</option>
+                <option value="race">Race</option>
+                <option value="publisher">Publisher</option>
+            </select>
+
+          
+            <!-- Apply Filters Button -->
+            <button onclick="updateBubbleChart()">Apply Filters</button>
+        </div>
+
+        <!-- Chart Area -->
+        <div class="chart-area">
+            <!-- Bubble Chart Container -->
+            <div id="bubbleChartContainer" style="width: 1850px; height: 1050px;"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
     <script>
         // Theme Toggle
         document.getElementById("toggle").addEventListener("change", function () {
@@ -330,6 +411,6 @@
     <script src="tab2.js"></script>
     <script src="tab3.js"></script>
     <script src="tab4.js"></script>
+    <script src="tab5.js"></script>
 </body>
-
 </html>

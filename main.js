@@ -149,6 +149,7 @@ async function main() {
     populateFilters(superheroData);
     updateBarChart();
 
+
     // Tab 2: Superhero Comparison
     populateDropdown("hero1", superheroData, "Batman (Bruce Wayne)");
     populateDropdown("hero2", superheroData, "Superman");
@@ -162,6 +163,10 @@ async function main() {
     // Tab 4: Full Network
     populateGroupDropdown("groupDropdown");
     updateNetworkChart("all");
+
+    //Tab 5: Bubble Chart
+    populateFiltersBubble(superheroData);
+    updateBubbleChart();
 }
 
 main();
