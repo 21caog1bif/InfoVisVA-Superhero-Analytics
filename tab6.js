@@ -8,8 +8,9 @@ function tab6_applyFilters(data) {
 }
 
 async function initialize2DMap() {
-    const width = 960;
-    const height = 600;
+    const mapContainer = document.getElementById("heroMap");
+    const width = mapContainer.offsetWidth;
+    const height = mapContainer.offsetHeight;
     const borderFactor = 1.2;
 
     try {
@@ -257,5 +258,3 @@ function findCountry(data, countries) {
     }
     return null;
 }
-
-initialize2DMap();
