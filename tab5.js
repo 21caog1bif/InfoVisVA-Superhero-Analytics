@@ -1,12 +1,12 @@
 function populateFiltersBubble(data) {
     // Setze Standardwerte für die Filter
-    document.getElementById("bubbleXAxisSelector").value = "strength"; // Standard X-Achse
-    document.getElementById("bubbleYAxisSelector").value = "speed";      // Standard Y-Achse
-    document.getElementById("bubbleSizeSelector").value = "power";         // Standard Bubble Size
-    document.getElementById("bubbleColorSelector").value = "alignment";     // Standard Color Grouping
+    document.getElementById("bubbleXAxisSelector").value = "strength";
+    document.getElementById("bubbleYAxisSelector").value = "speed";      
+    document.getElementById("bubbleSizeSelector").value = "power";         
+    document.getElementById("bubbleColorSelector").value = "alignment";     
 
     // Optional: Filtern der Daten oder Initialisieren von weiteren Filtern
-    const groups = [...new Set(data.map(d => d.publisher || "Unknown"))]; // Beispiel: Publisher als Filter
+    const groups = [...new Set(data.map(d => d.publisher || "Unknown"))]; 
     const groupDropdown = document.getElementById("groupDropdown");
     groups.forEach(group => {
         let option = document.createElement("option");
@@ -14,6 +14,28 @@ function populateFiltersBubble(data) {
         option.innerText = group;
         groupDropdown.appendChild(option);
     });
+
+    // Hinzufügen von Event-Listenern für die Achsen-Selektoren
+    const xAxisSelector = document.getElementById("bubbleXAxisSelector");
+    const yAxisSelector = document.getElementById("bubbleYAxisSelector");
+
+    xAxisSelector.addEventListener("change", function() {
+        checkAxisSelection();
+    });
+
+    yAxisSelector.addEventListener("change", function() {
+        checkAxisSelection();
+    });
+
+    function checkAxisSelection() {
+        // Überprüfen, ob X- und Y-Achse denselben Wert haben
+        if (xAxisSelector.value === yAxisSelector.value) {
+            // Wenn ja, verhindere die Auswahl
+            alert("X-Achse und Y-Achse dürfen nicht denselben Wert haben!");
+            // Stelle den Y-Achsen-Selektor auf einen anderen Wert zurück (oder setze eine alternative Handhabung)
+            yAxisSelector.value = "speed";  // Oder setze es auf einen anderen Standardwert
+        }
+    }
 }
 
 // Funktion zur Formatierung von Werten
