@@ -1,14 +1,16 @@
 // Tab 1: Dropdowns für Filter füllen
 function populateFilters(data) {
-    console.log(`TEST`); // Debugging
     const raceDropdown = document.getElementById("raceFilter");
     const genderDropdown = document.getElementById("genderFilter");
+    const publisherDropdown = document.getElementById("publisherFilter");
+    const groupDropdown = document.getElementById("groupFilter");
 
     // Eindeutige Werte extrahieren und bereinigen
     const uniqueRaces = [...new Set(data.map(hero => hero.race).filter(value => isValidValue(value)))].sort();
-    console.log("Unique races from data:", uniqueRaces);
     const uniqueGenders = [...new Set(data.map(hero => hero.gender).filter(value => isValidValue(value)))].sort();
-
+    const uniquePublishers = [...new Set(data.map(hero => hero.publisher).filter(value => isValidValue(value)))].sort();
+    const uniqueGroups = [...new Set(data.map(hero => hero.group).filter(value => isValidValue(value)))].sort();
+    console.log("Unique groups from data:", uniqueGroups);
     // Dropdowns mit Werten füllen
     uniqueRaces.forEach(race => {
         const option = document.createElement("option");
@@ -16,17 +18,29 @@ function populateFilters(data) {
         option.textContent = race;
         raceDropdown.appendChild(option);
     });
-    console.log(`TEST2`); // Debugging
     uniqueGenders.forEach(gender => {
         const option = document.createElement("option");
         option.value = gender.toLowerCase();
         option.textContent = gender;
         genderDropdown.appendChild(option);
     });
+
+    uniquePublishers.forEach(publisher => {
+        const option = document.createElement("option");
+        option.value = publisher.toLowerCase();
+        option.textContent = publisher;
+        publisherDropdown.appendChild(option);
+    });
+
+    uniqueGroups.forEach(group => {
+        const option = document.createElement("option");
+        option.value = group.toLowerCase();
+        option.textContent = group;
+        groupDropdown.appendChild(option);
+    });
 }
 
 function applyFilters(data) {
-    console.log(`APPLY`); // Debugging
     const attribute = document.getElementById("attributeSelector").value;
     const raceFilter = document.getElementById("raceFilter").value.toLowerCase();
     const genderFilter = document.getElementById("genderFilter").value.toLowerCase();
@@ -35,6 +49,8 @@ function applyFilters(data) {
     const maxHeight = parseInt(document.getElementById("maxHeightFilter").value);
     const minWeight = parseInt(document.getElementById("minWeightFilter").value);
     const maxWeight = parseInt(document.getElementById("maxWeightFilter").value);
+    const publisherFilter = document.getElementById("publisherFilter").value.toLowerCase();
+    //const groupFilter = document.getElementById("groupFilter").value.toLowerCase();
 
     // Filter für Sliderwerte des Attributs
     const minAttribute = parseInt(document.getElementById("minAttributeFilter").value);
@@ -42,13 +58,15 @@ function applyFilters(data) {
 
     // Zusätzliche Filter
     //const strengthAbove50Filter = document.getElementById("strengthAbove50Filter").checked;
-    const heroOnlyFilter = document.getElementById("heroOnlyFilter").checked;
+    //const heroOnlyFilter = document.getElementById("heroOnlyFilter").checked;
 
     return data.filter(hero => {
         // Race, Gender, and Alignment Filters
         const raceMatch = raceFilter ? hero.race && hero.race.toLowerCase() === raceFilter : true;
         const genderMatch = genderFilter ? hero.gender && hero.gender.toLowerCase() === genderFilter : true;
         const alignmentMatch = alignmentFilter ? hero.alignment && hero.alignment.toLowerCase() === alignmentFilter : true;
+        const publisherMatch = publisherFilter ? hero.publisher && hero.publisher.toLowerCase() === publisherFilter : true;
+        //const groupMatch = groupFilter ? hero.group && hero.group.toLowerCase() === groupFilter : true;
 
         // Height Filter (normalize to cm)
         const heightInCm = parseHeight(hero.height);
@@ -62,7 +80,6 @@ function applyFilters(data) {
         let attributeMatch = true;
         if (hero[attribute] !== undefined) {
             const heroAttributeValue = parseInt(hero[attribute]);
-            //console.log(`Hero ${hero.name} ${attribute}: ${heroAttributeValue}`); // Debugging
             attributeMatch = heroAttributeValue >= minAttribute && heroAttributeValue <= maxAttribute;
             //attributeMatch = heroAttributeValue >= minAttribute;
 
@@ -70,55 +87,49 @@ function applyFilters(data) {
 
         // Additional Filters
         //const strengthMatch = strengthAbove50Filter ? parseInt(hero.strength) > 50 : true;
-        const heroMatch = heroOnlyFilter ? hero.alignment && hero.alignment.toLowerCase() === "good" : true;
+        //const heroMatch = heroOnlyFilter ? hero.alignment && hero.alignment.toLowerCase() === "good" : true;
 
-        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch && attributeMatch && heroMatch;
+        return raceMatch && genderMatch && alignmentMatch && publisherMatch &&
+        heightMatch && weightMatch && attributeMatch ; //groupMatch entfernt
     });
 }
+document.addEventListener("DOMContentLoaded", function () {
+    const minSlider = document.getElementById("minAttributeFilter");
+    const maxSlider = document.getElementById("maxAttributeFilter");
+    const minValueDisplay = document.getElementById("minValueDisplay");
+    const maxValueDisplay = document.getElementById("maxValueDisplay");
 
+    // Initialwerte setzen
+    minValueDisplay.textContent = minSlider.value;
+    maxValueDisplay.textContent = maxSlider.value;
 
-// Tab 1: Filter anwenden und Balkendiagramm aktualisieren
-/**
- * 
- * @param {*} data 
- * @returns 
- 
-function applyFilters(data) {
-    const attribute = document.getElementById("attributeSelector").value;
-    const raceFilter = document.getElementById("raceFilter").value.toLowerCase();
-    const genderFilter = document.getElementById("genderFilter").value.toLowerCase();
-    const alignmentFilter = document.getElementById("alignmentFilter").value.toLowerCase();
-    const minHeight = parseInt(document.getElementById("minHeightFilter").value);
-    const maxHeight = parseInt(document.getElementById("maxHeightFilter").value);
-    const minWeight = parseInt(document.getElementById("minWeightFilter").value);
-    const maxWeight = parseInt(document.getElementById("maxWeightFilter").value);
+    // Event-Listener für den Min-Slider
+    minSlider.addEventListener("input", function () {
+        const minValue = parseInt(minSlider.value);
+        const maxValue = parseInt(maxSlider.value);
 
-    //const flyingFilter = document.getElementById("flyingFilter").checked;
-    const strengthAbove50Filter = document.getElementById("strengthAbove50Filter").checked;
-    const heroOnlyFilter = document.getElementById("heroOnlyFilter").checked;
+        if (minValue > maxValue) {
+            maxSlider.value = minValue; // Max-Slider anpassen
+            maxValueDisplay.textContent = minValue; // Anzeige aktualisieren
+        }
 
-    return data.filter(hero => {
-        // Race, Gender, and Alignment Filters
-        const raceMatch = raceFilter ? hero.race && hero.race.toLowerCase() === raceFilter : true;
-        const genderMatch = genderFilter ? hero.gender && hero.gender.toLowerCase() === genderFilter : true;
-        const alignmentMatch = alignmentFilter ? hero.alignment && hero.alignment.toLowerCase() === alignmentFilter : true;
-
-        // Height Filter (normalize to cm)
-        const heightInCm = parseHeight(hero.height);
-        const heightMatch = (!minHeight || heightInCm >= minHeight) && (!maxHeight || heightInCm <= maxHeight);
-
-        // Weight Filter (normalize to kg)
-        const weightInKg = parseWeight(hero.weight);
-        const weightMatch = (!minWeight || weightInKg >= minWeight) && (!maxWeight || weightInKg <= maxWeight);
-
-        // Additional Filters
-        //const flyingMatch = flyingFilter ? hero.can_fly && hero.can_fly.toLowerCase() === "true" : true;
-        const strengthMatch = strengthAbove50Filter ? parseInt(hero.strength) > 50 : true;
-        const heroMatch = heroOnlyFilter ? hero.alignment && hero.alignment.toLowerCase() === "good" : true;
-
-        return raceMatch && genderMatch && alignmentMatch && heightMatch && weightMatch &&  strengthMatch && heroMatch;
+        minValueDisplay.textContent = minValue; // Anzeige aktualisieren
     });
-}*/
+
+    // Event-Listener für den Max-Slider
+    maxSlider.addEventListener("input", function () {
+        const minValue = parseInt(minSlider.value);
+        const maxValue = parseInt(maxSlider.value);
+
+        if (maxValue < minValue) {
+            minSlider.value = maxValue; // Min-Slider anpassen
+            minValueDisplay.textContent = maxValue; // Anzeige aktualisieren
+        }
+
+        maxValueDisplay.textContent = maxValue; // Anzeige aktualisieren
+    });
+});
+
 
 
 function parseHeight(height) {
@@ -158,17 +169,8 @@ function parseWeight(weight) {
 }
 
 function updateBarChart() {
-    console.log(`TEST6`); // Debugging
     const filteredData = applyFilters(superheroData);
-    console.log(`TEST7`); // Debugging
 
-    console.log(`MIN VALUE: `,parseInt(document.getElementById("minAttributeFilter").value));
-
-    if (filteredData.length === 0) {
-        console.log("No data after applying filters."); // Debugging, falls keine Daten übrig sind
-    } else {
-        console.log("Filtered Data:", filteredData); // Debugging
-    }
     const attribute = document.getElementById("attributeSelector").value;
 
     const labels = filteredData.map(hero => hero.name);
@@ -193,7 +195,7 @@ function updateBarChart() {
                     enabled: false, // Disable default tooltips
                     external: function (context) {
                         const tooltipModel = context.tooltip;
-
+                    
                         // Create tooltip element if it doesn't exist
                         let tooltipEl = document.getElementById('chartjs-tooltip');
                         if (!tooltipEl) {
@@ -211,36 +213,35 @@ function updateBarChart() {
                             tooltipEl.style.fontFamily = 'Arial, sans-serif';
                             document.body.appendChild(tooltipEl);
                         }
-
+                    
                         // Hide tooltip if no data
                         if (tooltipModel.opacity === 0) {
                             tooltipEl.style.opacity = 0;
                             return;
                         }
-
+                    
                         // Get data of the current point
                         const dataIndex = tooltipModel.dataPoints[0].dataIndex;
                         const hero = filteredData[dataIndex];
-
+                    
+                        // Parse height and weight for proper display
+                        const heightInCm = parseHeight(hero.height);
+                        const weightInKg = parseWeight(hero.weight);
+                    
                         // Set tooltip content
                         tooltipEl.innerHTML = `
                             <strong>${hero.name}</strong><br>
-                            <img src="${hero.url}" alt="${hero.name}" style="width: 60px; height: 60px; border-radius: 5px; margin-bottom: 5px;"><br>
-                            <strong>Full Name:</strong> ${hero["full-name"] || "N/A"}<br>
-                            <strong>Race:</strong> ${hero.race || "N/A"}<br>
-                            <strong>Gender:</strong> ${hero.gender || "N/A"}<br>
-                            <strong>Publisher:</strong> ${hero.publisher || "N/A"}<br>
-                            <strong>Alignment:</strong> ${hero.alignment || "N/A"}<br>
-                            <strong>Height:</strong> ${hero.height || "N/A"}<br>
-                            <strong>Weight:</strong> ${hero.weight || "N/A"}<br>
+                            <strong>Height:</strong> ${heightInCm !== null ? `${heightInCm} cm` : "N/A"}<br>
+                            <strong>Weight:</strong> ${weightInKg !== null ? `${weightInKg} kg` : "N/A"}<br>
                         `;
-
+                    
                         // Tooltip positioning
                         const canvasPosition = context.chart.canvas.getBoundingClientRect();
                         tooltipEl.style.opacity = 1;
                         tooltipEl.style.left = canvasPosition.left + window.pageXOffset + tooltipModel.caretX + 'px';
                         tooltipEl.style.top = canvasPosition.top + window.pageYOffset + tooltipModel.caretY + 'px';
                     }
+                    
                 }
             }
         }
