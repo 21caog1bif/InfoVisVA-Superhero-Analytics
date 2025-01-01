@@ -39,6 +39,7 @@
         <div id="tab3-button" class="tab" onclick="openTab(event, 'tab3')">Relatives</div>
         <div class="tab" onclick="openTab(event, 'tab4')">Groups</div>
         <div class="tab" onclick="openTab(event, 'tab5')">Bubble Chart</div>
+        <div class="tab" onclick="openTab(event, 'tab6')">Hero Map</div>
     </div>
 
     <!-- Tab 1: Attribute Visualization -->
@@ -342,6 +343,33 @@
 
 
 
+<!-- Tab 6: Map -->
+<div id="tab6" class="tab-content">
+    <div class="tab-layout">
+        <div class="filter-sidebar">
+            
+            <label for="tab6-locationFilter">Location:</label>
+            <select id="tab6-locationFilter">
+                <option value="place-of-birth">Place of Birth</option>
+                <option value="base">Base</option>
+            </select>
+
+            <label for="tab6-alignmentFilter">Alignment:</label>
+            <select id="tab6-alignmentFilter">
+                <option value="">All</option>
+                <option value="good">Good</option>
+                <option value="bad">Bad</option>
+                <option value="neutral">Neutral</option>
+            </select>
+
+            <label for="tab6-groupByCountry">Group by Country:</label>
+            <input type="checkbox" id="tab6-groupByCountry" checked/>
+
+            <button onclick="initialize2DMap()">Update Map</button>
+        </div>
+        <div id="heroMap"  style="width: 960px; height: 600px; background-color: #c8f2ff;"></div>
+    </div>
+</div>
 
 
     <script>
@@ -412,5 +440,6 @@
     <script src="tab3.js"></script>
     <script src="tab4.js"></script>
     <script src="tab5.js"></script>
+    <script src="tab6.js"></script>
 </body>
 </html>

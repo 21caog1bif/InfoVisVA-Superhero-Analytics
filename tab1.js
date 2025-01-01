@@ -62,7 +62,7 @@ function applyFilters(data) {
         let attributeMatch = true;
         if (hero[attribute] !== undefined) {
             const heroAttributeValue = parseInt(hero[attribute]);
-            console.log(`Hero ${hero.name} ${attribute}: ${heroAttributeValue}`); // Debugging
+            //console.log(`Hero ${hero.name} ${attribute}: ${heroAttributeValue}`); // Debugging
             attributeMatch = heroAttributeValue >= minAttribute && heroAttributeValue <= maxAttribute;
             //attributeMatch = heroAttributeValue >= minAttribute;
 
