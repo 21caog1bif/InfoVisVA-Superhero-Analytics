@@ -1,13 +1,12 @@
 function populateFiltersBubble(data) {
     // Setze Standardwerte für die Filter
-    document.getElementById("bubbleXAxisSelector").value = "strength"; // Standard X-Achse
-    document.getElementById("bubbleYAxisSelector").value = "speed";      // Standard Y-Achse
-    document.getElementById("bubbleSizeSelector").value = "power";         // Standard Bubble Size
-    document.getElementById("bubbleColorSelector").value = "alignment";     // Standard Color Grouping
+    document.getElementById("bubbleXAxisSelector").value = "strength";
+    document.getElementById("bubbleYAxisSelector").value = "speed";      
+    document.getElementById("bubbleSizeSelector").value = "power";         
+    document.getElementById("bubbleColorSelector").value = "alignment";     
 
     // Optional: Filtern der Daten oder Initialisieren von weiteren Filtern
-    // Beispiel: Setze das Dropdown für Hero-Gruppierungen
-    const groups = [...new Set(data.map(d => d.publisher || "Unknown"))]; // Beispiel: Publisher als Filter
+    const groups = [...new Set(data.map(d => d.publisher || "Unknown"))]; 
     const groupDropdown = document.getElementById("groupDropdown");
     groups.forEach(group => {
         let option = document.createElement("option");
@@ -16,9 +15,77 @@ function populateFiltersBubble(data) {
         groupDropdown.appendChild(option);
     });
 
-    // Wenn mehr Filter vorhanden sind, diese auch hier setzen
+    // Hinzufügen von Event-Listenern für die Achsen-Selektoren
+    const xAxisSelector = document.getElementById("bubbleXAxisSelector");
+    const yAxisSelector = document.getElementById("bubbleYAxisSelector");
+
+    xAxisSelector.addEventListener("change", function() {
+        checkAxisSelection();
+    });
+
+    yAxisSelector.addEventListener("change", function() {
+        checkAxisSelection();
+    });
+
+    function checkAxisSelection() {
+        // Überprüfen, ob X- und Y-Achse denselben Wert haben
+        if (xAxisSelector.value === yAxisSelector.value) {
+            // Wenn ja, verhindere die Auswahl
+            alert("X-Achse und Y-Achse dürfen nicht denselben Wert haben!");
+            // Stelle den Y-Achsen-Selektor auf einen anderen Wert zurück (oder setze eine alternative Handhabung)
+            yAxisSelector.value = "speed";  // Oder setze es auf einen anderen Standardwert
+        }
+    }
 }
 
+// Funktion zur Formatierung von Werten
+// Funktion zur Formatierung von Werten
+const formatValue = (key, value) => {
+    if (!value) return "N/A"; // Fehlende Werte abfangen
+    
+    // Falls der Wert ein Array ist, wähle den zweiten Eintrag
+    if (Array.isArray(value)) {
+        value = value[1] || "N/A"; // Nimm den zweiten Wert oder "N/A", wenn nicht vorhanden
+    }
+
+    // Wenn key = "height", gib den Wert in cm zurück
+    if (key === "height") {
+        // Wenn der Wert in cm vorhanden ist, verwenden wir diesen
+        if (typeof value === 'string' && value.includes('cm')) {
+            return value; // Der Wert enthält bereits "cm"
+        }
+        // Wenn der Wert als String im Format "ft'in\"" kommt (z.B. 6'1"), konvertieren wir ihn in cm
+        if (typeof value === 'string' && value.includes("'")) {
+            const parts = value.split("'"); // z.B. 6'1" -> [6, 1]
+            const feet = parseInt(parts[0], 10);
+            const inches = parseInt(parts[1], 10);
+            const totalCm = (feet * 30.48) + (inches * 2.54); // Umrechnung in cm
+            return `${Math.round(totalCm)} cm`;
+        }
+        // Wenn der Wert eine Zahl ist, behandeln wir ihn als cm
+        return `${value} cm`; // Direkt den Wert in cm anzeigen
+    }
+
+    // Wenn key = "weight", gib den Wert in kg zurück
+    if (key === "weight") {
+        // Wenn der Wert in kg vorhanden ist, verwenden wir diesen
+        if (typeof value === 'string' && value.includes('kg')) {
+            return value; // Der Wert enthält bereits "kg"
+        }
+        // Wenn der Wert in lb (lbs) vorliegt, konvertieren wir ihn in kg
+        if (typeof value === 'string' && value.includes('lb')) {
+            const lbs = parseInt(value.replace(/[^\d]/g, '')); // Extrahiere die Zahl
+            const kg = lbs * 0.453592; // Umrechnung von lbs nach kg
+            return `${Math.round(kg)} kg`;
+        }
+        // Wenn der Wert eine Zahl ist, behandeln wir ihn als kg
+        return `${value} kg`; // Direkt den Wert in kg anzeigen
+    }
+
+    return value.toString(); // Andernfalls den Wert als String zurückgeben
+};
+
+// Funktion zur Erstellung des Diagramms
 function updateBubbleChart() {
     // Filterdaten abrufen
     const filteredData = applyFilters(superheroData);
@@ -102,20 +169,25 @@ function updateBubbleChart() {
         .attr("stroke-width", 2)
         .style("opacity", 0.8)
         .on("mouseover", function (event, d) {
+            // Tooltip anzeigen
             tooltip.style("opacity", 1)
                 .html(`
                     <strong>${d.name}</strong><br>
-                    X (${xAxis}): ${d[xAxis] || "N/A"}<br>
-                    Y (${yAxis}): ${d[yAxis] || "N/A"}<br>
-                    Size (${bubbleSize}): ${d[bubbleSize] || "N/A"}<br>
+                    X (${xAxis}): ${formatValue(xAxis, d[xAxis])}<br>
+                    Y (${yAxis}): ${formatValue(yAxis, d[yAxis])}<br>
+                    Size (${bubbleSize}): ${formatValue(bubbleSize, d[bubbleSize])}<br>
                     Color (${colorGrouping}): ${d[colorGrouping] || "N/A"}
                 `)
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY + 10}px`);
+
+            // Bubble hervorheben
             d3.select(this).attr("fill", "orange");
         })
         .on("mouseout", function () {
             tooltip.style("opacity", 0);
+
+            // Wiederherstellen der ursprünglichen Farbe
             d3.select(this).attr("fill", d => colorScale(d[colorGrouping] || "Other"));
         });
 
@@ -123,14 +195,26 @@ function updateBubbleChart() {
     const xAxisCall = d3.axisBottom(xScale);
     const yAxisCall = d3.axisLeft(yScale);
 
+    // Überprüfen, ob die Achsen `height` oder `weight` sind, und entsprechende Formatierung anwenden
+    if (xAxis === "height" || xAxis === "weight") {
+        xAxisCall.tickFormat(d3.format(".0f")); // Formatierung ohne Dezimalstellen für height/weight
+    }
+    if (yAxis === "height" || yAxis === "weight") {
+        yAxisCall.tickFormat(d3.format(".0f")); // Formatierung ohne Dezimalstellen für height/weight
+    }
+
     zoomGroup.append("g")
         .attr("class", "x axis")
         .attr("transform", `translate(0, ${height})`)
-        .call(xAxisCall);
+        .call(xAxisCall)
+        .selectAll("path, line")  // Wähle Achsenlinien und Ticks
+        .style("stroke", "black");  // Setze Farbe auf Schwarz
 
     zoomGroup.append("g")
         .attr("class", "y axis")
-        .call(yAxisCall);
+        .call(yAxisCall)
+        .selectAll("path, line")  // Wähle Achsenlinien und Ticks
+        .style("stroke", "black");  // Setze Farbe auf Schwarz
 
     // Achsentitel hinzufügen
     zoomGroup.append("text")

@@ -54,7 +54,7 @@
                 </div>
 
                 <h3>Filters</h3>
-
+ 
                 <!-- Attribute Selector -->
                 <label for="attributeSelector">Attribute:</label>
                 <select id="attributeSelector">
@@ -98,6 +98,15 @@
                     <option value="neutral">Neutral</option>
                 </select>
 
+                                <!-- Publisher Selector -->
+                <label for="publisherFilter">Publisher:</label>
+                <select id="publisherFilter">
+                    <option value="">All</option>
+                </select>
+
+                
+
+
                 <!-- Height Filter -->
                 <label for="heightFilter">Height (cm):</label>
                 <input type="number" id="minHeightFilter" placeholder="Min Height">
@@ -108,13 +117,8 @@
                 <input type="number" id="minWeightFilter" placeholder="Min Weight">
                 <input type="number" id="maxWeightFilter" placeholder="Max Weight">
 
-                
 
-                <!-- Custom Checkbox Filters -->
-                <h4>Custom Filters:</h4>
-                <!-- <label><input type="checkbox" id="flyingFilter"> Can Fly</label><br> -->
-                <label><input type="checkbox" id="heroOnlyFilter"> Hero Only</label><br>
-
+              
                 <!-- Apply Filters Button -->
                 <button onclick="updateBarChart()">Apply Filters</button>
             </div>
