@@ -4,31 +4,72 @@ async function initialize2DMap() {
     const borderFactor = 1.2;
 
     try {
-        // GeoJSON-Datei laden
         const worldData = await d3.json("/worldmap/worldmap.geojson");
         const countries = await d3.csv('/worldmap/country.csv');
         const cities = await d3.csv('/worldmap/cities.csv');
 
-        // Erstelle die Projektion mit der berechneten Skalierung und Übersetzung
-        const projection = d3.geoMercator().fitSize([width, height], worldData);
+        const heroLocations = new Map()
+        const locationMap = new Map();
+        superheroData.forEach(hero => {
+            const location = getGeoLocation(hero["place-of-birth"], countries, cities);
+            if (location) {
+                locationMap.set(location.name, location)
+                if (!heroLocations.has(location.name)) {
+                    heroLocations.set(location.name, []);
+                }
+                heroLocations.get(location.name).push({
+                    hero: hero,
+                    exactLocation: location.exactLocation
+                });
+            }
+        });
 
-        // Pfadgenerator für die Projektion
+        const projection = d3.geoMercator().fitSize([width, height], worldData);
         const geoGenerator = d3.geoPath().projection(projection);
 
-        // Länder auf der Karte rendern
+        let maxRadius = d3.max(heroLocations, d => d.length);
+        var radiusScale = d3.scaleSqrt()
+            .domain([0, maxRadius])
+            .range([1, 8]);
+
+        let currentZoom = 1;
+        d3.select("#heroMap").selectAll("*").remove();
         const svg = d3.select("#heroMap")
             .append("svg")
             .attr("width", width)
             .attr("height", height)
             .call(
                 d3.zoom()
-                    .scaleExtent([1, 30])
+                    .scaleExtent([1, 80])
                     .translateExtent([
                         [(1 - borderFactor) * width, (1 - borderFactor) * height],
                         [borderFactor * width, borderFactor * height]
                     ])
                     .on("zoom", function (event) {
                         svg.attr("transform", event.transform);
+                        currentZoom = Math.min(15, event.transform.k);
+                
+                        heroes.selectAll("circle")
+                            .attr("r", function(d) {
+                                return radiusScale(d.length) / currentZoom;
+                            });
+                
+                        heroes.selectAll("image")
+                            .attr("width", function(d) {
+                                return 2 * radiusScale(d.length) / currentZoom;
+                            })
+                            .attr("height", function(d) {
+                                return 2 * radiusScale(d.length) / currentZoom;
+                            })
+                            .attr("x", function(d) {
+                                return -radiusScale(d.length) / currentZoom;
+                            })
+                            .attr("y", function(d) {
+                                return -radiusScale(d.length) / currentZoom;
+                            })
+                            .attr("clip-path", function(d) {
+                                return `circle(${radiusScale(d.length) / currentZoom}px at center)`;s
+                            });
                     }))
             .append("g");
 
@@ -43,9 +84,6 @@ async function initialize2DMap() {
             .style("stroke", "black");
 
         const heroes = svg.append("g");
-        const bubbleSize = 10;
-
-        // Tooltip erstellen
         const tooltip = d3.select("body").append("div")
             .attr("class", "tooltip")
             .style("position", "absolute")
@@ -56,118 +94,142 @@ async function initialize2DMap() {
             .style("border-radius", "5px")
             .style("font-size", "14px");
 
-        superheroData.forEach(hero => {
-            const location = getGeoLocation(hero["place-of-birth"], countries, cities);
-            if (location !== null) {
-                const lat = location.latitude;
-                const lng = location.longitude;
-                if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                    const [x, y] = projection([lng, lat]);
-
-                    const node = heroes.append("g")
-                        .attr("transform", `translate(${x}, ${y})`)
-                        .on("mouseover", function (event) {
-                            // Tooltip anzeigen
-                            tooltip.style("visibility", "visible")
-                                .text(`Name: ${hero.name || hero["full-name"]}\nBirthplace: ${location.name}`);
-
-                            d3.select(this).select("circle")
-                                .transition().duration(200)
-                                .attr("r", bubbleSize * 1.5) // Vergrößern
-                                .attr("fill", "orange"); // Farbe ändern
-
-                            d3.select(this).select("image")
-                                .transition().duration(200)
-                                .attr("width", 2 * bubbleSize * 1.5)
-                                .attr("height", 2 * bubbleSize * 1.5)
-                                .attr("x", -bubbleSize * 1.5)
-                                .attr("y", -bubbleSize * 1.5)
-                                .attr("clip-path", `circle(${bubbleSize * 1.5}px at center)`);
-                        })
-                        .on("mousemove", function (event) {
-                            // Tooltip folgt der Maus
-                            tooltip.style("top", (event.pageY + 5) + "px")
-                                .style("left", (event.pageX + 5) + "px");
-                        })
-                        .on("mouseout", function (event) {
-                            // Tooltip ausblenden
-                            tooltip.style("visibility", "hidden");
-
-                            d3.select(this).select("circle")
-                                .transition().duration(200)
-                                .attr("r", bubbleSize) // Zurücksetzen auf die ursprüngliche Größe
-                                .attr("fill", "blue"); // Zurück zur Originalfarbe
-
-                            // Bild zurücksetzen
-                            d3.select(this).select("image")
-                                .transition().duration(200)
-                                .attr("width", 2 * bubbleSize)
-                                .attr("height", 2 * bubbleSize)
-                                .attr("x", -bubbleSize)
-                                .attr("y", -bubbleSize)
-                                .attr("clip-path", `circle(${bubbleSize}px at center)`);
-                        });
-
-                    // Marker für jeden Helden auf der Karte platzieren
-                    node.append("circle")
-                        .attr("r", bubbleSize)
-                        .attr("fill", "blue")
-                        .attr("stroke-width", 4);
-
-                    // Bilder hinzufügen, falls verfügbar
-                    if (hero.url) {
-                        node.append("image")
-                            .attr("xlink:href", hero.url)
-                            .attr("width", 2 * bubbleSize)
-                            .attr("height", 2 * bubbleSize)
-                            .attr("x", -bubbleSize)
-                            .attr("y", -bubbleSize)
-                            .attr("clip-path", `circle(${bubbleSize}px at center)`)
-                            .style("pointer-events", "none");
-                    }
+            heroLocations.forEach((heroesAtLocation, key) => {
+                const location = locationMap.get(key);
+                const [x, y] = projection([location.longitude, location.latitude]);
+                const node = heroes.append("g")
+                    .datum(heroesAtLocation)
+                    .attr("transform", `translate(${x}, ${y})`);
+            
+                const bubbleSize = radiusScale(heroesAtLocation.length); // Blasengröße basierend auf der Anzahl der Helden
+                node.append("circle")
+                    .attr("r", bubbleSize)
+                    .attr("fill", "blue")
+                    .attr("stroke-width", 2);
+            
+                node.append("image")
+                    .attr("xlink:href", heroesAtLocation[0].hero.url)
+                    .attr("width", 2 * bubbleSize)
+                    .attr("height", 2 * bubbleSize)
+                    .attr("x", -bubbleSize)
+                    .attr("y", -bubbleSize)
+                    .attr("clip-path", `circle(${bubbleSize}px at center)`)
+                    .style("pointer-events", "none");
+            
+                let index = 0;
+                node.on("mouseover", function (event) {
+                    tooltip
+                        .attr("data-selectedLocation", location.name)
+                        .style("visibility", "visible")
+                        .html(`<strong>${location.name}</strong> (${index + 1}/${heroesAtLocation.length})<br>Hero: ${heroesAtLocation[index].hero.name}<br>Location: ${heroesAtLocation[index].exactLocation}`);
+            
+                    const newBubbleSize = (bubbleSize * 1.5) / currentZoom;
+                    d3.select(this).select("circle")
+                        .transition().duration(200)
+                        .attr("r", newBubbleSize)
+                        .attr("fill", "orange");
+            
+                    d3.select(this).select("image")
+                        .transition().duration(200)
+                        .attr("width", 2 * newBubbleSize)
+                        .attr("height", 2 * newBubbleSize)
+                        .attr("x", -newBubbleSize)
+                        .attr("y", -newBubbleSize)
+                        .attr("clip-path", `circle(${newBubbleSize}px at center)`);
+                })
+                .on("mousemove", function (event) {
+                    tooltip.style("top", (event.pageY + 5) + "px")
+                        .style("left", (event.pageX + 5) + "px");
+                })
+                .on("mouseout", function () {
+                    tooltip
+                        .attr("data-selectedLocation", null)
+                        .style("visibility", "hidden");
+            
+                    const newBubbleSize = (bubbleSize) / currentZoom;
+                    d3.select(this).select("circle")
+                        .transition().duration(200)
+                        .attr("r", newBubbleSize) // Zurück auf die ursprüngliche Größe
+                        .attr("fill", "blue");
+            
+                    d3.select(this).select("image")
+                        .transition().duration(200)
+                        .attr("width", 2 * newBubbleSize)
+                        .attr("height", 2 * newBubbleSize)
+                        .attr("x", -newBubbleSize)
+                        .attr("y", -newBubbleSize)
+                        .attr("clip-path", `circle(${newBubbleSize}px at center)`);
+                });
+            
+                // Helden wechseln alle 1s
+                if (heroesAtLocation.length > 1) {
+                    setInterval(() => {
+                        index = (index + 1) % heroesAtLocation.length;
+                        node.select("image")
+                            .attr("xlink:href", heroesAtLocation[index].hero.url);
+            
+                        // Tooltip-Text aktualisieren
+                        if (tooltip.style("visibility") === "visible" && tooltip.attr("data-selectedLocation") === location.name) {
+                            tooltip.html(`<strong>${location.name}</strong> (${index + 1}/${heroesAtLocation.length})<br>Hero: ${heroesAtLocation[index].hero.name}<br>Location: ${heroesAtLocation[index].exactLocation}`);
+                        }
+                    }, 1000);
                 }
-            }
-        });
+            });                
     } catch (error) {
         console.error("Could not load geojson data:", error);
     }
 }
 
+function splitText(text) {
+    const commaSplit = text.split(",")
+    return commaSplit.concat(commaSplit.flatMap(part => part.trim().split(' ')));
+}
+
 function getGeoLocation(data, countries, cities) {
-    let countryResult = null;
-
-    let searchText = [];
-    const commaSplit = data.split(",")
-    searchText = commaSplit.concat(commaSplit.flatMap(part => part.trim().split(' ')));
-
+    let searchText = splitText(data);
     for (let text of searchText) {
         for (let city of cities) {
             if (text.toLowerCase() === city.city.toLowerCase()) {
-                // wenn eine passende stadt gefunden wird, kann diese sofort übernommen werden
-                return {
-                    name: city.city,
-                    latitude: city.lat,
-                    longitude: city.lng
-                };
-            }
-        }
-
-        // solange kein mögliches country gefunden wurde, weitersuchen
-        if (countryResult === null) {
-            for (let country of countries) {
-                if (text.toLowerCase() === country.Country.toLowerCase()) {
-                    countryResult = {
-                        name: country.Country,
-                        latitude: country.Latitude,
-                        longitude: country.Longitude
+                const country = findCountry(city.country, countries);
+                if (country !== null) {
+                    return {
+                        name: country.name,
+                        latitude: country.latitude,
+                        longitude: country.longitude,
+                        exactLocation: city.city
                     };
-                    break;
                 }
             }
         }
+
+        const country = findCountry(text, countries);
+        if (country !== null) {
+            return {
+                name: country.name,
+                latitude: country.latitude,
+                longitude: country.longitude,
+                exactLocation: text
+            };
+        }
     }
 
-    return countryResult;
+    return null;
+}
+
+function findCountry(data, countries) {
+    let searchText = splitText(data);
+    for (let text of searchText) {
+        for (let country of countries) {
+            if (text.toLowerCase() === country.Country.toLowerCase()) {
+                return {
+                    name: country.Country,
+                    latitude: country.Latitude,
+                    longitude: country.Longitude
+                };
+            }
+        }
+    }
+    return null;
 }
 
 initialize2DMap();
