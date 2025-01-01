@@ -170,6 +170,7 @@ function updateBubbleChart() {
         .style("opacity", 0.8)
         .on("mouseover", function (event, d) {
             // Tooltip anzeigen
+            
             tooltip.style("opacity", 1)
                 .html(`
                     <strong>${d.name}</strong><br>
@@ -182,7 +183,7 @@ function updateBubbleChart() {
                 .style("top", `${event.pageY + 10}px`);
 
             // Bubble hervorheben
-            d3.select(this).attr("fill", "orange");
+            d3.select(this).attr("fill", "orange").style("z-index", 1000); // Bubble in den Vordergrund bringen
         })
         .on("mouseout", function () {
             tooltip.style("opacity", 0);
