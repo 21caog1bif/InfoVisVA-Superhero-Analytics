@@ -347,7 +347,7 @@
 <div id="tab6" class="tab-content">
     <div class="tab-layout">
         <div class="filter-sidebar">
-            
+            <h3>Map Filters</h3>
             <label for="tab6-locationFilter">Location:</label>
             <select id="tab6-locationFilter">
                 <option value="place-of-birth">Place of Birth</option>
@@ -367,7 +367,11 @@
 
             <button onclick="initialize2DMap()">Update Map</button>
         </div>
-        <div id="heroMap"  style="width: 960px; height: 600px; background-color: #c8f2ff;"></div>
+        <!-- Chart Area -->
+        <div class="chart-area">
+            <!-- Chart Container -->
+            <div id="heroMap" style="width: 100%; height: 100%;"></div>
+        </div>
     </div>
 </div>
 
@@ -412,6 +416,7 @@
                 activeContent.style.display = 'block';
 
                 if (tabId === 'tab4') initializeZoom(); // Zoom für Tab 4 neu initialisieren
+                if (tabId === 'tab6') initialize2DMap(); // Karte in Tab 6 initialisieren
             }
         }
 
