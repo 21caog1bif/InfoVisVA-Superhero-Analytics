@@ -1,3 +1,12 @@
+function tab6_applyFilters(data) {
+    const alignmentFilter = document.getElementById("tab6-alignmentFilter").value.toLowerCase();
+
+    return data.filter(hero => {
+        const alignmentMatch = alignmentFilter ? hero.alignment && hero.alignment.toLowerCase() === alignmentFilter : true;
+        return alignmentMatch;
+    });
+}
+
 async function initialize2DMap() {
     const width = 960;
     const height = 600;
@@ -8,16 +17,20 @@ async function initialize2DMap() {
         const countries = await d3.csv('/worldmap/country.csv');
         const cities = await d3.csv('/worldmap/cities.csv');
 
+        const locationFilter = document.getElementById("tab6-locationFilter").value.toLowerCase();
+        const groupByCountry = document.getElementById("tab6-groupByCountry").checked
+        const filteredData = tab6_applyFilters(superheroData);
         const heroLocations = new Map()
         const locationMap = new Map();
-        superheroData.forEach(hero => {
-            const location = getGeoLocation(hero["place-of-birth"], countries, cities);
+        filteredData.forEach(hero => {
+            const location = getGeoLocation(hero[locationFilter], countries, cities, groupByCountry);
             if (location) {
-                locationMap.set(location.name, location)
-                if (!heroLocations.has(location.name)) {
-                    heroLocations.set(location.name, []);
+                const key = location.name
+                locationMap.set(key, location)
+                if (!heroLocations.has(key)) {
+                    heroLocations.set(key, []);
                 }
-                heroLocations.get(location.name).push({
+                heroLocations.get(key).push({
                     hero: hero,
                     exactLocation: location.exactLocation
                 });
@@ -30,7 +43,7 @@ async function initialize2DMap() {
         let maxRadius = d3.max(heroLocations, d => d.length);
         var radiusScale = d3.scaleSqrt()
             .domain([0, maxRadius])
-            .range([1, 8]);
+            .range([3, 8]);
 
         let currentZoom = 1;
         d3.select("#heroMap").selectAll("*").remove();
@@ -97,6 +110,9 @@ async function initialize2DMap() {
             heroLocations.forEach((heroesAtLocation, key) => {
                 const location = locationMap.get(key);
                 const [x, y] = projection([location.longitude, location.latitude]);
+                if (isNaN(x) || isNaN(y) || x === Infinity || x === -Infinity || y === Infinity || y === -Infinity) {
+                    return;
+                }
                 const node = heroes.append("g")
                     .datum(heroesAtLocation)
                     .attr("transform", `translate(${x}, ${y})`);
@@ -185,18 +201,27 @@ function splitText(text) {
     return commaSplit.concat(commaSplit.flatMap(part => part.trim().split(' ')));
 }
 
-function getGeoLocation(data, countries, cities) {
+function getGeoLocation(data, countries, cities, groupByCountry) {
     let searchText = splitText(data);
     for (let text of searchText) {
         for (let city of cities) {
             if (text.toLowerCase() === city.city.toLowerCase()) {
-                const country = findCountry(city.country, countries);
-                if (country !== null) {
+                if (groupByCountry) {
+                    const country = findCountry(city.country, countries);
+                    if (country !== null) {
+                        return {
+                            name: country.name,
+                            latitude: country.latitude,
+                            longitude: country.longitude,
+                            exactLocation: city.city
+                        };
+                    }
+                } else {
                     return {
-                        name: country.name,
-                        latitude: country.latitude,
-                        longitude: country.longitude,
-                        exactLocation: city.city
+                        name: city.city,
+                        latitude: city.lat,
+                        longitude: city.lng,
+                        exactLocation: city.country
                     };
                 }
             }
@@ -208,7 +233,7 @@ function getGeoLocation(data, countries, cities) {
                 name: country.name,
                 latitude: country.latitude,
                 longitude: country.longitude,
-                exactLocation: text
+                exactLocation: country.match
             };
         }
     }
@@ -224,7 +249,8 @@ function findCountry(data, countries) {
                 return {
                     name: country.Country,
                     latitude: country.Latitude,
-                    longitude: country.Longitude
+                    longitude: country.Longitude,
+                    match: text
                 };
             }
         }
