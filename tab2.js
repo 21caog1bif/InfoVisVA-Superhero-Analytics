@@ -170,10 +170,10 @@ function drawRadarChart(selector, labels, dataset) {
     const container = d3.select(selector).node().parentNode; // chart-area als Eltern-Element
     const containerWidth = container.getBoundingClientRect().width;
 
-    const padding = { right: 100, left: 100 }; // Padding für Text
+    const padding = { top: 50, right: 100, left: 100, bottom: 50}; // Padding für Text
     const width = Math.max(containerWidth * 0.7, 500); // Setze Mindestbreite auf 500px
     const height = width * 0.8; // Dynamische Höhe basierend auf der Breite
-    const radius = Math.min(width - padding.left - padding.right, height) / 2;
+    const radius = Math.min(width - padding.left - padding.right, height - padding.top - padding.bottom) / 2;
     const angleSlice = (2 * Math.PI) / labels.length;
 
     const rScale = d3.scaleLinear()
