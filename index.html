@@ -379,6 +379,44 @@
     </div>
 </div>
 
+<!-- Tab 7: Timeline -->
+<div id="tab7" class="tab-content">
+    <div class="tab-layout">
+        <div class="filter-sidebar">
+            <h3>First Appereances of every Superhero</h3>
+            <label for="tab7-yearFilterStart">Start Year:</label>
+            <input type="number" id="tab7-yearFilterStart" placeholder="e.g., 1930" />
+        
+            <label for="tab7-yearFilterEnd">End Year:</label>
+            <input type="number" id="tab7-yearFilterEnd" placeholder="e.g., 2023" />
+        
+            <label for="publisherFilter">Publisher:</label>
+            <select id="publisherFilter">
+                <option value="">All</option>
+                <option value="Marvel Comics">Marvel Comics</option>
+                <option value="DC Comics">DC Comics</option>
+            </select>
+
+            <label for="genderFilter">Gender:</label>
+            <select id="genderFilter">
+                <option value="">All</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+            </select>
+
+
+        
+            <button id="updateTimelineButton">Update Timeline</button>
+        </div>
+        
+        <!-- Chart Area -->
+        <div class="chart-area">
+            <!-- Chart Container -->
+            <div id="tab7-chart" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+</div>
+
 
     <script>
         // Theme Toggle
@@ -450,5 +488,6 @@
     <script src="tab4.js"></script>
     <script src="tab5.js"></script>
     <script src="tab6.js"></script>
+     <script src="tab7.js"></script>
 </body>
 </html>
