@@ -32,14 +32,12 @@ Superhero Analytics is an interactive web tool for visualizing and analyzing sup
    git clone https://github.com/21caog1bif/InfoVisVA-Superhero-Analytics.git
    ```
 
-2. Place the `superheroes_data.csv` file in the same directory as `index.html`.
-
-3. Start a simple HTTP server:
+2. Start a simple HTTP server:
    ```bash
    python -m http.server
    ```
 
-4. Open `http://localhost:8000` in your web browser.
+3. Navigate to `http://localhost:8000` (or the corresponding port) in your browser.
 
 ---
 
