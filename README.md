@@ -1,152 +1,125 @@
-
 # Superhero Analytics
 
-Superhero Analytics is a web-based visualization tool that allows users to explore and compare superhero attributes. This project provides interactive charts and detailed comparisons between superheroes, leveraging CSV data for insights.
+Superhero Analytics is an interactive web tool for visualizing and analyzing superhero data. It provides a user-friendly interface with various visualization methods and interactions to explore the world of superheroes in depth. With this tool, users can examine superhero attributes, compare heroes, analyze relationships, and more, making it a powerful resource for fans and analysts alike.
 
 ---
 
-## Features
+## Table of Contents
 
-- **Attribute Visualization**: 
-  - View superhero attributes (e.g., Intelligence, Strength, Speed) in a bar chart format.
-  - Apply various filters to refine the data, such as race, gender, alignment, height, and weight.
-  
-- **Superhero Comparison**:
-  - Compare two superheroes side-by-side with a radar chart.
-  - Display additional superhero details in a table beneath the radar chart.
-  - View superhero images dynamically based on the selected hero.
-
-- **Dynamic Filters**:
-  - Dropdowns for race, gender, and alignment.
-  - Sliders and input fields for height and weight ranges.
-  - Checkboxes for custom filters like "Can Fly" or "Strength > 50".
+1. [Setup and Installation](#setup-and-installation)
+2. [Data Overview](#data-overview)
+3. [Usage](#usage)
+   1. [Attributes](#1-attributes)
+   2. [Comparison](#2-comparison)
+   3. [Relatives](#3-relatives)
+   4. [Groups](#4-groups)
+   5. [Bubble Chart](#5-bubble-chart)
+   6. [Hero Map](#6-hero-map)
+4. [Contributions and License](#contributions-and-license)
 
 ---
 
-## Setup and Installation
+## 1. Setup and Installation
 
 ### Prerequisites
+- A modern web browser (e.g., Chrome, Firefox, Edge, Safari).
+- A locally hosted or online server for serving `HTML`, `CSS`, and `JavaScript` files.
 
-- A modern web browser (Chrome, Firefox, Edge, or Safari).
-- A local or online server to serve the `HTML`, `CSS`, and `JavaScript` files.
-
-### Steps
-
-1. Clone or download the repository to your local machine.
+### Installation Steps
+1. Clone or download the repository:
    ```bash
    git clone https://github.com/21caog1bif/InfoVisVA-Superhero-Analytics.git
    ```
 
-2. Place the `superheroes_data.csv` file in the same directory as the `index.html` file.
+2. Place the `superheroes_data.csv` file in the same directory as `index.html`.
 
-3. Open a terminal in the project directory and start a simple HTTP server. For example:
+3. Start a simple HTTP server:
    ```bash
    python -m http.server
    ```
 
-4. Navigate to `http://localhost:8000` (or the corresponding port) in your browser.
+4. Open `http://localhost:8000` in your web browser.
 
 ---
 
-## File Structure
+## 2. Data Overview
 
-```
-Superhero-Analytics/
-│
-├── index.html            # Main HTML file
-├── style.css             # Stylesheet for layout and design
-├── script.js             # JavaScript file for logic and interactivity
-├── superheroes_data.csv  # CSV file containing superhero data
-└── README.md             # Project documentation
-```
-
----
-
-## Usage
-
-### Attribute Visualization
-1. Navigate to the **Attribute Visualization** tab.
-2. Select an attribute (e.g., Intelligence, Strength) from the dropdown menu.
-3. Apply filters such as race, gender, alignment, or height/weight ranges.
-4. View the updated bar chart displaying superhero data.
-
-### Superhero Comparison
-1. Navigate to the **Superhero Comparison** tab.
-2. Select two superheroes from the dropdown menus.
-3. Click the "Compare" button to display:
-   - A radar chart comparing their attributes.
-   - Additional information about each superhero (e.g., full name, alignment, first appearance) below their respective images.
-
----
-
-## Data Format
-
-The `superheroes_data.csv` file should be structured as follows:
+The `superheroes_data.csv` file should include the following columns:
 
 | Column              | Description                                |
 |---------------------|--------------------------------------------|
-| id                  | Unique identifier for the superhero        |
+| id                  | Unique ID of the superhero                |
 | name                | Name of the superhero                     |
-| intelligence        | Intelligence level (numeric)              |
-| strength            | Strength level (numeric)                  |
-| speed               | Speed level (numeric)                     |
-| durability          | Durability level (numeric)                |
-| power               | Power level (numeric)                     |
-| combat              | Combat level (numeric)                    |
-| full-name           | Full name of the superhero                |
-| alter-egos          | List of alter egos                        |
-| aliases             | List of aliases                           |
-| place-of-birth      | Place of birth                             |
-| first-appearance    | First appearance in comics or media       |
-| publisher           | Publisher (e.g., Marvel Comics, DC Comics)|
-| alignment           | Alignment (Good, Bad, Neutral)            |
-| gender              | Gender (Male, Female, etc.)               |
-| race                | Race (Human, Alien, etc.)                 |
-| height              | Height in various formats                 |
-| weight              | Weight in various formats                 |
-| eye-color           | Eye color                                 |
-| hair-color          | Hair color                                |
-| occupation          | Occupation                                |
-| base                | Base of operations                        |
-| group-affiliation   | Affiliated groups                         |
-| relatives           | Relatives                                 |
-| url                 | URL of the superhero's image              |
+| intelligence        | Intelligence value (numeric)              |
+| strength            | Strength value (numeric)                  |
+| speed               | Speed value (numeric)                     |
+| durability          | Durability value (numeric)                |
+| power               | Power value (numeric)                     |
+| combat              | Combat skill value (numeric)              |
+| ...                 | Additional attributes as per documentation|
+
 
 ---
 
-## Known Issues
+## 3. Usage
 
-- **Missing or Incorrect Data**: Ensure the `superheroes_data.csv` file is correctly formatted, as invalid or inconsistent data may cause visualization errors.
-- **Commas in the values of `superheroes_data.csv` file lead to problems with parsing
+Superhero Analytics is designed for intuitive usage. Users can explore data through various tabs, each offering unique visualizations and filtering options. The interface includes a filter sidebar on the left, a toggle for switching between dark and light modes, and navigation tabs at the top. In the following, each tab is described in detail.
+
+### 1. Attributes
+- **Description**: Visualizes attributes (e.g., intelligence, strength) in a bar chart.
+- **Interactions**:
+  - Select an attribute from the dropdown menu.
+  - Use filters to narrow down data by race, gender, alignment, height, or weight.
+
+### 2. Comparison
+- **Description**: Compares two superheroes using a radar chart.
+- **Interactions**:
+  - Select two heroes from the dropdown menus.
+  - View additional details such as images, race, height, and more in a table.
+
+### 3. Relatives
+- **Description**: Visualizes the family connections of a superhero.
+- **Interactions**:
+  - Select a hero to view their relationships.
+  - Use the timeline in the sidebar to revisit previously explored heroes.
+
+### 4. Groups
+- **Description**: Displays groups of superheroes and their members.
+- **Interactions**:
+  - Select a group or search for a hero to view specific details.
+  - Use the timeline and network statistics (e.g., number of nodes and links).
+  - Click on a hero to seamlessly navigate to the Relatives tab, displaying the selected hero’s connections.
+
+### 5. Bubble Chart
+- **Description**: Visualizes attributes in a bubble chart.
+- **Interactions**:
+  - Choose axes and attributes for the visualization.
+  - Use filters to focus on specific heroes.
+
+### 6. Hero Map
+- **Description**: Displays the geographical distribution of heroes (birthplace or base location).
+- **Interactions**:
+  - Choose whether to display the birthplace or base location.
+  - Filter by alignment (good, bad, neutral).
+  - Group locations by country.
+
+### 7. Timeline
+- **Description**: Displays a chronological timeline highlighting the first appearances of superheroes.
+- **Interactions**:
+  - Zoom in and out to focus on specific time periods or view the entire timeline.
+  - Hover over events to see detailed information, including the superhero's name, first appearance year, and associated comic volume.
+  - Drag or scroll to navigate through different time periods seamlessly.
 
 ---
 
-## Future Improvements
+## 4. Participants
 
-- Add more detailed filtering options (e.g., filter by publisher or affiliation).
-- Support for multi-hero comparisons in the radar chart.
-- Enhance styling with animations and hover effects.
-- Add more attributes for deeper insights.
+This project was developed as the final assignment for the module **InfoVisVA** at the **Hochschule für Technik Stuttgart**. The following participants contributed to its creation:
 
----
+- **Oguzhan Cantürk** (21caog1bif)
+- **Sinan Percen** (21pesi1bif)
+- **Thomas Gastens** (21gath1bif)
+- **Levi Grausam** (11grle1bif)
 
-## License
+We acknowledge and appreciate the efforts of all team members in making this project a success.
 
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-## Contributions
-
-Contributions are welcome! Please fork the repository and create a pull request with your improvements or suggestions. For major changes, please open an issue to discuss your proposal.
-
----
-
-## Credits
-
-- Data Source: Custom `superheroes_data.csv` dataset.
-- Libraries:
-  - [Chart.js](https://www.chartjs.org/) for data visualization.
-  - [PapaParse](https://www.papaparse.com/) for CSV parsing.
-
-Happy visualizing!
