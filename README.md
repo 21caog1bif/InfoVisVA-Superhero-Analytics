@@ -15,11 +15,12 @@ Superhero Analytics is an interactive web tool for visualizing and analyzing sup
    4. [Groups](#4-groups)
    5. [Bubble Chart](#5-bubble-chart)
    6. [Hero Map](#6-hero-map)
-4. [Contributions and License](#contributions-and-license)
+   7. [Timeline](#7-timeline)
+4. [Participants](#participants)
 
 ---
 
-## 1. Setup and Installation
+## Setup and Installation
 
 ### Prerequisites
 - A modern web browser (e.g., Chrome, Firefox, Edge, Safari).
@@ -42,7 +43,7 @@ Superhero Analytics is an interactive web tool for visualizing and analyzing sup
 
 ---
 
-## 2. Data Overview
+## Data Overview
 
 The `superheroes_data.csv` file should include the following columns:
 
@@ -58,10 +59,9 @@ The `superheroes_data.csv` file should include the following columns:
 | combat              | Combat skill value (numeric)              |
 | ...                 | Additional attributes as per documentation|
 
-
 ---
 
-## 3. Usage
+## Usage
 
 Superhero Analytics is designed for intuitive usage. Users can explore data through various tabs, each offering unique visualizations and filtering options. The interface includes a filter sidebar on the left, a toggle for switching between dark and light modes, and navigation tabs at the top. In the following, each tab is described in detail.
 
@@ -112,7 +112,7 @@ Superhero Analytics is designed for intuitive usage. Users can explore data thro
 
 ---
 
-## 4. Participants
+## Participants
 
 This project was developed as the final assignment for the module **InfoVisVA** at the **Hochschule für Technik Stuttgart**. The following participants contributed to its creation:
 
