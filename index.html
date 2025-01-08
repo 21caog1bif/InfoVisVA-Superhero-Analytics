@@ -40,6 +40,7 @@
         <div class="tab" onclick="openTab(event, 'tab4')">Groups</div>
         <div class="tab" onclick="openTab(event, 'tab5')">Bubble Chart</div>
         <div class="tab" onclick="openTab(event, 'tab6')">Hero Map</div>
+        <div class="tab" onclick="openTab(event, 'tab8')">Pie Chart</div>
     </div>
 
     <!-- Tab 1: Attribute Visualization -->
@@ -418,6 +419,29 @@
 </div>
 
 
+<!-- Tab 8: Kreisdiagramm -->
+<div id="tab8" class="tab-content">
+    <div class="tab-layout">
+        <div class="filter-sidebar">
+            <h3>Select Data</h3>
+            <select id="tab8-selected-data">
+                <option value="gender">Gender</option>
+                <option value="race">Race</option>
+                <option value="alignment">Alignment</option>
+                <option value="publisher">Publisher</option>
+                <option value="attribute">Attribute</option>
+            </select>
+            <button onclick="initializePieChart()">Show</button>
+        </div>
+        <!-- Chart Area -->
+        <div class="chart-area">
+            <!-- Chart Container -->
+            <div id="pieChart" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+</div>
+
+
     <script>
         // Theme Toggle
         document.getElementById("toggle").addEventListener("change", function () {
@@ -459,6 +483,7 @@
 
                 if (tabId === 'tab4') initializeZoom(); // Zoom für Tab 4 neu initialisieren
                 if (tabId === 'tab6') initialize2DMap(); // Karte in Tab 6 initialisieren
+                if (tabId === 'tab8') initializePieChart(); // Kreisdiagramm in Tab 8 initialisieren
             }
         }
 
@@ -489,5 +514,6 @@
     <script src="tab5.js"></script>
     <script src="tab6.js"></script>
      <script src="tab7.js"></script>
+    <script src="tab8.js"></script>
 </body>
 </html>
