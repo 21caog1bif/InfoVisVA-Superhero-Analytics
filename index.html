@@ -39,7 +39,7 @@
         <div id="tab3-button" class="tab" onclick="openTab(event, 'tab3')">Relatives</div>
         <div class="tab" onclick="openTab(event, 'tab4')">Groups</div>
         <div class="tab" onclick="openTab(event, 'tab5')">Bubble Chart</div>
-        <div class="tab" onclick="openTab(event, 'tab6')">Hero Map</div>
+        <div id="tab6-button" class="tab" onclick="openTab(event, 'tab6')">Hero Map</div>
         <div class="tab" onclick="openTab(event, 'tab7')">Timeline</div>
         <div class="tab" onclick="openTab(event, 'tab8')">Pie Chart</div>
     </div>
@@ -56,7 +56,7 @@
                 </div>
 
                 <h3>Filters</h3>
- 
+
                 <!-- Attribute Selector -->
                 <label for="attributeSelector">Attribute:</label>
                 <select id="attributeSelector">
@@ -68,16 +68,16 @@
                     <option value="combat">Combat</option>
                 </select>
 
-                    <!-- Dynamic Slider for the Selected Attribute -->
-            <div id="attributeSlider">
-                <label for="minAttributeFilter">Min Value:</label>
-                <input type="range" id="minAttributeFilter" min="0" max="100" step="1">
-                <span id="minValueDisplay">0</span>
-                <label for="maxAttributeFilter">Max Value:</label>
-                <input type="range" id="maxAttributeFilter" min="0" max="100" step="1">
-                <span id="maxValueDisplay">100</span>
-              
-            </div>
+                <!-- Dynamic Slider for the Selected Attribute -->
+                <div id="attributeSlider">
+                    <label for="minAttributeFilter">Min Value:</label>
+                    <input type="range" id="minAttributeFilter" min="0" max="100" step="1">
+                    <span id="minValueDisplay">0</span>
+                    <label for="maxAttributeFilter">Max Value:</label>
+                    <input type="range" id="maxAttributeFilter" min="0" max="100" step="1">
+                    <span id="maxValueDisplay">100</span>
+
+                </div>
 
                 <!-- Race Selector -->
                 <label for="raceFilter">Race:</label>
@@ -100,13 +100,13 @@
                     <option value="neutral">Neutral</option>
                 </select>
 
-                                <!-- Publisher Selector -->
+                <!-- Publisher Selector -->
                 <label for="publisherFilter">Publisher:</label>
                 <select id="publisherFilter">
                     <option value="">All</option>
                 </select>
 
-                
+
 
 
                 <!-- Height Filter -->
@@ -120,7 +120,7 @@
                 <input type="number" id="maxWeightFilter" placeholder="Max Weight">
 
 
-              
+
                 <!-- Apply Filters Button -->
                 <button onclick="updateBarChart()">Apply Filters</button>
             </div>
@@ -283,165 +283,165 @@
     </div>
 
 
-<!-- Tab 5: Bubble Chart -->
-<div id="tab5" class="tab-content">
-    <div class="tab-layout">
-        <!-- Filter Sidebar -->
-        <div class="filter-sidebar">
-            <h3>Bubble Chart Filters</h3>
+    <!-- Tab 5: Bubble Chart -->
+    <div id="tab5" class="tab-content">
+        <div class="tab-layout">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <h3>Bubble Chart Filters</h3>
 
-            <!-- X-Axis Selector -->
-            <label for="bubbleXAxisSelector">X-Axis:</label>
-            <select id="bubbleXAxisSelector">
-                <option value="intelligence">Intelligence</option>
-                <option value="strength">Strength</option>
-                <option value="speed">Speed</option>
-                <option value="durability">Durability</option>
-                <option value="power">Power</option>
-                <option value="combat">Combat</option>
-                <option value="height">Height</option>
-                <option value="weight">Weight</option>
-            </select>
+                <!-- X-Axis Selector -->
+                <label for="bubbleXAxisSelector">X-Axis:</label>
+                <select id="bubbleXAxisSelector">
+                    <option value="intelligence">Intelligence</option>
+                    <option value="strength">Strength</option>
+                    <option value="speed">Speed</option>
+                    <option value="durability">Durability</option>
+                    <option value="power">Power</option>
+                    <option value="combat">Combat</option>
+                    <option value="height">Height</option>
+                    <option value="weight">Weight</option>
+                </select>
 
-            <!-- Y-Axis Selector -->
-            <label for="bubbleYAxisSelector">Y-Axis:</label>
-            <select id="bubbleYAxisSelector">
-                <option value="intelligence">Intelligence</option>
-                <option value="strength">Strength</option>
-                <option value="speed">Speed</option>
-                <option value="durability">Durability</option>
-                <option value="power">Power</option>
-                <option value="combat">Combat</option>
-                <option value="height">Height</option>
-                <option value="weight">Weight</option>
-            </select>
+                <!-- Y-Axis Selector -->
+                <label for="bubbleYAxisSelector">Y-Axis:</label>
+                <select id="bubbleYAxisSelector">
+                    <option value="intelligence">Intelligence</option>
+                    <option value="strength">Strength</option>
+                    <option value="speed">Speed</option>
+                    <option value="durability">Durability</option>
+                    <option value="power">Power</option>
+                    <option value="combat">Combat</option>
+                    <option value="height">Height</option>
+                    <option value="weight">Weight</option>
+                </select>
 
-            <!-- Bubble Size Selector -->
-            <label for="bubbleSizeSelector">Bubble Size:</label>
-            <select id="bubbleSizeSelector">
-                <option value="power">Power</option>
-                <option value="strength">Strength</option>
-                <option value="speed">Speed</option>
-                <option value="durability">Durability</option>
-            </select>
+                <!-- Bubble Size Selector -->
+                <label for="bubbleSizeSelector">Bubble Size:</label>
+                <select id="bubbleSizeSelector">
+                    <option value="power">Power</option>
+                    <option value="strength">Strength</option>
+                    <option value="speed">Speed</option>
+                    <option value="durability">Durability</option>
+                </select>
 
-            <!-- Color Grouping Selector -->
-            <label for="bubbleColorSelector">Color Grouping:</label>
-            <select id="bubbleColorSelector">
-                <option value="alignment">Alignment</option>
-                <option value="gender">Gender</option>
-                <option value="race">Race</option>
-                <option value="publisher">Publisher</option>
-            </select>
-
-          
-            <!-- Apply Filters Button -->
-            <button onclick="updateBubbleChart()">Apply Filters</button>
-        </div>
-
-        <!-- Chart Area -->
-        <div class="chart-area">
-            <!-- Bubble Chart Container -->
-            <div id="bubbleChartContainer" style="width: 1850px; height: 1050px;"></div>
-        </div>
-    </div>
-</div>
+                <!-- Color Grouping Selector -->
+                <label for="bubbleColorSelector">Color Grouping:</label>
+                <select id="bubbleColorSelector">
+                    <option value="alignment">Alignment</option>
+                    <option value="gender">Gender</option>
+                    <option value="race">Race</option>
+                    <option value="publisher">Publisher</option>
+                </select>
 
 
+                <!-- Apply Filters Button -->
+                <button onclick="updateBubbleChart()">Apply Filters</button>
+            </div>
 
-<!-- Tab 6: Map -->
-<div id="tab6" class="tab-content">
-    <div class="tab-layout">
-        <div class="filter-sidebar">
-            <h3>Map Filters</h3>
-            <label for="tab6-locationFilter">Location:</label>
-            <select id="tab6-locationFilter">
-                <option value="place-of-birth">Place of Birth</option>
-                <option value="base">Base</option>
-            </select>
-
-            <label for="tab6-alignmentFilter">Alignment:</label>
-            <select id="tab6-alignmentFilter">
-                <option value="">All</option>
-                <option value="good">Good</option>
-                <option value="bad">Bad</option>
-                <option value="neutral">Neutral</option>
-            </select>
-
-            <label for="tab6-groupByCountry">Group by Country:</label>
-            <input type="checkbox" id="tab6-groupByCountry" checked/>
-
-            <button onclick="initialize2DMap()">Update Map</button>
-        </div>
-        <!-- Chart Area -->
-        <div class="chart-area">
-            <!-- Chart Container -->
-            <div id="heroMap" style="width: 100%; height: 100%;"></div>
+            <!-- Chart Area -->
+            <div class="chart-area">
+                <!-- Bubble Chart Container -->
+                <div id="bubbleChartContainer" style="width: 1850px; height: 1050px;"></div>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Tab 7: Timeline -->
-<div id="tab7" class="tab-content">
-    <div class="tab-layout">
-        <div class="filter-sidebar">
-            <h3>First Appereances of every Superhero</h3>
-            <label for="tab7-yearFilterStart">Start Year:</label>
-            <input type="number" id="tab7-yearFilterStart" placeholder="e.g., 1930" />
-        
-            <label for="tab7-yearFilterEnd">End Year:</label>
-            <input type="number" id="tab7-yearFilterEnd" placeholder="e.g., 2023" />
-        
-            <label for="publisherFilter">Publisher:</label>
-            <select id="publisherFilter">
-                <option value="">All</option>
-                <option value="Marvel Comics">Marvel Comics</option>
-                <option value="DC Comics">DC Comics</option>
-            </select>
-
-            <label for="genderFilter">Gender:</label>
-            <select id="genderFilter">
-                <option value="">All</option>
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
-            </select>
 
 
-        
-            <button id="updateTimelineButton">Update Timeline</button>
-        </div>
-        
-        <!-- Chart Area -->
-        <div class="chart-area">
-            <!-- Chart Container -->
-            <div id="tab7-chart" style="width: 100%; height: 100%;"></div>
+
+    <!-- Tab 6: Map -->
+    <div id="tab6" class="tab-content">
+        <div class="tab-layout">
+            <div class="filter-sidebar">
+                <h3>Map Filters</h3>
+                <label for="tab6-locationFilter">Location:</label>
+                <select id="tab6-locationFilter">
+                    <option value="place-of-birth">Place of Birth</option>
+                    <option value="base">Base</option>
+                </select>
+
+                <label for="tab6-alignmentFilter">Alignment:</label>
+                <select id="tab6-alignmentFilter">
+                    <option value="">All</option>
+                    <option value="good">Good</option>
+                    <option value="bad">Bad</option>
+                    <option value="neutral">Neutral</option>
+                </select>
+
+                <label for="tab6-groupByCountry">Group by Country:</label>
+                <input type="checkbox" id="tab6-groupByCountry" checked />
+
+                <button onclick="initialize2DMap()">Update Map</button>
+            </div>
+            <!-- Chart Area -->
+            <div class="chart-area">
+                <!-- Chart Container -->
+                <div id="heroMap" style="width: 100%; height: 100%;"></div>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Tab 7: Timeline -->
+    <div id="tab7" class="tab-content">
+        <div class="tab-layout">
+            <div class="filter-sidebar">
+                <h3>First Appereances of every Superhero</h3>
+                <label for="tab7-yearFilterStart">Start Year:</label>
+                <input type="number" id="tab7-yearFilterStart" placeholder="e.g., 1930" />
+
+                <label for="tab7-yearFilterEnd">End Year:</label>
+                <input type="number" id="tab7-yearFilterEnd" placeholder="e.g., 2023" />
+
+                <label for="publisherFilter">Publisher:</label>
+                <select id="publisherFilter">
+                    <option value="">All</option>
+                    <option value="Marvel Comics">Marvel Comics</option>
+                    <option value="DC Comics">DC Comics</option>
+                </select>
+
+                <label for="genderFilter">Gender:</label>
+                <select id="genderFilter">
+                    <option value="">All</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                </select>
 
 
 
-<!-- Tab 8: Kreisdiagramm -->
-<div id="tab8" class="tab-content">
-    <div class="tab-layout">
-        <div class="filter-sidebar">
-            <h3>Select Data</h3>
-            <select id="tab8-selected-data">
-                <option value="gender">Gender</option>
-                <option value="race">Race</option>
-                <option value="alignment">Alignment</option>
-                <option value="publisher">Publisher</option>
-                <option value="attribute">Attribute</option>
-            </select>
-            <button onclick="initializePieChart()">Show</button>
-        </div>
-        <!-- Chart Area -->
-        <div class="chart-area">
-            <!-- Chart Container -->
-            <div id="pieChart" style="width: 100%; height: 100%;"></div>
+                <button id="updateTimelineButton">Update Timeline</button>
+            </div>
+
+            <!-- Chart Area -->
+            <div class="chart-area">
+                <!-- Chart Container -->
+                <div id="tab7-chart" style="width: 100%; height: 100%;"></div>
+            </div>
         </div>
     </div>
-</div>
+
+
+
+    <!-- Tab 8: Kreisdiagramm -->
+    <div id="tab8" class="tab-content">
+        <div class="tab-layout">
+            <div class="filter-sidebar">
+                <h3>Select Data</h3>
+                <select id="tab8-selected-data">
+                    <option value="gender">Gender</option>
+                    <option value="race">Race</option>
+                    <option value="alignment">Alignment</option>
+                    <option value="publisher">Publisher</option>
+                    <option value="attribute">Attribute</option>
+                </select>
+                <button onclick="initializePieChart()">Show</button>
+            </div>
+            <!-- Chart Area -->
+            <div class="chart-area">
+                <!-- Chart Container -->
+                <div id="pieChart" style="width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+    </div>
 
 
     <script>
@@ -463,6 +463,7 @@
         };
 
 
+        let tab2first = true, tab3first = true, tab4first = true
         // Tabs umschalten
         function openTab(event, tabId) {
             // Entferne die `active`-Klasse von allen Tabs
@@ -483,7 +484,22 @@
             if (activeContent) {
                 activeContent.style.display = 'block';
 
-                if (tabId === 'tab4') initializeZoom(); // Zoom für Tab 4 neu initialisieren
+                if (tabId === 'tab2' && tab2first) {
+                    handleHeroSelection(); // Initiale Validierung
+                    updateRadarChart();
+                    tab2first = false;
+                }
+                if (tabId === 'tab3' && tab3first) {
+                    visualizeRelatives();
+                    tab3first = false;
+                }
+                if (tabId === 'tab4') {
+                    if (tab4first) {
+                        updateNetworkChart("all");
+                        tab4first = false;
+                    }
+                    initializeZoom(); // Zoom für Tab 4 neu initialisieren
+                }
                 if (tabId === 'tab6') initialize2DMap(); // Karte in Tab 6 initialisieren
                 if (tabId === 'tab8') initializePieChart(); // Kreisdiagramm in Tab 8 initialisieren
             }
@@ -518,4 +534,5 @@
     <script src="tab7.js"></script>
     <script src="tab8.js"></script>
 </body>
+
 </html>

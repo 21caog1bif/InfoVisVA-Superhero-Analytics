@@ -153,16 +153,12 @@ async function main() {
     // Tab 2: Superhero Comparison
     populateDropdown("hero1", superheroData, "Batman (Bruce Wayne)");
     populateDropdown("hero2", superheroData, "Superman");
-    handleHeroSelection(); // Initiale Validierung
-    updateRadarChart();
 
     // Tab 3: Relationship Visualization
     populateDropdown("heroDropdown", superheroData, "Quicksilver");
-    visualizeRelatives();
 
     // Tab 4: Full Network
     populateGroupDropdown("groupDropdown");
-    updateNetworkChart("all");
 
     //Tab 5: Bubble Chart
     populateFiltersBubble(superheroData);
