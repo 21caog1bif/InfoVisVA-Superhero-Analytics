@@ -1,3 +1,8 @@
+/**
+ * Filtert Heldendaten basierend auf den ausgewählten Filtereigenschaften
+ * @param {*} data - Die Heldendaten 
+ * @returns  - Die gefilterten HeldenDatem
+ */
 function tab6_applyFilters(data) {
     const alignmentFilter = document.getElementById("tab6-alignmentFilter").value.toLowerCase();
 
@@ -7,11 +12,19 @@ function tab6_applyFilters(data) {
     });
 }
 
+/**
+ * Initalisiere die Hero Karte
+ */
 async function initialize2DMap() {
     const mapContainer = document.getElementById("heroMap");
     const width = mapContainer.offsetWidth;
     const height = mapContainer.offsetHeight;
+    // Faktor, um welche die eigentliche Weltkarte größer ist, um scrollen auch voll ausgezoomt zu ermöglichen
     const borderFactor = 1.2;
+    // konstante um Bilder kreisförmig anzuzeigen
+    const radiusToImageSize = 2.6666;
+    // Prozentualer Anteil der Kreisumrandung abhängig vom Radius
+    const circleStrokeWidth = 0.1;
 
     try {
         const worldData = await d3.json("/worldmap/worldmap.geojson");
@@ -38,6 +51,7 @@ async function initialize2DMap() {
             }
         });
 
+        // Projektion um latitude/longitude in Pixelkordinaten umzuwandeln
         const projection = d3.geoMercator().fitSize([width, height], worldData);
         const geoGenerator = d3.geoPath().projection(projection);
 
@@ -66,24 +80,28 @@ async function initialize2DMap() {
                         heroes.selectAll("circle")
                             .attr("r", function(d) {
                                 return radiusScale(d.length) / currentZoom;
+                            })
+                            .attr("stroke-width", function(d) {
+                                return radiusScale(d.length) * circleStrokeWidth / currentZoom;
                             });
                 
                         heroes.selectAll("image")
                             .attr("width", function(d) {
-                                return 2 * radiusScale(d.length) / currentZoom;
+                                return radiusToImageSize * radiusScale(d.length) / currentZoom;
                             })
                             .attr("height", function(d) {
-                                return 2 * radiusScale(d.length) / currentZoom;
+                                return radiusToImageSize * radiusScale(d.length) / currentZoom;
                             })
                             .attr("x", function(d) {
-                                return -radiusScale(d.length) / currentZoom;
+                                return radiusToImageSize * -radiusScale(d.length) / 2 / currentZoom;
                             })
                             .attr("y", function(d) {
-                                return -radiusScale(d.length) / currentZoom;
+                                return radiusToImageSize * -radiusScale(d.length) / 2 / currentZoom;
                             })
                             .attr("clip-path", function(d) {
                                 return `circle(${radiusScale(d.length) / currentZoom}px at center)`;s
-                            });
+                            })
+                            .style("pointer-events", "none");
                     }))
             .append("g");
 
@@ -122,14 +140,15 @@ async function initialize2DMap() {
                 node.append("circle")
                     .attr("r", bubbleSize)
                     .attr("fill", "blue")
-                    .attr("stroke-width", 2);
+                    .attr("stroke", "blue")
+                    .attr("stroke-width", bubbleSize * circleStrokeWidth / currentZoom);
             
                 node.append("image")
-                    .attr("xlink:href", heroesAtLocation[0].hero.url)
-                    .attr("width", 2 * bubbleSize)
-                    .attr("height", 2 * bubbleSize)
-                    .attr("x", -bubbleSize)
-                    .attr("y", -bubbleSize)
+                    .attr("xlink:href", (heroesAtLocation[0].hero.url && heroesAtLocation[0].hero.url !== "-") ? heroesAtLocation[0].hero.url : unknown_superhero_url)
+                    .attr("width", radiusToImageSize * bubbleSize)
+                    .attr("height", radiusToImageSize * bubbleSize)
+                    .attr("x", radiusToImageSize * -bubbleSize / 2)
+                    .attr("y", radiusToImageSize * -bubbleSize / 2)
                     .attr("clip-path", `circle(${bubbleSize}px at center)`)
                     .style("pointer-events", "none");
             
@@ -144,14 +163,16 @@ async function initialize2DMap() {
                     d3.select(this).select("circle")
                         .transition().duration(200)
                         .attr("r", newBubbleSize)
-                        .attr("fill", "orange");
+                        .attr("fill", "orange")
+                        .attr("stroke", "orange")
+                        .attr("stroke-width", bubbleSize * circleStrokeWidth / currentZoom);
             
                     d3.select(this).select("image")
                         .transition().duration(200)
-                        .attr("width", 2 * newBubbleSize)
-                        .attr("height", 2 * newBubbleSize)
-                        .attr("x", -newBubbleSize)
-                        .attr("y", -newBubbleSize)
+                        .attr("width", radiusToImageSize * newBubbleSize)
+                        .attr("height", radiusToImageSize * newBubbleSize)
+                        .attr("x", radiusToImageSize * -newBubbleSize / 2)
+                        .attr("y", radiusToImageSize *  -newBubbleSize / 2)
                         .attr("clip-path", `circle(${newBubbleSize}px at center)`);
                 })
                 .on("mousemove", function (event) {
@@ -166,15 +187,17 @@ async function initialize2DMap() {
                     const newBubbleSize = (bubbleSize) / currentZoom;
                     d3.select(this).select("circle")
                         .transition().duration(200)
-                        .attr("r", newBubbleSize) // Zurück auf die ursprüngliche Größe
-                        .attr("fill", "blue");
+                        .attr("r", newBubbleSize)
+                        .attr("fill", "blue")
+                        .attr("stroke", "blue")
+                        .attr("stroke-width", bubbleSize * circleStrokeWidth / currentZoom);
             
                     d3.select(this).select("image")
                         .transition().duration(200)
-                        .attr("width", 2 * newBubbleSize)
-                        .attr("height", 2 * newBubbleSize)
-                        .attr("x", -newBubbleSize)
-                        .attr("y", -newBubbleSize)
+                        .attr("width", radiusToImageSize * newBubbleSize)
+                        .attr("height", radiusToImageSize * newBubbleSize)
+                        .attr("x", radiusToImageSize * -newBubbleSize / 2)
+                        .attr("y", radiusToImageSize * -newBubbleSize / 2)
                         .attr("clip-path", `circle(${newBubbleSize}px at center)`);
                 });
             
@@ -183,9 +206,8 @@ async function initialize2DMap() {
                     setInterval(() => {
                         index = (index + 1) % heroesAtLocation.length;
                         node.select("image")
-                            .attr("xlink:href", heroesAtLocation[index].hero.url);
+                            .attr("xlink:href", (heroesAtLocation[index].hero.url && heroesAtLocation[index].hero.url !== "-") ? heroesAtLocation[index].hero.url : unknown_superhero_url);
             
-                        // Tooltip-Text aktualisieren
                         if (tooltip.style("visibility") === "visible" && tooltip.attr("data-selectedLocation") === location.name) {
                             tooltip.html(`<strong>${location.name}</strong> (${index + 1}/${heroesAtLocation.length})<br>Hero: ${heroesAtLocation[index].hero.name}<br>Location: ${heroesAtLocation[index].exactLocation}`);
                         }
@@ -197,11 +219,24 @@ async function initialize2DMap() {
     }
 }
 
+/**
+ * Splittet den Text bei weitläufig im Datensatz verwendeten Trennzeichen
+ * @param {*} text - Input text 
+ * @returns - Verschiedene Teile des Texts, in denen Informationen über Länder oder Städte enthalten sein können
+ */
 function splitText(text) {
     const commaSplit = text.split(",")
     return commaSplit.concat(commaSplit.flatMap(part => part.trim().split(' ')));
 }
 
+/**
+ * Sucht eine passende GeoLocation für einen location String
+ * @param {*} data - location String
+ * @param {*} countries - csv aller Länderdaten
+ * @param {*} cities - csv aller Städtedaten
+ * @param {*} groupByCountry - true, wenn Stadtstandort unter dem Land groupiert werden sollen
+ * @returns - Ein Objekt mit Name, Längengrad, Breitengrad und den Exakten Namen Match
+ */
 function getGeoLocation(data, countries, cities, groupByCountry) {
     let searchText = splitText(data);
     for (let text of searchText) {
@@ -242,6 +277,12 @@ function getGeoLocation(data, countries, cities, groupByCountry) {
     return null;
 }
 
+/**
+ * Sucht ein passendes Land für einen location String
+ * @param {*} data - location String
+ * @param {*} countries - csv aller Länderdaten
+ * @returns - Ein Objekt mit Name, Längengrad, Breitengrad und den Exakten Namen Match
+ */
 function findCountry(data, countries) {
     let searchText = splitText(data);
     for (let text of searchText) {

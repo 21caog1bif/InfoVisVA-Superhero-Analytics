@@ -1,3 +1,7 @@
+/**
+ * Erstellt ein Objekt, das von initializePieChart() gerendert werden kann
+ * @returns - Ein Objekt mit Title und Data Array bestehend aus Categorory-Value Paaren. 
+ */
 function createPieData() {
     const selected = document.getElementById("tab8-selected-data").value.toLowerCase();
     const isSimpleData = selected === "gender" || selected === "alignment" || selected === "publisher" || selected === "race";
@@ -38,6 +42,7 @@ function createPieData() {
 
         pieData.data = topCategories;
     } else if (selected === "attribute") {
+        // Summe aller Attribute bei den Helden
         const attributeList = ["intelligence", "strength", "speed", "durability", "power", "combat"];
         const counts = {};
 
@@ -58,6 +63,7 @@ function createPieData() {
             value
         })).sort((a, b) => b.value - a.value);
     } else {
+        // kann mit vorgegeben Filtern nicht passieren
         pieData.data = [
             { category: 'No Data selected', value: 1 }
         ]
@@ -66,7 +72,9 @@ function createPieData() {
     return pieData;
 }
 
-// Diagramm initialisieren
+/**
+ * Initalisiere Kreisdiagramm
+ */
 function initializePieChart() {
     d3.select("#pieChart").select("svg").remove();
 

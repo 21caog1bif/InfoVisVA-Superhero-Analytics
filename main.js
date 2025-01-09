@@ -1,6 +1,8 @@
 let superheroData = [];
 let barChart;
 
+const unknown_superhero_url = "/unknown_superhero.png" 
+
 // CSV-Daten laden mit D3.js
 async function loadCSVWithD3(filePath) {
     try {
