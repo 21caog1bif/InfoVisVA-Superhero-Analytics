@@ -108,6 +108,12 @@ Superhero Analytics is designed for intuitive usage. Users can explore data thro
   - Hover over events to see detailed information, including the superhero's name, first appearance year, and associated comic volume.
   - Drag or scroll to navigate through different time periods seamlessly.
 
+### 8. Pie Chart
+- **Description**: Visualizes the superhero dataset in a pie chart based on gender, alignment, publisher, race or attribute
+- **Interactions**:
+  - Select the data to create the pie chart from a dropdown menu
+  - Hover over a slice to view the exact value
+
 ---
 
 ## Participants

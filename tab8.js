@@ -12,7 +12,9 @@ function createPieData() {
         superheroData.forEach(hero => {
             let type = hero[selected] || "-";
             if (type === "-" || type === "null") {
-                type = "Unknown"
+                type = "Unknown";
+            } else {
+                type = type.charAt(0).toUpperCase() + type.slice(1);
             }
             counts[type] = (counts[type] || 0) + 1;
         });
