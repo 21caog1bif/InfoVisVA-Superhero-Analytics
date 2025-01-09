@@ -1,11 +1,10 @@
 function populateFiltersBubble(data) {
-    // Setze Standardwerte für die Filter
+    // Standardwerte für Filter setzen
     document.getElementById("bubbleXAxisSelector").value = "strength";
     document.getElementById("bubbleYAxisSelector").value = "speed";      
     document.getElementById("bubbleSizeSelector").value = "power";         
     document.getElementById("bubbleColorSelector").value = "alignment";     
 
-    // Optional: Filtern der Daten oder Initialisieren von weiteren Filtern
     const groups = [...new Set(data.map(d => d.publisher || "Unknown"))]; 
     const groupDropdown = document.getElementById("groupDropdown");
     groups.forEach(group => {
@@ -15,7 +14,7 @@ function populateFiltersBubble(data) {
         groupDropdown.appendChild(option);
     });
 
-    // Hinzufügen von Event-Listenern für die Achsen-Selektoren
+    // Event-Listenern für Achsen-Selektoren
     const xAxisSelector = document.getElementById("bubbleXAxisSelector");
     const yAxisSelector = document.getElementById("bubbleYAxisSelector");
 
@@ -28,33 +27,30 @@ function populateFiltersBubble(data) {
     });
 
     function checkAxisSelection() {
-        // Überprüfen, ob X- und Y-Achse denselben Wert haben
+        //  x und y auf den gleichen Wert prüfen
         if (xAxisSelector.value === yAxisSelector.value) {
-            // Wenn ja, verhindere die Auswahl
+            // gleiche Werte nicht erlauben
             alert("X-Achse und Y-Achse dürfen nicht denselben Wert haben!");
-            // Stelle den Y-Achsen-Selektor auf einen anderen Wert zurück (oder setze eine alternative Handhabung)
-            yAxisSelector.value = "speed";  // Oder setze es auf einen anderen Standardwert
+            yAxisSelector.value = "speed"; // auf anderen Wert setzen, hier speed 
         }
     }
 }
 
-// Funktion zur Formatierung von Werten
-// Funktion zur Formatierung von Werten
+// Werte formatieren
 const formatValue = (key, value) => {
     if (!value) return "N/A"; // Fehlende Werte abfangen
     
-    // Falls der Wert ein Array ist, wähle den zweiten Eintrag
+    // zweiten Eintrag nehmen
     if (Array.isArray(value)) {
-        value = value[1] || "N/A"; // Nimm den zweiten Wert oder "N/A", wenn nicht vorhanden
+        value = value[1] || "N/A"; // zweiter Wert oder "N/A", wenn nicht vorhanden
     }
 
     // Wenn key = "height", gib den Wert in cm zurück
     if (key === "height") {
-        // Wenn der Wert in cm vorhanden ist, verwenden wir diesen
         if (typeof value === 'string' && value.includes('cm')) {
-            return value; // Der Wert enthält bereits "cm"
+            return value; //  Wert bereits "cm"
         }
-        // Wenn der Wert als String im Format "ft'in\"" kommt (z.B. 6'1"), konvertieren wir ihn in cm
+    
         if (typeof value === 'string' && value.includes("'")) {
             const parts = value.split("'"); // z.B. 6'1" -> [6, 1]
             const feet = parseInt(parts[0], 10);
@@ -62,8 +58,7 @@ const formatValue = (key, value) => {
             const totalCm = (feet * 30.48) + (inches * 2.54); // Umrechnung in cm
             return `${Math.round(totalCm)} cm`;
         }
-        // Wenn der Wert eine Zahl ist, behandeln wir ihn als cm
-        return `${value} cm`; // Direkt den Wert in cm anzeigen
+        return `${value} cm`; // Wert in cm anzeigen
     }
 
     // Wenn key = "weight", gib den Wert in kg zurück
@@ -82,7 +77,7 @@ const formatValue = (key, value) => {
         return `${value} kg`; // Direkt den Wert in kg anzeigen
     }
 
-    return value.toString(); // Andernfalls den Wert als String zurückgeben
+    return value.toString(); 
 };
 
 // Funktion zur Erstellung des Diagramms
@@ -96,7 +91,7 @@ function updateBubbleChart() {
     const bubbleSize = document.getElementById("bubbleSizeSelector").value;
     const colorGrouping = document.getElementById("bubbleColorSelector").value;
 
-    // Container für den Bubble Chart bereinigen
+    // Container für den Bubble Chart leeren
     const bubbleContainer = d3.select("#bubbleChartContainer");
     bubbleContainer.selectAll("*").remove();
 
@@ -126,13 +121,13 @@ function updateBubbleChart() {
 
     // Zoom-Handler definieren
     const zoom = d3.zoom()
-        .scaleExtent([1, 10]) // Zoomstufen: 1x bis 10x
-        .translateExtent([[0, 0], [width, height]]) // Bereich der Übersetzung
+        .scaleExtent([1, 10]) 
+        .translateExtent([[0, 0], [width, height]]) 
         .on("zoom", (event) => {
             zoomGroup.attr("transform", event.transform);
         });
 
-    // Zoom auf das SVG anwenden
+    // Zoom
     svg.call(zoom);
 
     // Gruppenelement für Zoom erstellen
@@ -170,7 +165,6 @@ function updateBubbleChart() {
         .style("opacity", 0.8)
         .on("mouseover", function (event, d) {
             // Tooltip anzeigen
-            
             tooltip.style("opacity", 1)
                 .html(`
                     <strong>${d.name}</strong><br>
@@ -208,14 +202,14 @@ function updateBubbleChart() {
         .attr("class", "x axis")
         .attr("transform", `translate(0, ${height})`)
         .call(xAxisCall)
-        .selectAll("path, line")  // Wähle Achsenlinien und Ticks
-        .style("stroke", "black");  // Setze Farbe auf Schwarz
+        .selectAll("path, line")  
+        .style("stroke", "black");  
 
     zoomGroup.append("g")
         .attr("class", "y axis")
         .call(yAxisCall)
-        .selectAll("path, line")  // Wähle Achsenlinien und Ticks
-        .style("stroke", "black");  // Setze Farbe auf Schwarz
+        .selectAll("path, line")  
+        .style("stroke", "black"); 
 
     // Achsentitel hinzufügen
     zoomGroup.append("text")

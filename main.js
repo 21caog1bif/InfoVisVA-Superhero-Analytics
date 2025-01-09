@@ -134,7 +134,7 @@ function extractMetric(value, unit) {
 async function main() {
 
     try {
-        superheroData = await loadCSVWithD3("superheroes_data.csv");
+        superheroData = await loadCSVWithD3("merged_data3_2.csv");
     } catch {
         handleError("Fehler beim Laden der CSV-Daten. Bitte versuchen Sie es später erneut.");
         return;

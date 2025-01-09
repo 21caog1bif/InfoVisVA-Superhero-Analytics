@@ -11,6 +11,7 @@ function populateFilters(data) {
     const uniquePublishers = [...new Set(data.map(hero => hero.publisher).filter(value => isValidValue(value)))].sort();
     const uniqueGroups = [...new Set(data.map(hero => hero.group).filter(value => isValidValue(value)))].sort();
     console.log("Unique groups from data:", uniqueGroups);
+    
     // Dropdowns mit Werten füllen
     uniqueRaces.forEach(race => {
         const option = document.createElement("option");
@@ -50,23 +51,18 @@ function applyFilters(data) {
     const minWeight = parseInt(document.getElementById("minWeightFilter").value);
     const maxWeight = parseInt(document.getElementById("maxWeightFilter").value);
     const publisherFilter = document.getElementById("publisherFilter").value.toLowerCase();
-    //const groupFilter = document.getElementById("groupFilter").value.toLowerCase();
 
     // Filter für Sliderwerte des Attributs
     const minAttribute = parseInt(document.getElementById("minAttributeFilter").value);
     const maxAttribute = parseInt(document.getElementById("maxAttributeFilter").value);
 
     // Zusätzliche Filter
-    //const strengthAbove50Filter = document.getElementById("strengthAbove50Filter").checked;
-    //const heroOnlyFilter = document.getElementById("heroOnlyFilter").checked;
-
     return data.filter(hero => {
         // Race, Gender, and Alignment Filters
         const raceMatch = raceFilter ? hero.race && hero.race.toLowerCase() === raceFilter : true;
         const genderMatch = genderFilter ? hero.gender && hero.gender.toLowerCase() === genderFilter : true;
         const alignmentMatch = alignmentFilter ? hero.alignment && hero.alignment.toLowerCase() === alignmentFilter : true;
         const publisherMatch = publisherFilter ? hero.publisher && hero.publisher.toLowerCase() === publisherFilter : true;
-        //const groupMatch = groupFilter ? hero.group && hero.group.toLowerCase() === groupFilter : true;
 
         // Height Filter (normalize to cm)
         const heightInCm = parseHeight(hero.height);
@@ -84,13 +80,8 @@ function applyFilters(data) {
             //attributeMatch = heroAttributeValue >= minAttribute;
 
         }
-
-        // Additional Filters
-        //const strengthMatch = strengthAbove50Filter ? parseInt(hero.strength) > 50 : true;
-        //const heroMatch = heroOnlyFilter ? hero.alignment && hero.alignment.toLowerCase() === "good" : true;
-
         return raceMatch && genderMatch && alignmentMatch && publisherMatch &&
-        heightMatch && weightMatch && attributeMatch ; //groupMatch entfernt
+        heightMatch && weightMatch && attributeMatch ; 
     });
 }
 document.addEventListener("DOMContentLoaded", function () {

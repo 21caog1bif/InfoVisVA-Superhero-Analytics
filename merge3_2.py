@@ -1,28 +1,28 @@
 import pandas as pd
 import re
 
-# Lade beide CSV-Dateien
-df1 = pd.read_csv('superheroes_data.csv')  # Erster Datensatz
-df2 = pd.read_csv('superheroes_nlp_dataset.csv')  # Zweiter Datensatz
+# Lade CSV-Dateien
+df1 = pd.read_csv('superheroes_data.csv')  
+df2 = pd.read_csv('superheroes_nlp_dataset.csv') 
 
-# Funktion zur Formatierung von Größe und Gewicht
+# formatier Größe und Gewicht
 def format_height_weight(value):
-    if pd.isna(value) or value == "-" or value.strip() == "":  # Ignoriere leere oder "-" Werte
+    if pd.isna(value) or value == "-" or value.strip() == "":  # leere Zellen ignorieren
         return "-"
     if "•" in value:  # Splitte bei "•" (z. B. '6\'0" • 183 cm')
         parts = [part.strip() for part in value.split("•")]
         return f'["{parts[0]}", "{parts[1]}"]'
-    return value  # Rückgabe unveränderter Werte, falls keine Bereinigung nötig ist
+    return value  
 
-# Funktion zur Formatierung der relatives-Spalte
+# formatiere relatives-Spalte
 def format_relatives(value):
-    if pd.isna(value) or value == "-" or value.strip() == "":  # Ignoriere leere oder "-" Werte
+    if pd.isna(value) or value == "-" or value.strip() == "":  # leere Zellen ignorieren
         return "-"
-    # Prüfen und Komma nach ")" einfügen, falls nötig
+    # füge , nach ) ein, da zweiter Datensatz anders formatiert ist
     formatted_value = re.sub(r'\)\s*(?=\w)', r'), ', value)
     return formatted_value
 
-# Wende die Bereinigungsfunktion auf die entsprechenden Spalten an
+# führe Formatierung aus, wenn Spalte existiert
 if 'height' in df2.columns:
     df2['height'] = df2['height'].apply(format_height_weight)
 if 'weight' in df2.columns:
@@ -30,36 +30,32 @@ if 'weight' in df2.columns:
 if 'relatives' in df2.columns:
     df2['relatives'] = df2['relatives'].apply(format_relatives)
 
-# Setze fehlende Werte in allen Spalten auf "-"
+# leeren Zellen mit - füllen
 df1 = df1.fillna("-")
 df2 = df2.fillna("-")
 
-# Identifiziere die Spalten, die in beiden Datensätzen vorhanden sind
+# gleiche spalten identifizieren und entferne alle unterschiedlichen aus df2
 common_columns = df1.columns.intersection(df2.columns)
-
-# Filtere df2, um nur die Spalten zu behalten, die auch in df1 existieren
 df2_filtered = df2[common_columns]
 
-# Erstelle eine neue id für alle Helden aus df2, die noch nicht in df1 sind
-# Maximalwert der id in df1 (um sicherzustellen, dass die neuen ids ab 732 beginnen)
+# df2 hat keine IDs uns soll beginnend ab der letzten ID von df1 (731) beginnen
 max_id = df1['id'].max()
-new_id_start = max_id + 1 if max_id >= 731 else 732  # Ab 732 oder der nächsten freien id
+new_id_start = max_id + 1 if max_id >= 731 else 732  
 
-# Filtere die Helden aus df2, die noch nicht in df1 sind (basierend auf 'name')
+# neue Helden, die nicht in df1 sind hinzufügen
 new_heroes = df2_filtered[~df2_filtered['name'].isin(df1['name'])]
 
-# Weisen Sie neuen Helden eine id zu
+# ID zuweisen
 new_heroes['id'] = range(new_id_start, new_id_start + len(new_heroes))
 
-# Füge die neuen Helden zu df1 hinzu
+# neue Helden in df1 hinzufügen
 merged_df = pd.concat([df1, new_heroes], ignore_index=True)
 
-# Setze fehlende Werte im zusammengeführten Datensatz auf "-"
+# fehlende Werte auf default leer setzen
 merged_df = merged_df.fillna("-")
 
-# Speichere das Ergebnis in einer neuen CSV-Datei
+# neue csv Datei erstellen
 merged_df.to_csv('merged_data3_2.csv', index=False)
 
-# Zeige die ersten Zeilen des erweiterten Datensatzes
 print("Erweiterter Datensatz:")
 print(merged_df.head())
