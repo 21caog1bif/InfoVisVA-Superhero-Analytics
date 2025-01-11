@@ -9,7 +9,7 @@ function handleHeroSelection() {
     const hero2Selector = document.getElementById("hero2");
 
     if (!hero1Selector || !hero2Selector) {
-        handleError("Dropdowns für Helden konnten nicht gefunden werden.");
+        console.error("Dropdowns für Helden konnten nicht gefunden werden.");
         return;
     }
 
@@ -63,12 +63,9 @@ function updateRadarChart() {
     );
 
     if (!hero1 || !hero2) {
-        handleError("Einer oder beide Helden konnten nicht gefunden werden. Bitte wählen Sie gültige Helden aus.", "error-message");
+        console.error("Einer oder beide Helden konnten nicht gefunden werden. Bitte wählen Sie gültige Helden aus.");
         return;
     }
-
-    // Entferne die Fehlermeldung, wenn alles korrekt ist
-    handleError(null, "error-message");
 
     // Tabellen und Bilder aktualisieren
     updateHeroTables(hero1, hero2, hero1DisplayName, hero2DisplayName);
@@ -97,9 +94,11 @@ function updateRadarChart() {
  */
 function updateHeroTables(hero1, hero2, hero1DisplayName, hero2DisplayName) {
 
+    let hero1Image = hero1.url === "-" ? "unknown_superhero.png" : hero1.url;
+    let hero2Image = hero2.url === "-" ? "unknown_superhero.png" : hero2.url;
     // Update Hero Images
-    document.getElementById("hero1Image").src = hero1.url;
-    document.getElementById("hero2Image").src = hero2.url;
+    document.getElementById("hero1Image").src = hero1Image;
+    document.getElementById("hero2Image").src = hero2Image;
 
     // Update Hero Names
     const hero1Name = hero1DisplayName.includes("(") ? hero1DisplayName.replace("(", "\n(") : hero1DisplayName + "\n";

@@ -26,7 +26,7 @@ function addToTimeline(heroId) {
         timelineList.appendChild(listItem);
         timelineList.classList.remove("hidden");
     } else {
-        handleError(`Hero with ID ${heroId} not found.`);
+        console.error(`Hero with ID ${heroId} not found.`);
         return;
     }
 }
@@ -42,19 +42,16 @@ function visualizeRelatives() {
     const hero = superheroData.find(h => h.id === heroId);
 
     if (!hero) {
-        handleError(`Hero with ID ${heroId} not found.`);
+        console.error(`Hero with ID ${heroId} not found.`);
         renderGraph([], []);
         return;
     }
-
-    // Entferne Fehler, wenn alles korrekt ist
-    handleError(null);
 
     if (!hero.relatives || hero.relatives === "-") {
         renderGraph([{
             id: hero.id,
             label: hero.name || hero["full-name"],
-            image: hero.url,
+            image: hero.url === "-" ? "unknown_superhero.png" : hero.url,
             isMain: true,
             status: "mainHero"
         }], []);
@@ -63,12 +60,14 @@ function visualizeRelatives() {
 
     const rawRelatives = splitRelatives(hero.relatives, heroId);
 
-    console.log("rawRelatives:")
-    console.log(rawRelatives)
-
     const relatives = rawRelatives.map(rel => {
         const relatedHero = superheroData.find(h => h.id === rel.heroID);
-        const image = relatedHero ? relatedHero.url : null; // Bild nur für Helden
+        let relativeImage = null
+        if (relatedHero) {
+            if(relatedHero.url === "-") relativeImage = "unknown_superhero.png"
+            else relativeImage = relatedHero.url
+        }
+        const image = relativeImage; // Bild nur für Helden
         const label = relatedHero
             ? relatedHero.name || relatedHero["full-name"] // Heldenname oder Full-Name
             : rel.name;
@@ -92,7 +91,7 @@ function visualizeRelatives() {
     const nodes = [{
         id: hero.id,
         label: hero.name || hero["full-name"],
-        image: hero.url,
+        image: hero.url === "-" ? "unknown_superhero.png" : hero.url,
         isMain: true,
         status: "mainHero"
     }];
@@ -390,7 +389,6 @@ function renderGraph(nodes, links) {
     // Event-Listener für Knoten
     node.on("click", (event, d) => {
         if (d.image) {
-            console.log(`Switching to hero with ID: ${d.id}`);
             document.getElementById("heroDropdown").value = d.id;
             playAudio();
             visualizeRelatives();
