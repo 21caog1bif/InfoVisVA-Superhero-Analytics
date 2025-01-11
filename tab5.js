@@ -131,11 +131,13 @@ function updateBubbleChart() {
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
 
+    let zoomTransform = d3.zoomIdentity; // Speicherung des zooms für die guidelines
     // Zoom-Handler definieren
     const zoom = d3.zoom()
         .scaleExtent([1, 10])
         .translateExtent([[0, 0], [width, height]])
         .on("zoom", (event) => {
+            zoomTransform = event.transform; // Speichere die Transformation
             zoomGroup.attr("transform", event.transform);
         });
 
@@ -163,19 +165,8 @@ function updateBubbleChart() {
         .domain([...new Set(filteredData.map(d => d[colorGrouping] || "Other"))])
         .range(d3.schemeTableau10);
 
-    // Guidelines für die bubbles (sichtbar mit hover)
-    const guidelineX = svg.append("line")
-        .attr("stroke", "gray")
-        .attr("stroke-dasharray", "4")
-        .attr("opacity", 0);
-
-    const guidelineY = svg.append("line")
-        .attr("stroke", "gray")
-        .attr("stroke-dasharray", "4")
-        .attr("opacity", 0);
-
     // Blasen hinzufügen
-    zoomGroup.selectAll("circle")
+    let bubbles = zoomGroup.selectAll("circle")
         .data(filteredData)
         .enter()
         .append("circle")
@@ -191,26 +182,7 @@ function updateBubbleChart() {
             d3.select(this).lower(); // Bubble in den Hintergrund mit Rechtsklick
         })
         .on("mouseover", function (event, d) {
-            const bubbleX = xScale(+d[xAxis]); // Skaliertes X
-            const bubbleY = yScale(+d[yAxis]); // Skaliertes Y
-
-            // Guideline X (vertikale Linie)
-            guidelineX
-                .attr("x1", margin.left + bubbleX)
-                .attr("y1", margin.top + bubbleY)
-                .attr("x2", margin.left + bubbleX)
-                .attr("y2", margin.top + height)
-                .attr("opacity", 1);
-
-            // Guideline Y (horizontale Linie)
-            guidelineY
-                .attr("x1", margin.left + bubbleX)
-                .attr("y1", margin.top + bubbleY)
-                .attr("x2", margin.left)
-                .attr("y2", margin.top + bubbleY)
-                .attr("opacity", 1);
-
-            d3.selectAll("circle").style("opacity", 0.3);
+            bubbles.style("opacity", 0.3);
             d3.select(this).style("opacity", 1).style("z-index", 1000); // Bubble in den Vordergrund bringen
             // Tooltip anzeigen
             tooltip.style("opacity", 1)
@@ -225,11 +197,7 @@ function updateBubbleChart() {
                 .style("top", `${event.pageY + 10}px`);
         })
         .on("mouseout", function () {
-            // Guidelines ausblenden
-            guidelineX.attr("opacity", 0);
-            guidelineY.attr("opacity", 0);
-
-            d3.selectAll("circle").style("opacity", 0.8); // Standardwert für die Sichtbarkeit
+            bubbles.style("opacity", 0.8); // Standardwert für die Sichtbarkeit
             tooltip.style("opacity", 0);
         });
 
