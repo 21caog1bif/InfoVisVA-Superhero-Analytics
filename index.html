@@ -320,7 +320,7 @@
             <!-- Chart Area -->
             <div class="chart-area">
                 <!-- Bubble Chart Container -->
-                <div id="bubbleChartContainer" style="width: 1850px; height: 1050px;"></div>
+                <div id="bubbleChartContainer" style="width: 100%; height: 100%;"></div>
             </div>
         </div>
     </div>
@@ -441,7 +441,7 @@
         };
 
 
-        let tab2first = true, tab3first = true, tab4first = true
+        let tab2first = true, tab3first = true, tab4first = true, tab5first = true
         // Tabs umschalten
         function openTab(event, tabId) {
             // Entferne die `active`-Klasse von allen Tabs
@@ -477,6 +477,10 @@
                         tab4first = false;
                     }
                     initializeZoom(); // Zoom für Tab 4 neu initialisieren
+                }
+                if (tabId === 'tab5' && tab5first) {
+                    updateBubbleChart();
+                    tab5first = false;
                 }
                 if (tabId === 'tab6') initialize2DMap(); // Karte in Tab 6 initialisieren
                 if (tabId === 'tab8') initializePieChart(); // Kreisdiagramm in Tab 8 initialisieren

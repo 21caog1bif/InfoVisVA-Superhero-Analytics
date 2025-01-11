@@ -1,11 +1,11 @@
 function populateFiltersBubble(data) {
     // Standardwerte für Filter setzen
     document.getElementById("bubbleXAxisSelector").value = "strength";
-    document.getElementById("bubbleYAxisSelector").value = "speed";      
-    document.getElementById("bubbleSizeSelector").value = "power";         
-    document.getElementById("bubbleColorSelector").value = "alignment";     
+    document.getElementById("bubbleYAxisSelector").value = "speed";
+    document.getElementById("bubbleSizeSelector").value = "power";
+    document.getElementById("bubbleColorSelector").value = "alignment";
 
-    const groups = [...new Set(data.map(d => d.publisher || "Unknown"))]; 
+    const groups = [...new Set(data.map(d => d.publisher || "Unknown"))];
     const groupDropdown = document.getElementById("groupDropdown");
     groups.forEach(group => {
         let option = document.createElement("option");
@@ -14,32 +14,38 @@ function populateFiltersBubble(data) {
         groupDropdown.appendChild(option);
     });
 
-    // Event-Listenern für Achsen-Selektoren
+    // Event-Listener für Achsen-Selektoren
     const xAxisSelector = document.getElementById("bubbleXAxisSelector");
     const yAxisSelector = document.getElementById("bubbleYAxisSelector");
 
-    xAxisSelector.addEventListener("change", function() {
-        checkAxisSelection();
-    });
+    // Funktion, um die verfügbaren Optionen zu aktualisieren
+    function updateAxisOptions() {
+        const selectedXAxis = xAxisSelector.value;
+        const selectedYAxis = yAxisSelector.value;
 
-    yAxisSelector.addEventListener("change", function() {
-        checkAxisSelection();
-    });
+        // X-Achsen-Optionen aktualisieren
+        Array.from(xAxisSelector.options).forEach(option => {
+            option.disabled = option.value === selectedYAxis; // Deaktiviere die Y-Auswahl in der X-Achse
+        });
 
-    function checkAxisSelection() {
-        //  x und y auf den gleichen Wert prüfen
-        if (xAxisSelector.value === yAxisSelector.value) {
-            // gleiche Werte nicht erlauben
-            alert("X-Achse und Y-Achse dürfen nicht denselben Wert haben!");
-            yAxisSelector.value = "speed"; // auf anderen Wert setzen, hier speed 
-        }
+        // Y-Achsen-Optionen aktualisieren
+        Array.from(yAxisSelector.options).forEach(option => {
+            option.disabled = option.value === selectedXAxis; // Deaktiviere die X-Auswahl in der Y-Achse
+        });
     }
+
+    // Event-Listener für die Selektoren
+    xAxisSelector.addEventListener("change", updateAxisOptions);
+    yAxisSelector.addEventListener("change", updateAxisOptions);
+
+    // Initiale Aktualisierung der Optionen
+    updateAxisOptions();
 }
 
 // Werte formatieren
 const formatValue = (key, value) => {
     if (!value) return "N/A"; // Fehlende Werte abfangen
-    
+
     // zweiten Eintrag nehmen
     if (Array.isArray(value)) {
         value = value[1] || "N/A"; // zweiter Wert oder "N/A", wenn nicht vorhanden
@@ -50,7 +56,7 @@ const formatValue = (key, value) => {
         if (typeof value === 'string' && value.includes('cm')) {
             return value; //  Wert bereits "cm"
         }
-    
+
         if (typeof value === 'string' && value.includes("'")) {
             const parts = value.split("'"); // z.B. 6'1" -> [6, 1]
             const feet = parseInt(parts[0], 10);
@@ -77,7 +83,7 @@ const formatValue = (key, value) => {
         return `${value} kg`; // Direkt den Wert in kg anzeigen
     }
 
-    return value.toString(); 
+    return value.toString();
 };
 
 // Funktion zur Erstellung des Diagramms
@@ -96,9 +102,15 @@ function updateBubbleChart() {
     bubbleContainer.selectAll("*").remove();
 
     // Chart-Dimensionen
-    const margin = { top: 80, right: 100, bottom: 80, left: 50 };
-    const width = 1850 - margin.left - margin.right;
-    const height = 1050 - margin.top - margin.bottom;
+    const container = d3.select("#bubbleChartContainer").node()?.parentNode; // chart-area als Eltern-Element
+    const containerWidth = container.getBoundingClientRect().width;
+    const containerHeight = container.getBoundingClientRect().height;
+
+    const margin = { top: 150, right: 100, bottom: 80, left: 100 };
+    const defaultChartHeight = 1050; // Default-Wert für die Höhe
+    const width = containerWidth - margin.left - margin.right;
+    const height = (containerHeight || defaultChartHeight) - margin.top - margin.bottom;
+
 
     // Tooltip erstellen
     const tooltip = d3.select("body")
@@ -121,8 +133,8 @@ function updateBubbleChart() {
 
     // Zoom-Handler definieren
     const zoom = d3.zoom()
-        .scaleExtent([1, 10]) 
-        .translateExtent([[0, 0], [width, height]]) 
+        .scaleExtent([1, 10])
+        .translateExtent([[0, 0], [width, height]])
         .on("zoom", (event) => {
             zoomGroup.attr("transform", event.transform);
         });
@@ -145,11 +157,22 @@ function updateBubbleChart() {
 
     const sizeScale = d3.scaleSqrt()
         .domain([0, d3.max(filteredData, d => parseFloat(d[bubbleSize]) || 0)])
-        .range([5, 40]);
+        .range([5, 30]);
 
     const colorScale = d3.scaleOrdinal()
         .domain([...new Set(filteredData.map(d => d[colorGrouping] || "Other"))])
         .range(d3.schemeTableau10);
+
+    // Guidelines für die bubbles (sichtbar mit hover)
+    const guidelineX = svg.append("line")
+        .attr("stroke", "gray")
+        .attr("stroke-dasharray", "4")
+        .attr("opacity", 0);
+
+    const guidelineY = svg.append("line")
+        .attr("stroke", "gray")
+        .attr("stroke-dasharray", "4")
+        .attr("opacity", 0);
 
     // Blasen hinzufügen
     zoomGroup.selectAll("circle")
@@ -163,7 +186,32 @@ function updateBubbleChart() {
         .attr("stroke", "white")
         .attr("stroke-width", 2)
         .style("opacity", 0.8)
+        .on("contextmenu", function (event, d) {
+            event.preventDefault(); // Verhindert Standard-Kontextmenü des Browsers
+            d3.select(this).lower(); // Bubble in den Hintergrund mit Rechtsklick
+        })
         .on("mouseover", function (event, d) {
+            const bubbleX = xScale(+d[xAxis]); // Skaliertes X
+            const bubbleY = yScale(+d[yAxis]); // Skaliertes Y
+
+            // Guideline X (vertikale Linie)
+            guidelineX
+                .attr("x1", margin.left + bubbleX)
+                .attr("y1", margin.top + bubbleY)
+                .attr("x2", margin.left + bubbleX)
+                .attr("y2", margin.top + height)
+                .attr("opacity", 1);
+
+            // Guideline Y (horizontale Linie)
+            guidelineY
+                .attr("x1", margin.left + bubbleX)
+                .attr("y1", margin.top + bubbleY)
+                .attr("x2", margin.left)
+                .attr("y2", margin.top + bubbleY)
+                .attr("opacity", 1);
+
+            d3.selectAll("circle").style("opacity", 0.3);
+            d3.select(this).style("opacity", 1).style("z-index", 1000); // Bubble in den Vordergrund bringen
             // Tooltip anzeigen
             tooltip.style("opacity", 1)
                 .html(`
@@ -175,15 +223,14 @@ function updateBubbleChart() {
                 `)
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY + 10}px`);
-
-            // Bubble hervorheben
-            d3.select(this).attr("fill", "orange").style("z-index", 1000); // Bubble in den Vordergrund bringen
         })
         .on("mouseout", function () {
-            tooltip.style("opacity", 0);
+            // Guidelines ausblenden
+            guidelineX.attr("opacity", 0);
+            guidelineY.attr("opacity", 0);
 
-            // Wiederherstellen der ursprünglichen Farbe
-            d3.select(this).attr("fill", d => colorScale(d[colorGrouping] || "Other"));
+            d3.selectAll("circle").style("opacity", 0.8); // Standardwert für die Sichtbarkeit
+            tooltip.style("opacity", 0);
         });
 
     // Achsen hinzufügen
@@ -198,18 +245,68 @@ function updateBubbleChart() {
         yAxisCall.tickFormat(d3.format(".0f")); // Formatierung ohne Dezimalstellen für height/weight
     }
 
+    // Legende hinzufügen
+    const legendGroup = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", `translate(${margin.left}, 20)`); // Position oberhalb des Charts
+
+    const legendData = colorScale.domain(); // Kategorien für die Legende
+    const legendCircleRadius = 10; // Radius der Kreise
+    const legendSpacing = 10; // Abstand zwischen den Elementen
+    const maxLegendWidth = width - margin.left - margin.right; // Maximale Breite für die Legende
+
+    let currentX = 0; // X-Position für die Legenden-Einträge
+    let currentY = 0; // Y-Position für die Legenden-Einträge
+
+    // Erstelle die Legenden-Einträge
+    legendData.forEach((category, i) => {
+        // Berechne die Breite des aktuellen Eintrags
+        const textWidth = category.length * 7; // Grobe Schätzung: 7px pro Zeichen
+        const entryWidth = 2 * legendCircleRadius + 5 + textWidth + legendSpacing; // Kreis + Abstand + Text + Padding
+
+        // Wechsel in die nächste Zeile, falls die Breite überschritten wird
+        if (currentX + entryWidth > maxLegendWidth) {
+            currentX = 0; // Zurück zum linken Rand
+            currentY += 2 * legendCircleRadius + legendSpacing; // Nächste Zeile
+        }
+
+        const legendItem = legendGroup.append("g")
+            .attr("transform", `translate(${currentX}, ${currentY})`);
+
+        // Kreis
+        legendItem.append("circle")
+            .attr("cx", legendCircleRadius) // Horizontaler Mittelpunkt
+            .attr("cy", legendCircleRadius) // Vertikaler Mittelpunkt
+            .attr("r", legendCircleRadius)
+            .attr("fill", colorScale(category))
+            .attr("stroke", "white")
+            .attr("stroke-width", 1);
+
+        // Text für die Kategorie
+        legendItem.append("text")
+            .attr("x", 2 * legendCircleRadius + 5) // Abstand zum Kreis
+            .attr("y", legendCircleRadius + 4) // Vertikale Zentrierung (4px für besseren Textausgleich)
+            .attr("font-size", "12px")
+            .attr("text-anchor", "start")
+            .attr("fill", "black")
+            .text(category);
+
+        // Aktualisiere die X-Position für den nächsten Eintrag
+        currentX += entryWidth;
+    });
+
     zoomGroup.append("g")
         .attr("class", "x axis")
         .attr("transform", `translate(0, ${height})`)
         .call(xAxisCall)
-        .selectAll("path, line")  
-        .style("stroke", "black");  
+        .selectAll("path, line")
+        .style("stroke", "black");
 
     zoomGroup.append("g")
         .attr("class", "y axis")
         .call(yAxisCall)
-        .selectAll("path, line")  
-        .style("stroke", "black"); 
+        .selectAll("path, line")
+        .style("stroke", "black");
 
     // Achsentitel hinzufügen
     zoomGroup.append("text")

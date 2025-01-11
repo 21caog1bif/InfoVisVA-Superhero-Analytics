@@ -74,7 +74,7 @@
 
 .axis text {
     font-size: 12px;
-    fill: var(--text-color);
+    color: black;
 }
 
 .radarArea {
