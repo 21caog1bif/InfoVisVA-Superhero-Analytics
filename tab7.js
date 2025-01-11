@@ -1,29 +1,46 @@
 document.addEventListener('DOMContentLoaded', function () {
     const tab7Chart = document.getElementById('tab7-chart');
 
+    // Funktion zur Extraktion des Jahres
+    function extractMonthYear(dateString) {
+        const match = dateString.match(/\b(January|February|March|April|May|June|July|August|September|October|November|December),\s(\d{4})\b/);
+        if (match) {
+            const year = parseInt(match[2]); // Jahr extrahieren
+            return year; // Nur das Jahr zurückgeben
+        }
+        return null; // Kein passendes Datum gefunden
+    }
+
     function updateTimeline() {
         d3.csv('merged_data3_2.csv').then(data => {
             const startYear = parseInt(document.getElementById('tab7-yearFilterStart').value) || 1900;
             const endYear = parseInt(document.getElementById('tab7-yearFilterEnd').value) || 2100;
-            const publisherFilter = document.querySelector('#tab7 .filter-sidebar #publisherFilter').value;
-            const genderFilter = document.querySelector('#tab7 .filter-sidebar #genderFilter').value;
+            const publisherFilter = document.querySelector('#tab7 .filter-sidebar #publisherFilter').value.trim();
+            const genderFilter = document.querySelector('#tab7 .filter-sidebar #genderFilter').value.trim();
 
             const filteredData = data.filter(d => {
-                const year = new Date(d['first-appearance']).getFullYear();
+                const year = extractMonthYear(d['first-appearance']); // Jahr extrahieren
                 const publisher = d.publisher ? d.publisher.trim() : "";
                 const gender = d.gender ? d.gender.trim() : "";
-                const publisherMatch = !publisherFilter || publisher === publisherFilter;
-                const genderMatch = !genderFilter || gender === genderFilter;
-                return year >= startYear && year <= endYear && publisherMatch && genderMatch;
+
+                const publisherMatch = !publisherFilter || publisher.toLowerCase() === publisherFilter.toLowerCase();
+                const genderMatch = !genderFilter || gender.toLowerCase() === genderFilter.toLowerCase();
+                return year && year >= startYear && year <= endYear && publisherMatch && genderMatch;
             });
 
-            const eventData = filteredData.map(d => ({
-                starting_time: new Date(d['first-appearance']).getTime(),
-                publisher: d.publisher ? d.publisher.trim() : "Unknown"
+            const groupedData = d3.group(
+                filteredData,
+                d => extractMonthYear(d['first-appearance']) // Jahr direkt zurückgeben
+            );
+
+            const eventData = Array.from(groupedData, ([year, heroes]) => ({
+                year,
+                count: heroes.length,
+                heroNames: heroes.map(hero => hero.name)
             }));
 
             const margin = { top: 20, right: 20, bottom: 40, left: 100 };
-            const width = 1500 - margin.left - margin.right; // Größer gemacht
+            const width = 1500 - margin.left - margin.right;
             const height = 600 - margin.top - margin.bottom;
 
             const chartContainer = d3.select("#tab7-chart");
@@ -40,24 +57,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 .append("g")
                 .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-            const xScale = d3.scaleTime()
-                .domain([d3.min(eventData, d => d.starting_time), d3.max(eventData, d => d.starting_time)])
-                .range([0, width]);
+            if (eventData.length === 0) {
+                svg.append("text")
+                    .attr("x", width / 2)
+                    .attr("y", height / 2)
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "24px")
+                    .style("fill", "#999")
+                    .text("No data available for the selected filters");
+                return;
+            }
 
-            const colorScale = d => {
-                switch (d.publisher) {
-                    case "Marvel Comics":
-                        return "red";
-                    case "DC Comics":
-                        return "blue";
-                    default:
-                        return "green";
-                }
-            };
+            const xScale = d3.scaleTime()
+                .domain([d3.min(eventData, d => new Date(d.year, 0, 1)), d3.max(eventData, d => new Date(d.year, 0, 1))])
+                .range([0, width]);
 
             svg.append("g")
                 .attr("transform", `translate(0, ${height / 2})`)
-                .call(d3.axisBottom(xScale).ticks(d3.timeYear.every(5)));
+                .call(d3.axisBottom(xScale).ticks(d3.timeYear.every(2)))
+                .selectAll("text")
+                .style("font-size", d => {
+                    const year = +d.getFullYear();
+                    return year % 10 === 0 ? "10px" : "5px";
+                })
+                .attr("dy", d => {
+                    const year = +d.getFullYear();
+                    return year % 10 === 0 ? "1.5em" : "0.5em";
+                })
+                .style("font-weight", d => (d.getFullYear() % 10 === 0 ? "bold" : "normal"));
 
             const g = svg.append("g");
 
@@ -65,12 +92,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 .data(eventData)
                 .enter()
                 .append("circle")
-                .attr("cx", d => xScale(d.starting_time))
+                .attr("cx", d => xScale(new Date(d.year, 0, 1)))
                 .attr("cy", height / 2)
-                .attr("r", 8)
-                .attr("fill", d => colorScale(d))
+                .attr("r", 5)
+                .attr("fill", "steelblue")
+                .attr("opacity", 0.7)
                 .on("mouseover", function (event, d) {
-                    d3.select(this).transition().duration(100).attr("r", 12).attr("fill", "orange");
+                    d3.select(this).transition().duration(100).attr("opacity", 1);
+                    const heroList = d.heroNames.length > 1
+                        ? d.heroNames.map(name => `• ${name}`).join('<br>')
+                        : d.heroNames[0];
+                    const tooltipContent = `
+                        <strong>Year: ${d.year}</strong><br>
+                        <strong>Heroes (${d.count}):</strong><br>${heroList}
+                    `;
                     d3.select("body").append("div")
                         .attr("class", "tooltip")
                         .style("position", "absolute")
@@ -80,18 +115,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         .style("border-radius", "4px")
                         .style("opacity", 0.9)
                         .style("pointer-events", "none")
-                        .html(`Year: ${new Date(d.starting_time).getFullYear()}<br>Publisher: ${d.publisher}`)
+                        .html(tooltipContent)
                         .style("left", `${event.pageX + 10}px`)
                         .style("top", `${event.pageY + 10}px`);
                 })
                 .on("mouseout", function () {
-                    d3.select(this).transition().duration(100).attr("r", 8).attr("fill", d => colorScale(d));
+                    d3.select(this).transition().duration(100).attr("opacity", 0.7);
                     d3.selectAll(".tooltip").remove();
                 });
 
-            // Zoom- und Pan-Funktion hinzufügen
             const zoom = d3.zoom()
-                .scaleExtent([0.5, 10]) // Minimaler und maximaler Zoom
+                .scaleExtent([0.5, 10])
                 .on("zoom", function (event) {
                     svg.attr("transform", event.transform);
                 });
@@ -104,6 +138,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (updateButton) {
         updateButton.addEventListener('click', updateTimeline);
     }
-
+    console.log("Test:", extractMonthYear("Uncanny X-Men #317 (October, 1994)")); // Soll 1994 ausgeben
+    console.log("Test:", extractMonthYear("X-Men (2099)")); // Soll null ausgeben
+    console.log("Test:", extractMonthYear("Fantastic Four (July, 1961)")); // Soll 1961 ausgeben
     updateTimeline();
 });
