@@ -32,9 +32,6 @@ function populateGroupDropdown(selectorId) {
         option.textContent = group // Anzeigename im Dropdown (bereits formatiert in normalizeGroupName)
         dropdown.appendChild(option);
     });
-
-    console.log("populateDropdown: Dropdown Data");
-    console.log(dropdown.children);
 }
 
 function updateStatsPanel(nodes, links) {
@@ -133,10 +130,6 @@ function updateNetworkChart(selectedGroupId) {
     const nodes = prepareFullNetworkNodes(); // Bereite nur die relevanten Knoten vor
     const links = prepareFullNetworkLinks(nodes); // Verknüpfe nur die relevanten Knoten
 
-    console.log("Aktueller Gruppenfilter:", currentGroupFilter);
-    console.log("Nodes:", nodes);
-    console.log("Links:", links);
-
     // Fülle das Helden-Dropdown basierend auf den sichtbaren Helden
     populateCurrentHeroDropdown("currentHeroDropdown", nodes);
 
@@ -175,7 +168,7 @@ function prepareFullNetworkNodes() {
                 id: hero.id,
                 heroName: hero.name,
                 fullName: hero["full-name"],
-                image: hero.url || null,
+                image: hero.url || "unknown_superhero.png",
                 groups, // Liste der Gruppen für Verbindungen
             });
         }
@@ -353,7 +346,6 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
                 updateNetworkChart(d.id); // ID der Gruppe verwenden
             }
             else if (!d.isGroup && d.id) { // Nur für Heldenknoten
-                console.log(`Switching to relatives of hero with ID: ${d.id}`);
                 document.getElementById("heroDropdown").value = d.id; // Dropdown von Tab 3 aktualisieren
                 switchToTab("tab3-button");
                 playAudio();

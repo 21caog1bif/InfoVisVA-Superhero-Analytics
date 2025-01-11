@@ -34,28 +34,6 @@ function switchToTab(tabId) {
     }
 }
 
-/**
- * Universelle Fehlerbehandlungsfunktion für dynamische Fehlermeldungen.
- * @param {string} errorMessage - Die Fehlermeldung (oder null, um die Meldung auszublenden).
- */
-function handleError(errorMessage) {
-    const activeTab = document.querySelector('.tab-content.active');
-    const errorContainer = activeTab ? activeTab.querySelector('#global-error-message') : null;
-
-    if (!errorContainer) {
-        console.error("Fehlercontainer nicht gefunden.");
-        return;
-    }
-
-    if (errorMessage) {
-        errorContainer.innerHTML = errorMessage;
-        errorContainer.style.display = "block";
-        console.error("error message", errorMessage);
-    } else {
-        errorContainer.style.display = "none";
-    }
-}
-
 function isValidValue(value) {
     // Prüfen auf leere, ungültige oder Platzhalter-Werte
     if (!value || value === '-' || value.toLowerCase() === 'null' || value.trim() === '') {
@@ -138,12 +116,12 @@ async function main() {
     try {
         superheroData = await loadCSVWithD3("merged_data3_2.csv");
     } catch {
-        handleError("Fehler beim Laden der CSV-Daten. Bitte versuchen Sie es später erneut.");
+        console.error("Fehler beim Laden der CSV-Daten. Bitte versuchen Sie es später erneut.");
         return;
     }
 
     if (!superheroData || superheroData.length === 0) {
-        handleError("Keine gültigen Daten gefunden. Bitte überprüfen Sie die CSV-Datei.");
+        console.error("Keine gültigen Daten gefunden. Bitte überprüfen Sie die CSV-Datei.");
         return;
     }
 
