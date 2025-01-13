@@ -39,9 +39,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 heroNames: heroes.map(hero => hero.name)
             }));
 
-            const margin = { top: 20, right: 20, bottom: 40, left: 100 };
-            const width = 1500 - margin.left - margin.right;
-            const height = 600 - margin.top - margin.bottom;
+            // Dynamically adjust graph dimensions based on container size
+            const containerWidth = tab7Chart.offsetWidth;
+            const containerHeight = tab7Chart.offsetHeight;
+            const margin = { top: 150, right: 150, bottom: 80, left: 100 };
+            const width = containerWidth - margin.left - margin.right;
+            const height = containerHeight - margin.top - margin.bottom;
 
             const chartContainer = d3.select("#tab7-chart");
             chartContainer.selectAll("*").remove();

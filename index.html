@@ -42,6 +42,7 @@
         <div id="tab6-button" class="tab" onclick="openTab(event, 'tab6')">Hero Map</div>
         <div class="tab" onclick="openTab(event, 'tab7')">Timeline</div>
         <div class="tab" onclick="openTab(event, 'tab8')">Pie Chart</div>
+        <div class="tab" id="tab9-button" onclick="openTab(event, 'tab9')">Boxplot</div>
     </div>
 
     <!-- Tab 1: Attribute Visualization -->
@@ -421,6 +422,38 @@
         </div>
     </div>
 
+    <!-- Tab 9: Boxplot -->
+    <div id="tab9" class="tab-content">
+        <div class="tab-layout">
+            <div class="filter-sidebar">
+                <h3>Filters</h3>
+                <label for="tab9-attribute">Attribute:</label>
+                <select id="tab9-attribute">
+                    <option value="strength">Strength</option>
+                    <option value="intelligence">Intelligence</option>
+                    <option value="speed">Speed</option>
+                    <option value="durability">Durability</option>
+                    <option value="power">Power</option>
+                    <option value="combat">Combat</option>
+                </select>
+
+                <label for="tab9-publisher1">Publisher 1:</label>
+                <select id="tab9-publisher1"></select>
+
+                <label for="tab9-publisher2">Publisher 2:</label>
+                <select id="tab9-publisher2"></select>
+
+                <label for="tab9-group-by">Group By:</label>
+                <select id="tab9-group-by"></select>
+
+                <button id="tab9-update-button" onclick="updateBoxplots()">Update</button>
+            </div>
+
+            <div class="chart-area">
+                <div id="boxplotChart" style="width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Theme Toggle
@@ -441,7 +474,7 @@
         };
 
 
-        let tab2first = true, tab3first = true, tab4first = true, tab5first = true
+        let tab2first = true, tab3first = true, tab4first = true, tab5first = true, tab7first = true, tab9first = true;
         // Tabs umschalten
         function openTab(event, tabId) {
             // Entferne die `active`-Klasse von allen Tabs
@@ -482,8 +515,16 @@
                     updateBubbleChart();
                     tab5first = false;
                 }
+                if (tabId === 'tab7' && tab7first) {
+                    updateTimeline();
+                    tab7first = false;
+                }
                 if (tabId === 'tab6') initialize2DMap(); // Karte in Tab 6 initialisieren
                 if (tabId === 'tab8') initializePieChart(); // Kreisdiagramm in Tab 8 initialisieren
+                if (tabId === 'tab9' && tab9first) {
+                    updateBoxplots();
+                    tab9first = false;
+                }
             }
         }
 
@@ -515,6 +556,7 @@
     <script src="tab6.js"></script>
     <script src="tab7.js"></script>
     <script src="tab8.js"></script>
+    <script src="tab9.js"></script>
 </body>
 
 </html>

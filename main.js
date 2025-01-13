@@ -49,7 +49,7 @@ function isValidValue(value) {
  * @param {*} defaultText Standardwert
  * @returns 
  */
-function populateDropdown(selectorId, data, defaultText = null) {
+function populateHeroDropdown(selectorId, data, defaultText = null) {
     const selector = document.getElementById(selectorId);
 
     if (!selector) {
@@ -129,18 +129,17 @@ async function main() {
     populateFilters(superheroData);
     updateBarChart();
 
-
     // Tab 2: Superhero Comparison
-    populateDropdown("hero1", superheroData, "Batman (Bruce Wayne)");
-    populateDropdown("hero2", superheroData, "Superman");
+    populateHeroDropdown("hero1", superheroData, "Batman (Bruce Wayne)");
+    populateHeroDropdown("hero2", superheroData, "Superman");
 
     // Tab 3: Relationship Visualization
-    populateDropdown("heroDropdown", superheroData, "Quicksilver");
+    populateHeroDropdown("heroDropdown", superheroData, "Quicksilver");
 
     // Tab 4: Full Network
     populateGroupDropdown("groupDropdown");
 
-    //Tab 5: Bubble Chart
+    // Tab 5: Bubble Chart
     populateFiltersBubble(superheroData);
     updateBubbleChart();
 }

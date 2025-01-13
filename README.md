@@ -114,6 +114,14 @@ Superhero Analytics is designed for intuitive usage. Users can explore data thro
   - Select the data to create the pie chart from a dropdown menu
   - Hover over a slice to view the exact value
 
+### 9. Boxplot
+- **Description**: Visualizes the superhero dataset as a boxplot based on numerical attributes (e.g., intelligence, strength) and categories like gender, alignment, or publisher.
+- **Interactions**:
+  - Select an attribute and grouping category from dropdown menus
+  - Compare data for up to two selected publishers against the entire dataset
+  - Hover over a box to view details like median, Q1, Q3, and outliers
+
+
 ---
 
 ## Participants
