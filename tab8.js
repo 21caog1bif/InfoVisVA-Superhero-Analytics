@@ -124,7 +124,17 @@ function initializePieChart() {
         .attr("d", arc)
         .attr("fill", d => color(d.data.category))
         .attr("stroke", "white")
-        .style("stroke-width", "2px");
+        .style("stroke-width", "2px")
+        .each(function(d) { this._current = d; }) // Startpunkt für die Animation
+        .transition()
+        .duration(1000) // Dauer der Animation
+        .attrTween("d", function(d) {
+            const interpolate = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
+            return function(t) {
+                return arc(interpolate(t));
+            };
+        });
+    
 
     arcs.append("title")
         .text(d => `${d.data.category}: ${d.data.value} (${((d.data.value / totalValue) * 100).toFixed(2)}%)`);

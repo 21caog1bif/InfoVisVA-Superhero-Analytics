@@ -289,6 +289,7 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
                 tooltip
                     .html(`Group: ${d.label}`)
                     .style("opacity", 1)
+                    .style('visibility', 'visible')
                     .style("left", `${event.pageX + 10}px`)
                     .style("top", `${event.pageY + 10}px`);
 
@@ -307,6 +308,7 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
                 tooltip
                     .html(`Hero: ${d.heroName}<br>Name: ${d.fullName}<br>Group: ${groupText}`)
                     .style("opacity", 1)
+                    .style('visibility', 'visible')
                     .style("left", `${event.pageX + 10}px`)
                     .style("top", `${event.pageY + 10}px`);
 
@@ -322,7 +324,9 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
                 .style("top", `${event.pageY + 10}px`);
         })
         .on("mouseout", function (event, d) {
-            tooltip.style("opacity", 0);
+            tooltip
+                .style("opacity", 0)
+                .style('visibility', 'hidden')
             if (d.isGroup) {
                 d3.select(this)
                     .transition()
@@ -337,7 +341,9 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
             }
         })
         .on("click", (event, d) => {
-            tooltip.style("opacity", 0);
+            tooltip
+                .style("opacity", 0)
+                .style('visibility', 'hidden')
 
             // Aktualisiere das Dropdown auf die ausgewählte Gruppe
             const dropdown = document.getElementById("groupDropdown");
@@ -360,7 +366,6 @@ function renderNetworkWithGroupNodes(nodes, links, width, height) {
                 const primaryGroup = d.groups[0]; // Wähle die erste Gruppe
                 dropdown.value = groupInfo[primaryGroup]?.id || "all"; // Fallback auf "all"
             }
-            tooltip.style("opacity", 0);
         });
 
 
@@ -427,11 +432,11 @@ function generateGroupColors(nodes) {
 function highlightHero() {
     const heroId = document.getElementById("currentHeroDropdown").value
     d3.selectAll(".nodes g").each(function (d) {
-        if(!d.isGroup){
+        if (!d.isGroup) {
             const isMatch = d.id === heroId; // Prüfen, ob die ID mit dem ausgewählten Helden übereinstimmt
-        d3.select(this).select("circle")
-            .attr("stroke", isMatch ? "red" : "#fff") // Highlighten, falls Treffer
-            .attr("stroke-width", isMatch ? 10 : 1.5);
+            d3.select(this).select("circle")
+                .attr("stroke", isMatch ? "red" : "#fff") // Highlighten, falls Treffer
+                .attr("stroke-width", isMatch ? 10 : 1.5);
         }
     });
 

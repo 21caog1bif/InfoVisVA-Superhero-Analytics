@@ -131,15 +131,11 @@ function updateBubbleChart() {
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
 
-    let zoomTransform = d3.zoomIdentity; // Speicherung des zooms für die guidelines
     // Zoom-Handler definieren
     const zoom = d3.zoom()
         .scaleExtent([1, 10])
         .translateExtent([[0, 0], [width, height]])
-        .on("zoom", (event) => {
-            zoomTransform = event.transform; // Speichere die Transformation
-            zoomGroup.attr("transform", event.transform);
-        });
+        .on("zoom", (event) => { zoomGroup.attr("transform", event.transform); });
 
     // Zoom
     svg.call(zoom);
@@ -172,7 +168,8 @@ function updateBubbleChart() {
         .append("circle")
         .attr("cx", d => xScale(parseFloat(d[xAxis]) || 0))
         .attr("cy", d => yScale(parseFloat(d[yAxis]) || 0))
-        .attr("r", d => sizeScale(parseFloat(d[bubbleSize]) || 0))
+        .attr("r", 0) // Start mit Radius 0
+        //.attr("r", d => sizeScale(parseFloat(d[bubbleSize]) || 0))
         .attr("fill", d => colorScale(d[colorGrouping] || "Other"))
         .attr("stroke", "white")
         .attr("stroke-width", 2)
@@ -199,7 +196,11 @@ function updateBubbleChart() {
         .on("mouseout", function () {
             bubbles.style("opacity", 0.8); // Standardwert für die Sichtbarkeit
             tooltip.style("opacity", 0);
-        });
+        })
+
+    bubbles.transition()
+        .duration(1000) // Dauer der Animation
+        .attr("r", d => sizeScale(parseFloat(d[bubbleSize]) || 0));;
 
     // Achsen hinzufügen
     const xAxisCall = d3.axisBottom(xScale);
@@ -269,7 +270,7 @@ function updateBubbleChart() {
         .call(xAxisCall)
         .selectAll("path, line")
         .style("stroke", "black");
-
+    
     zoomGroup.append("g")
         .attr("class", "y axis")
         .call(yAxisCall)

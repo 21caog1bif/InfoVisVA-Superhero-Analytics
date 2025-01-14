@@ -371,12 +371,8 @@
                 <label for="tab7-yearFilterEnd">End Year:</label>
                 <input type="number" id="tab7-yearFilterEnd" placeholder="e.g., 2023" />
 
-                <label for="publisherFilter">Publisher:</label>
-                <select id="publisherFilter">
-                    <option value="">All</option>
-                    <option value="Marvel Comics">Marvel Comics</option>
-                    <option value="DC Comics">DC Comics</option>
-                </select>
+                <label for="tab7-publisher">Publisher:</label>
+                <select id="tab7-publisher"></select>
 
                 <label for="genderFilter">Gender:</label>
                 <select id="genderFilter">
@@ -385,9 +381,7 @@
                     <option value="Male">Male</option>
                 </select>
 
-
-
-                <button id="updateTimelineButton">Update Timeline</button>
+                <button id="updateTimelineButton" onclick="updateTimeline()">Update Timeline</button>
             </div>
 
             <!-- Chart Area -->
@@ -397,8 +391,6 @@
             </div>
         </div>
     </div>
-
-
 
     <!-- Tab 8: Kreisdiagramm -->
     <div id="tab8" class="tab-content">
@@ -446,7 +438,7 @@
                 <label for="tab9-group-by">Group By:</label>
                 <select id="tab9-group-by"></select>
 
-                <button id="tab9-update-button" onclick="updateBoxplots()">Update</button>
+                <button id="tab9-update-button">Update</button>
             </div>
 
             <div class="chart-area">
@@ -474,56 +466,79 @@
         };
 
 
-        let tab2first = true, tab3first = true, tab4first = true, tab5first = true, tab7first = true, tab9first = true;
+        // Initialisierungsstatus für Tabs
+        const tabState = {
+            tab2: true,
+            tab3: true,
+            tab4: true,
+            tab5: true,
+            tab6: true,
+            tab7: true,
+            tab8: true,
+            tab9: true
+        };
+
         // Tabs umschalten
         function openTab(event, tabId) {
             // Entferne die `active`-Klasse von allen Tabs
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
 
-            // Aktiviere den geklickten Tab
-            if (event) {
-                event.currentTarget.classList.add('active');
-            }
-
-            // Verstecke alle Inhalte
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => content.style.display = 'none');
+            if (event) event.currentTarget.classList.add('active'); // Angeklickten Tab aktivieren
+            
+            document.querySelectorAll('.tab-content').forEach(content => (content.style.display = 'none')); // Verstecke alle Inhalte
 
             // Zeige den passenden Inhalt
             const activeContent = document.getElementById(tabId);
             if (activeContent) {
                 activeContent.style.display = 'block';
 
-                if (tabId === 'tab2' && tab2first) {
-                    handleHeroSelection(); // Initiale Validierung
-                    updateRadarChart();
-                    tab2first = false;
-                }
-                if (tabId === 'tab3' && tab3first) {
-                    visualizeRelatives();
-                    tab3first = false;
-                }
-                if (tabId === 'tab4') {
-                    if (tab4first) {
-                        updateNetworkChart("all");
-                        tab4first = false;
+                // Tab-spezifische Initialisierungen
+                const initializeTab = {
+                    tab2: () => {
+                        if (tabState.tab2) {
+                            handleHeroSelection(); // Initiale Validierung
+                            updateRadarChart();
+                            tabState.tab2 = false;
+                        }
+                    },
+                    tab3: () => {
+                        if (tabState.tab3) {
+                            visualizeRelatives();
+                            tabState.tab3 = false;
+                        }
+                    },
+                    tab4: () => {
+                        if (tabState.tab4) {
+                            updateNetworkChart("all");
+                            tabState.tab4 = false;
+                        }
+                        initializeZoom(); // Zoom für Tab 4 neu initialisieren
+                    },
+                    tab5: () => {
+                        if (tabState.tab5) {
+                            updateBubbleChart();
+                            tabState.tab5 = false;
+                        }
+                    },
+                    tab6: initialize2DMap, // Karte in Tab 6 initialisieren
+                    tab7: () => {
+                        if (tabState.tab7) {
+                            updateTimeline();
+                            tabState.tab7 = false;
+                        }
+                    },
+                    tab8: initializePieChart, // Kreisdiagramm in Tab 8 initialisieren
+                    tab9: () => {
+                        if (tabState.tab9) {
+                            initializeBoxplot();
+                            tabState.tab9 = false;
+                        }
                     }
-                    initializeZoom(); // Zoom für Tab 4 neu initialisieren
-                }
-                if (tabId === 'tab5' && tab5first) {
-                    updateBubbleChart();
-                    tab5first = false;
-                }
-                if (tabId === 'tab7' && tab7first) {
-                    updateTimeline();
-                    tab7first = false;
-                }
-                if (tabId === 'tab6') initialize2DMap(); // Karte in Tab 6 initialisieren
-                if (tabId === 'tab8') initializePieChart(); // Kreisdiagramm in Tab 8 initialisieren
-                if (tabId === 'tab9' && tab9first) {
-                    updateBoxplots();
-                    tab9first = false;
+                };
+
+                // Tab-Initialisierung ausführen, falls definiert
+                if (initializeTab[tabId]) {
+                    initializeTab[tabId]();
                 }
             }
         }

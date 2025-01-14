@@ -157,6 +157,7 @@ async function initialize2DMap() {
                     tooltip
                         .attr("data-selectedLocation", location.name)
                         .style("visibility", "visible")
+                        .style('opacity', 1)
                         .html(`<strong>${location.name}</strong> (${index + 1}/${heroesAtLocation.length})<br>Hero: ${heroesAtLocation[index].hero.name}<br>Location: ${heroesAtLocation[index].exactLocation}`);
             
                     const newBubbleSize = (bubbleSize * 1.5) / currentZoom;
@@ -182,7 +183,8 @@ async function initialize2DMap() {
                 .on("mouseout", function () {
                     tooltip
                         .attr("data-selectedLocation", null)
-                        .style("visibility", "hidden");
+                        .style("visibility", "hidden")
+                        .style('opacity', 0);
             
                     const newBubbleSize = (bubbleSize) / currentZoom;
                     d3.select(this).select("circle")

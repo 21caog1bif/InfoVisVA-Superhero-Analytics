@@ -102,9 +102,19 @@
 }
 
 .tooltip {
-    font-size: 12px;
-    text-anchor: middle;
-    background-color: var(--chart-background);
+    position: absolute;
+    background: #333;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    visibility: hidden;
+    color: #fff;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 1000; 
+    transition: opacity 0.2s ease-in-out; 
+    opacity: 0;
 }
 
 /* ===================== */

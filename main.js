@@ -142,6 +142,12 @@ async function main() {
     // Tab 5: Bubble Chart
     populateFiltersBubble(superheroData);
     updateBubbleChart();
+
+    // Tab 7: Timeline
+    populatePublisherDropdown(superheroData);
+
+    // Tab 9: Box Plot
+    initializeBoxplot();
 }
 
 main();
