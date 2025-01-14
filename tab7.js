@@ -1,11 +1,28 @@
 const tab7Chart = document.getElementById('tab7-chart');
 
 function populatePublisherDropdown(data) {
-    const publishers = [...new Set(data.map(hero => hero.publisher).filter(value => value && value !== "-"))].sort();
-    console.log("Gefilterte Publisher:", publishers);
+    // Filter publishers with at least two valid heroes
+    const publisherCounts = data.reduce((acc, hero) => {
+        const year = extractMonthYear(hero['first-appearance']);
+        const publisher = hero.publisher ? hero.publisher.trim() : null;
+
+        if (year && publisher && publisher !== "-") {
+            acc[publisher] = (acc[publisher] || 0) + 1;
+        }
+
+        return acc;
+    }, {});
+
+    // Filter publishers with at least two heroes
+    const filteredPublishers = Object.keys(publisherCounts)
+        .filter(publisher => publisherCounts[publisher] >= 2)
+        .sort();
+
+    console.log("Gefilterte Publisher (mindestens 2 Helden):", filteredPublishers);
+
     const dropdown = document.getElementById("tab7-publisher");
-    dropdown.innerHTML = '<option value="">All</option>'; // Reset
-    publishers.forEach(publisher => {
+    dropdown.innerHTML = '<option value="">All</option>'; // Reset Dropdown
+    filteredPublishers.forEach(publisher => {
         const opt = document.createElement('option');
         opt.value = publisher;
         opt.textContent = publisher;

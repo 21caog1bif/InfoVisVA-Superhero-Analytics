@@ -61,7 +61,7 @@ The `superheroes_data.csv` file should include the following columns:
 
 ## Usage
 
-Superhero Analytics is designed for intuitive usage. Users can explore data through various tabs, each offering unique visualizations and filtering options. The interface includes a filter sidebar on the left, a toggle for switching between dark and light modes, and navigation tabs at the top. In the following, each tab is described in detail.
+Superhero Analytics is designed for intuitive usage. Users can explore data through various tabs, each offering unique visualizations and filtering options. The interface includes a filter sidebar on the left, a toggle for switching between dark and light modes, and navigation tabs at the top. The visualizations are equipped with smooth animations and show additional information on hover. In the following, each tab is described in detail.
 
 ### 1. Attributes
 - **Description**: Visualizes attributes (e.g., intelligence, strength) in a bar chart.
@@ -73,12 +73,14 @@ Superhero Analytics is designed for intuitive usage. Users can explore data thro
 - **Description**: Compares two superheroes using a radar chart.
 - **Interactions**:
   - Select two heroes from the dropdown menus.
+  - The same hero can not be selected twice.
   - View additional details such as images, race, height, and more in a table.
 
 ### 3. Relatives
 - **Description**: Visualizes the family connections of a superhero.
 - **Interactions**:
-  - Select a hero to view their relationships.
+  - Select a hero to view their relatives.
+  - If a relative is also a hero, you can click the hero relative to switch to its relative overview.
   - Use the timeline in the sidebar to revisit previously explored heroes.
 
 ### 4. Groups
@@ -86,6 +88,7 @@ Superhero Analytics is designed for intuitive usage. Users can explore data thro
 - **Interactions**:
   - Select a group or search for a hero to view specific details.
   - Use the timeline and network statistics (e.g., number of nodes and links).
+  - Click on a group to seperately view the selected group.
   - Click on a hero to seamlessly navigate to the Relatives tab, displaying the selected hero’s connections.
 
 ### 5. Bubble Chart
@@ -93,13 +96,14 @@ Superhero Analytics is designed for intuitive usage. Users can explore data thro
 - **Interactions**:
   - Choose axes and attributes for the visualization.
   - Use filters to focus on specific heroes.
+  - To reach any bubble, rightklick a bubble to move it to the back.
 
 ### 6. Hero Map
 - **Description**: Displays the geographical distribution of heroes (birthplace or base location).
 - **Interactions**:
   - Choose whether to display the birthplace or base location.
   - Filter by alignment (good, bad, neutral).
-  - Group locations by country.
+  - Optionally group locations by country.
 
 ### 7. Timeline
 - **Description**: Displays a chronological timeline highlighting the first appearances of superheroes.
@@ -111,15 +115,16 @@ Superhero Analytics is designed for intuitive usage. Users can explore data thro
 ### 8. Pie Chart
 - **Description**: Visualizes the superhero dataset in a pie chart based on gender, alignment, publisher, race or attribute
 - **Interactions**:
-  - Select the data to create the pie chart from a dropdown menu
-  - Hover over a slice to view the exact value
+  - Select the data to create the pie chart from a dropdown menu.
+  - Hover over a slice to view the exact value.
 
 ### 9. Boxplot
 - **Description**: Visualizes the superhero dataset as a boxplot based on numerical attributes (e.g., intelligence, strength) and categories like gender, alignment, or publisher.
 - **Interactions**:
-  - Select an attribute and grouping category from dropdown menus
-  - Compare data for up to two selected publishers against the entire dataset
-  - Hover over a box to view details like median, Q1, Q3, and outliers
+  - Select an attribute category from the dropdown menu.
+  - The boxplot for all heroes is always shown.
+  - Select up to two publishers to compare them against the entire dataset.
+  - Hover over a box to view details like median, Q1, Q3, and outliers.
 
 
 ---

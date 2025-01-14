@@ -1,7 +1,7 @@
 let superheroData = [];
 let barChart;
 
-const unknown_superhero_url = "/unknown_superhero.png" 
+const unknown_superhero_url = "/unknown_superhero.png"
 
 // CSV-Daten laden mit D3.js
 async function loadCSVWithD3(filePath) {
@@ -23,9 +23,9 @@ async function loadCSVWithD3(filePath) {
 
 function switchToTab(tabId) {
     // Finde den Tab mit der passenden ID oder verknüpften `onclick`
-    const targetTab = document.getElementById(tabId) || 
-                      Array.from(document.querySelectorAll('.tab')).find(tab => 
-                          tab.getAttribute('onclick')?.includes(tabId));
+    const targetTab = document.getElementById(tabId) ||
+        Array.from(document.querySelectorAll('.tab')).find(tab =>
+            tab.getAttribute('onclick')?.includes(tabId));
     if (targetTab) {
         // Simuliere einen Klick auf den Tab
         openTab({ currentTarget: targetTab }, tabId.replace('-button', ''));
@@ -100,6 +100,43 @@ function populateHeroDropdown(selectorId, data, defaultText = null) {
     }
 }
 
+// Dropdown mit Publishern basierend auf CSV-Daten befüllen
+function populateAnyPublisherDropdown(dropdownId, minOccurrences = 5) {
+    // Zähle die Vorkommen jedes Publishers
+    const publisherCounts = superheroData.reduce((counts, row) => {
+        const publisher = row.publisher && row.publisher.trim().toLowerCase();
+        if (publisher && publisher !== "-") {
+            counts[publisher] = (counts[publisher] || 0) + 1;
+        }
+        return counts;
+    }, {});
+
+    // Filtere die Publisher basierend auf der minimalen Anzahl von Vorkommen
+    const publishers = Object.entries(publisherCounts)
+        .filter(([publisher, count]) => count >= minOccurrences) // Nur Publisher mit ausreichend Vorkommen
+        .map(([publisher]) => publisher) // Extrahiere nur die Publisher
+        .map(p => p.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")) // Formatiere
+        .sort(); // Sortiere alphabetisch
+
+    console.log(`Gefilterte Publisher für Dropdown '${dropdownId}':`, publishers);
+
+    // Dropdown-Element finden
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) {
+        console.error(`Dropdown with ID "${dropdownId}" not found.`);
+        return;
+    }
+    dropdown.innerHTML = '<option value="">All</option>'; // Zurücksetzen
+
+    // Dropdown mit den gefilterten Publishern befüllen
+    publishers.forEach(publisher => {
+        const opt = document.createElement('option');
+        opt.value = publisher;
+        opt.textContent = publisher;
+        dropdown.appendChild(opt);
+    });
+}
+
 // Helper function to extract numeric values for height and weight
 function extractMetric(value, unit) {
     if (!value) return "N/A";
@@ -145,6 +182,7 @@ async function main() {
 
     // Tab 7: Timeline
     populatePublisherDropdown(superheroData);
+    //populateAnyPublisherDropdown("tab7-publisher");
 
     // Tab 9: Box Plot
     initializeBoxplot();
