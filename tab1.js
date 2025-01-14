@@ -186,16 +186,16 @@ function updateBarChart() {
                     enabled: false, // Disable default tooltips
                     external: function (context) {
                         const tooltipModel = context.tooltip;
-                    
+
                         // Create tooltip element if it doesn't exist
                         let tooltipEl = document.getElementById('chartjs-tooltip');
                         if (!tooltipEl) {
                             tooltipEl = document.createElement('div');
                             tooltipEl.id = 'chartjs-tooltip';
                             tooltipEl.style.position = 'absolute';
-                            tooltipEl.style.background = 'rgba(0, 0, 0, 0.8)'; // Always dark background
-                            tooltipEl.style.color = '#ffffff'; // Always white text
-                            tooltipEl.style.border = '1px solid #ffffff'; // Optional: border for better visibility
+                            tooltipEl.style.background = 'rgba(0, 0, 0, 0.8)';
+                            tooltipEl.style.color = '#ffffff';
+                            tooltipEl.style.border = '1px solid #ffffff';
                             tooltipEl.style.borderRadius = '8px';
                             tooltipEl.style.padding = '10px';
                             tooltipEl.style.pointerEvents = 'none';
@@ -204,39 +204,41 @@ function updateBarChart() {
                             tooltipEl.style.fontFamily = 'Arial, sans-serif';
                             document.body.appendChild(tooltipEl);
                         }
-                    
+
                         // Hide tooltip if no data
                         if (tooltipModel.opacity === 0) {
                             tooltipEl.style.opacity = 0;
                             return;
                         }
-                    
+
                         // Get data of the current point
                         const dataIndex = tooltipModel.dataPoints[0].dataIndex;
                         const hero = filteredData[dataIndex];
-                    
+
                         // Parse height and weight for proper display
                         const heightInCm = parseHeight(hero.height);
                         const weightInKg = parseWeight(hero.weight);
-                    
+                        const currentAttributeValue = hero[attribute] !== undefined ? hero[attribute] : "N/A";
+
                         // Set tooltip content
                         tooltipEl.innerHTML = `
                             <strong>${hero.name}</strong><br>
+                            <strong>${attribute}:</strong> ${currentAttributeValue}<br>
                             <strong>Height:</strong> ${heightInCm !== null ? `${heightInCm} cm` : "N/A"}<br>
                             <strong>Weight:</strong> ${weightInKg !== null ? `${weightInKg} kg` : "N/A"}<br>
                         `;
-                    
+
                         // Tooltip positioning
                         const canvasPosition = context.chart.canvas.getBoundingClientRect();
                         tooltipEl.style.opacity = 1;
                         tooltipEl.style.left = canvasPosition.left + window.pageXOffset + tooltipModel.caretX + 'px';
                         tooltipEl.style.top = canvasPosition.top + window.pageYOffset + tooltipModel.caretY + 'px';
                     }
-                    
                 }
             }
         }
     });
 }
+
 
 
