@@ -211,10 +211,6 @@ function initializeBoxplot() {
                 .attr('stroke-width', 2)
                 .attr('stroke-dasharray', '4,2');
 
-            const iqr = d.q3 - d.q1;
-            const lowerFence = d.q1 - 1.5 * iqr;
-            const upperFence = d.q3 + 1.5 * iqr;
-
             // Whiskers
             svg.append('line')
                 .attr('x1', x + boxWidth / 2)
@@ -227,6 +223,21 @@ function initializeBoxplot() {
                 .attr('x1', x + boxWidth / 2)
                 .attr('x2', x + boxWidth / 2)
                 .attr('y1', yScale(d.q3))
+                .attr('y2', yScale(d.max))
+                .attr('stroke', 'black');
+
+            // Horizontale Linien an den Whisker-Enden
+            svg.append('line')
+                .attr('x1', x + boxWidth / 4)
+                .attr('x2', x + (3 * boxWidth) / 4)
+                .attr('y1', yScale(d.min))
+                .attr('y2', yScale(d.min)) 
+                .attr('stroke', 'black');
+
+            svg.append('line')
+                .attr('x1', x + boxWidth / 4) 
+                .attr('x2', x + (3 * boxWidth) / 4)
+                .attr('y1', yScale(d.max))
                 .attr('y2', yScale(d.max))
                 .attr('stroke', 'black');
 
@@ -279,25 +290,43 @@ function initializeBoxplot() {
 
     // Funktion zur Erstellung der Boxplot-Daten
     function createBoxplotData(group, values) {
-        if (values.length === 0) return { group, min: 0, max: 0, q1: 0, median: 0, q3: 0, outliers: [], count: 0 };
+        if (values.length === 0)
+            return { group, min: 0, max: 0, q1: 0, median: 0, q3: 0, outliers: [], count: 0 };
 
-        const q1 = d3.quantile(values, 0.25);
-        const median = d3.quantile(values, 0.5);
-        const q3 = d3.quantile(values, 0.75);
+        // Daten sortieren
+        const sortedValues = values.sort((a, b) => a - b);
+
+        console.log("Sorted values for group " + group, sortedValues);
+
+        // Quartile berechnen
+        const q1 = d3.quantile(sortedValues, 0.25);
+        const median = d3.quantile(sortedValues, 0.5);
+        const q3 = d3.quantile(sortedValues, 0.75);
+
+        // Interquartilsabstand und Grenzen berechnen
         const iqr = q3 - q1;
-        const lowerFence = q1 - 1.5 * iqr;
-        const upperFence = q3 + 1.5 * iqr;
-        const outliers = values.filter(v => v < lowerFence || v > upperFence);
+        const lowerFence = Math.max(0, q1 - 1.5 * iqr); // Whisker dürfen nicht unter 0 gehen
+        const upperFence = Math.min(100, q3 + 1.5 * iqr); // Whisker dürfen nicht über 100 gehen
+
+        // Tatsächliches Minimum und Maximum innerhalb der Grenzen bestimmen
+        const min = Math.min(...sortedValues.filter(v => v >= lowerFence));
+        const max = Math.max(...sortedValues.filter(v => v <= upperFence));
+
+        // Ausreißer filtern (außerhalb der berechneten Grenzen)
+        const outliers = sortedValues.filter(v => v < lowerFence || v > upperFence);
+
+        console.log("min(sortedValues), lowerFence", min, lowerFence);
+        console.log("max(sortedValues), upperFence", max, upperFence);
 
         return {
             group,
-            min: Math.max(d3.min(values), lowerFence),
-            max: Math.min(d3.max(values), upperFence),
-            q1,
-            median,
-            q3,
-            outliers,
-            count: values.length // Anzahl der Werte
+            min,          // Tatsächliches Minimum innerhalb der Whisker
+            max,          // Tatsächliches Maximum innerhalb der Whisker
+            q1,           // Erstes Quartil
+            median,       // Median (zweites Quartil)
+            q3,           // Drittes Quartil
+            outliers,     // Werte außerhalb der Whisker
+            count: sortedValues.length // Anzahl der Werte
         };
     }
 }
