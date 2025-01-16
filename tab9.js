@@ -9,7 +9,7 @@ function populateDropdowns(data) {
 
 function fillDropdown(id, options) {
     const dropdown = document.getElementById(id);
-    dropdown.innerHTML = '<option value="">All</option>';
+    dropdown.innerHTML = '<option value="">None</option>';
     options.forEach(option => {
         const opt = document.createElement('option');
         opt.value = option;
